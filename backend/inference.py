@@ -9,6 +9,7 @@ metrics, one of the two would be wrong and there would be no way to tell which.
 
 from __future__ import annotations
 
+import gc
 import os
 import sys
 import time
@@ -37,9 +38,29 @@ from models.build import build_model  # noqa: E402
 DEFAULT_CHECKPOINT = Path(__file__).parent / "model" / "best.pt"
 DEMO_CLIPS_DIR = Path(__file__).parent / "demo_clips"
 
-# Render's free tier is one shared CPU with 512 MB. A cap keeps a large upload
-# from turning into a request that outlives the platform's own timeout.
-MAX_FRAMES = 900
+# Render's free tier is one shared CPU with 512 MB, and the memory budget is far
+# tighter than it looks: importing torch costs 403 MB and the checkpoint another
+# 9, so ~100 MB is left for every forward pass the service will ever run.
+#
+# Scoring a clip in one batch does not fit. Peak RSS on a 141-frame clip, by
+# chunk size (measured, reference machine):
+#
+#     chunk   peak     vs 512 MB    latency
+#       112   681 MB   OOM, killed   2464 ms   <- the original default
+#        32   521 MB   OOM, killed   2096 ms
+#        16   469 MB   +43 MB        2081 ms
+#         8   449 MB   +63 MB        1892 ms
+#
+# Chunking is not a speed/memory trade here - the small chunks are *faster*,
+# because the working set stays in cache. 8 is chosen for headroom on a shared
+# container, not because 16 was too slow. Raise it on an instance with real
+# memory; there is no accuracy implication either way, since the chunks are
+# independent forward passes over the same windows.
+CHUNK_SIZE = max(1, int(os.environ.get("INFERENCE_CHUNK_SIZE", "8")))
+
+# A cap keeps a large upload from turning into a request that outlives the
+# platform's timeout - or exhausts what little memory remains.
+MAX_FRAMES = max(60, int(os.environ.get("MAX_FRAMES", "600")))
 
 
 @dataclass
@@ -216,7 +237,7 @@ def analyze(
     clip = _as_clip(keypoints, fps, impact_frame, clip_id)
     dataset = ClipDataset([clip], loaded.features, loaded.labels)
     item = dataset[0]
-    scored = score_clip(loaded.model, item, loaded.device)
+    scored = score_clip(loaded.model, item, loaded.device, chunk_size=CHUNK_SIZE)
 
     decision = DecisionConfig(
         threshold=float(threshold if threshold is not None else loaded.decision.threshold),
@@ -247,12 +268,21 @@ def analyze(
             entry["evidence"] = _explain(loaded, item, frame, method, top_k)
         warnings.append(entry)
 
+    # Copy out the one array the response needs, then hand the window stack and
+    # every intermediate back before serialising. On a box where torch already
+    # owns 80% of the memory, waiting for the collector's own schedule is what
+    # turns a working request into a killed container on the next one.
+    scores = [round(float(s), 5) for s in scored.scores]
+    num_frames = int(clip.num_frames)
+    del item, dataset, scored, clip
+    gc.collect()
+
     return {
         "clip_id": clip_id,
-        "frames": int(clip.num_frames),
-        "fps": clip.fps,
+        "frames": num_frames,
+        "fps": float(fps),
         "impact_frame": impact_frame,
-        "scores": [round(float(s), 5) for s in scored.scores],
+        "scores": scores,
         "warnings": warnings,
         "decision": {
             "threshold": decision.threshold,

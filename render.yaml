@@ -27,6 +27,14 @@ services:
         value: "1"
       - key: MKL_NUM_THREADS
         value: "1"
+      # Windows per forward pass. Importing torch alone costs 403 MB of the
+      # free tier's 512, so the whole activation budget is ~100 MB; scoring a
+      # 141-frame clip in one batch peaks at 681 MB and the container is killed.
+      # 8 peaks at ~449 MB and is also marginally faster. See backend/inference.py.
+      - key: INFERENCE_CHUNK_SIZE
+        value: "8"
+      - key: MAX_FRAMES
+        value: "600"
       # Set this to the Vercel domain once the frontend is deployed. Until then
       # the app falls back to allowing *.vercel.app, which is convenient for
       # preview deployments and too permissive for anything else.

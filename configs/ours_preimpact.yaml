@@ -1,0 +1,18 @@
+# The proposed model: pre-impact time-weighted loss + joint grounding head.
+#
+# This is the row labelled "ours" in the results table and the reference point
+# for every ablation in Section 16.
+
+_base_: default.yaml
+
+run:
+  name: ours_preimpact
+
+model:
+  attention: true
+
+loss:
+  lam: 1.5
+
+explain:
+  enabled: true

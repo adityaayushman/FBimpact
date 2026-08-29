@@ -1,0 +1,22 @@
+# Ablation: - grounding head (Section 16).
+#
+# Joint attention is replaced by uniform mean-pooling over joints, so the model
+# produces no evidence output. Measures the accuracy cost of the explanation -
+# the question a reviewer asks when an interpretability component is added to a
+# safety system.
+#
+# Faithfulness is still computed via gradients, since there are no attention
+# weights left to rank with. That is the point: it shows what the deletion and
+# insertion curves look like for a model with no grounding head at all, which is
+# the control the headline faithfulness number needs.
+
+_base_: ../ours_preimpact.yaml
+
+run:
+  name: ablation_no_grounding
+
+model:
+  attention: false
+
+explain:
+  method: gradient_input

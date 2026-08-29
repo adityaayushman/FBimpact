@@ -1,0 +1,17 @@
+# Core: everything needed to train, evaluate and explain from a skeleton cache.
+torch>=2.1
+numpy>=1.24
+PyYAML>=6.0
+
+# Stage A only. Not needed to reproduce results from a released skeleton cache -
+# that is the point of caching skeletons rather than shipping video.
+# opencv-python>=4.8      # video decoding
+# rtmlib>=0.0.13          # RTMPose backend
+# onnxruntime-gpu>=1.16   # or onnxruntime for CPU
+# ultralytics>=8.3        # YOLO-Pose backend
+
+# Figures.
+# matplotlib>=3.7
+
+# Tests.
+# pytest>=7.4

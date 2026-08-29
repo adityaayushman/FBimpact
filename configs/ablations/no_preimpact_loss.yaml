@@ -1,0 +1,14 @@
+# Ablation: - pre-impact loss (Section 16), and the direct test of RQ3.
+#
+# `lam = 0` reduces the objective to plain class-weighted BCE over the same
+# labels. Architecture, data, schedule and seeds are untouched, so the
+# difference in lead time - and any cost in recall or false-alarm rate - is
+# attributable to the time weighting alone.
+
+_base_: ../ours_preimpact.yaml
+
+run:
+  name: ablation_no_preimpact_loss
+
+loss:
+  lam: 0.0

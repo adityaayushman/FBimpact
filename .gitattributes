@@ -1,0 +1,15 @@
+# Normalise line endings so a Windows checkout and a Linux build container
+# (Render, Vercel) see identical files. Without this, every file committed from
+# Windows shows as modified on the next clone.
+* text=auto eol=lf
+
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary artefacts: never touch these.
+*.npz  binary
+*.pt   binary
+*.png  binary
+*.jpg  binary
+*.mp4  binary
+*.avi  binary

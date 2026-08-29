@@ -1,0 +1,13 @@
+# Ablation: - velocity features (Section 16).
+#
+# Positions only, so C = 2 instead of 4. The model can still infer motion
+# through the temporal convolutions; what it loses is having motion handed to it
+# explicitly. Isolates the value of the velocity channel.
+
+_base_: ../ours_preimpact.yaml
+
+run:
+  name: ablation_no_velocity
+
+features:
+  with_velocity: false

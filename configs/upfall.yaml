@@ -1,0 +1,41 @@
+# UP-Fall, the primary benchmark (Section 13).
+#
+# Prerequisites, in order:
+#   1. python scripts/cache_poses.py --dataset upfall --root <UP-Fall videos> \
+#          --out data/cache/upfall
+#   2. python scripts/annotate_onsets.py --cache data/cache/upfall \
+#          --out data/annotations/upfall_onsets.csv
+#      (falls with no annotated t* are dropped, not guessed - see data/upfall.py)
+#   3. python train.py --config configs/upfall.yaml
+#
+# UP-Fall's cameras run at roughly 18 fps, not 30. Every frame-count parameter
+# below is therefore re-derived rather than inherited, because lead time is
+# reported in seconds and a window copied from a 30 fps config would silently
+# mean something else here.
+
+_base_: default.yaml
+
+run:
+  name: upfall
+
+data:
+  cache_dir: data/cache/upfall
+  source: upfall
+  onsets: data/annotations/upfall_onsets.csv
+  split:
+    mode: folds              # 17 subjects: leave-subjects-out is affordable
+    num_folds: 5
+
+features:
+  window: 18                 # ~1.0 s at 18 fps
+  stride: 3
+  temporal_jitter: 1
+
+labels:
+  w_pre: 12                  # ~0.67 s at 18 fps
+
+loss:
+  w_pre_seconds: 0.67        # must match labels.w_pre / fps
+
+decision:
+  refractory_frames: 18      # ~1 s

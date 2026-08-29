@@ -1,0 +1,21 @@
+# Objective 1 - the reproduced baseline.
+#
+# A standard skeleton fall model: ST-GCN with a plain class-weighted
+# classification loss, no pre-impact time weighting, no grounding head. It is
+# evaluated through *the same* windowing and decision logic as the proposed
+# model (Section 15), so the comparison isolates the anticipation objective
+# rather than confounding it with a different evaluation protocol.
+#
+# The architecture is otherwise identical to `ours_preimpact.yaml`. The only
+# differences are `loss.lam` and `model.attention`.
+
+_base_: default.yaml
+
+run:
+  name: baseline_stgcn
+
+model:
+  attention: false           # baseline emits no grounded evidence
+
+loss:
+  lam: 0.0                   # plain class-weighted BCE

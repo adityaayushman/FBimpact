@@ -1,0 +1,27 @@
+# Second backbone (Section 3, objective 1): the same objective and the same
+# evaluation on a GCN-LSTM instead of an ST-GCN, so the anticipation result can
+# be shown not to be an artefact of one architecture.
+
+_base_: default.yaml
+
+run:
+  name: gcn_lstm
+
+model:
+  name: gcn_lstm
+  gcn_channels: [64, 128]
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.1
+  graph_strategy: spatial
+  max_hop: 1
+  edge_importance: true
+  attention: true
+  attention_hidden: 32
+  temporal_pool: false
+  # ST-GCN-only keys are not valid here; build_model rejects them rather than
+  # silently ignoring them.
+  base_channels: null
+  blocks: null
+  kernel_size: null
+  causal: null

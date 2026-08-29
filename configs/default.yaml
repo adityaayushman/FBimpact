@@ -1,0 +1,98 @@
+# Base configuration. Every other config inherits from this one and overrides
+# only what it changes, so a diff between two configs is a diff between two
+# experiments.
+
+run:
+  name: default
+  seed: 0
+  seeds: [0, 1, 2]          # Section 14: report mean +/- std, never a single run
+  device: auto
+  deterministic: false      # cuDNN determinism costs ~45x on the reference GPU;
+                            # the seed already fixes init, data order and splits.
+                            # See utils/seed.py before turning this on.
+  results_dir: results
+
+data:
+  cache_dir: data/cache/synthetic
+  source: synthetic          # synthetic | upfall | urfd | le2i
+  onsets: null               # path to onsets.csv; required for real fall data
+  split:
+    mode: single             # single | folds
+    num_folds: 5
+    val_fraction: 0.2
+    test_fraction: 0.2
+    seed: 0
+
+features:
+  window: 30                 # T, ~1.0 s at 30 fps
+  stride: 5                  # training stride; inference is always 1
+  conf_threshold: 0.30
+  with_velocity: true
+  temporal_jitter: 2
+
+labels:
+  w_pre: 20                  # Section 9: imminent window in frames
+  post_impact: ignore        # ignore | negative | positive
+
+augment:
+  enabled: true
+  flip_prob: 0.5
+  scale_range: [0.9, 1.1]
+  noise_std: 0.01
+  rotate_deg: 0.0            # off: a fall is defined relative to gravity
+
+model:
+  name: stgcn
+  base_channels: 64
+  # Receptive field = 1 + (kernel_size - 1) * sum(dilations) = 25 frames, which
+  # fits inside features.window (30). Keep those two in step: beyond the window
+  # the extra taps only see padding. train.py warns if they drift apart.
+  blocks: [[64, 1], [64, 1], [128, 1], [128, 1]]
+  kernel_size: 7
+  dropout: 0.1
+  graph_strategy: spatial
+  max_hop: 1
+  causal: true               # never false for a reported lead-time number
+  edge_importance: true
+  attention: true
+  attention_hidden: 32
+  temporal_pool: false
+
+loss:
+  lam: 1.5                   # pre-impact time weighting; 0 = plain BCE
+  w_pre_seconds: 0.67        # keep consistent with labels.w_pre / fps
+  pos_weight: null           # null derives it from the training positive rate
+  max_pos_weight: 20.0
+  focal_gamma: 0.0
+  label_smoothing: 0.0
+
+train:
+  epochs: 40
+  batch_size: 32
+  lr: 0.001
+  weight_decay: 0.0001
+  scheduler: cosine
+  warmup_epochs: 2
+  grad_clip: 5.0
+  amp: true
+  num_workers: 0             # Windows: keep at 0 unless the loader is a bottleneck
+  eval_every: 1
+  patience: 12               # epochs without validation improvement
+
+decision:
+  threshold: 0.70            # Section 10 defaults
+  persistence: 3
+  refractory_frames: 30
+  early_trigger: false_alarm # false_alarm | hit | ignore
+  tolerance_frames: 0
+  select_on_val: true        # choose the operating point on validation only
+  max_false_alarms_per_hour: 1.0
+  objective: mean_lead_time
+
+explain:
+  enabled: true
+  method: attention          # attention | gradient | gradient_input | occlusion
+  baseline: zero             # zero | mean | neighbour
+  num_random: 5
+  max_warnings: 100
+  top_k: 3

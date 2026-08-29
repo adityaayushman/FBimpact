@@ -1,0 +1,14 @@
+# Ablation: - temporal modelling (Section 16).
+#
+# `temporal_pool` collapses the temporal kernels to size 1 and mean-pools the
+# window into a single score. What remains is a per-frame pose classifier with
+# no access to how the pose is changing. Isolates the value of the temporal
+# module.
+
+_base_: ../ours_preimpact.yaml
+
+run:
+  name: ablation_no_temporal
+
+model:
+  temporal_pool: true

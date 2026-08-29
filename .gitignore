@@ -1,0 +1,41 @@
+# Skeleton caches and run outputs are regenerable; the configs and code are not.
+data/cache/
+results/
+!results/.gitkeep
+
+# Annotations ARE a deliverable (Section 20) - keep them.
+!data/annotations/
+!data/annotations/*.csv
+
+# The deployed demo checkpoint and clips ARE committed: Render builds from the
+# repo and has no other artefact store. Regenerate with scripts/prepare_demo.py.
+!backend/model/
+!backend/model/best.pt
+!backend/demo_clips/
+!backend/demo_clips/*.npz
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+
+# Frontend
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+.env.local
+.env*.local
+
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Machine-generated tool permission allowlists, full of local absolute paths.
+.claude/

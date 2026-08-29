@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   api,
+  API_CONFIGURED,
   API_URL,
   type Analysis,
   type ClipSummary,
@@ -306,9 +307,22 @@ export default function Page() {
           {error && (
             <div className="card" style={{ marginBottom: 14 }}>
               <div className="error-box">{error}</div>
-              <p className="hint" style={{ marginTop: 10, marginBottom: 0 }}>
-                API: <code style={{ fontFamily: "var(--mono)" }}>{API_URL}</code>
-              </p>
+              {API_CONFIGURED ? (
+                <p className="hint" style={{ marginTop: 10, marginBottom: 0 }}>
+                  API: <code style={{ fontFamily: "var(--mono)" }}>{API_URL}</code>
+                </p>
+              ) : (
+                <ol className="hint" style={{ marginTop: 10, marginBottom: 0, paddingLeft: 18 }}>
+                  <li>
+                    Deploy the API to Render using <code style={{ fontFamily: "var(--mono)" }}>render.yaml</code>.
+                  </li>
+                  <li>
+                    Add <code style={{ fontFamily: "var(--mono)" }}>NEXT_PUBLIC_API_URL</code> to this
+                    Vercel project&rsquo;s environment variables.
+                  </li>
+                  <li>Redeploy — the value is inlined at build time.</li>
+                </ol>
+              )}
             </div>
           )}
 

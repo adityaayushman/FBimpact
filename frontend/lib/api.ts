@@ -6,9 +6,20 @@
  * leaves the device.
  */
 
-export const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000"
-).replace(/\/$/, "");
+const RAW_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
+
+/**
+ * Whether a backend was configured at build time.
+ *
+ * `NEXT_PUBLIC_API_URL` is inlined by Next at build time, so a deployment made
+ * before the backend existed has no way to pick one up later without a
+ * redeploy. Tracking that explicitly lets the UI say "no backend configured"
+ * instead of surfacing a mixed-content failure against localhost, which is what
+ * the bare fallback produces on an HTTPS page and which reads like a bug.
+ */
+export const API_CONFIGURED = RAW_API_URL.length > 0;
+
+export const API_URL = (RAW_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 /** [T][17][3] of (x, y, confidence) in pixels. */
 export type Keypoints = number[][][];
@@ -119,6 +130,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     });
   } catch (cause) {
+    if (!API_CONFIGURED && typeof window !== "undefined" && window.location.protocol === "https:") {
+      throw new Error(
+        "No backend is configured for this deployment. Deploy the API (see DEPLOY.md), " +
+          "then set NEXT_PUBLIC_API_URL in the Vercel project and redeploy - the value is " +
+          "inlined at build time, so a restart alone will not pick it up."
+      );
+    }
     // A free-tier container that has spun down takes ~30-60s to answer its first
     // request, and the fetch fails outright rather than returning a status - so
     // say that, instead of "failed to fetch".

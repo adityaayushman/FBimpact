@@ -2,6 +2,11 @@
 
 Two services: a **Next.js frontend on Vercel** and a **FastAPI inference API on Render**.
 
+| | Status | URL |
+|---|---|---|
+| Backend (Render) | **live** | https://fbimpact-api.onrender.com — [`/docs`](https://fbimpact-api.onrender.com/docs) |
+| Frontend (Vercel) | needs the repo connected | project `fbimpact` |
+
 ```
 Browser (Vercel)                                    Render
 ┌──────────────────────────────┐                  ┌────────────────────────┐
@@ -55,11 +60,36 @@ Once the frontend is live, set `ALLOWED_ORIGINS` to its domain. Until then the a
 back to allowing `*.vercel.app`, which is handy for preview deployments and too permissive
 for anything else.
 
-**Free-tier realities.** The container spins down after ~15 minutes idle, so the first
-request afterwards takes 30–60 s; the client shows a cold-start message rather than
-"failed to fetch". `/analyze` on a 140-frame clip takes ~2.7 s on a local CPU and will be
-slower on a shared one. `/faithfulness` is ~150 forward passes and takes several seconds —
-that is why it is a separate, opt-in endpoint rather than part of `/analyze`.
+### Free-tier realities (measured on the live service)
+
+**Memory is the binding constraint, and it is tighter than it looks.** Importing torch
+costs 403 MB of the 512 MB box and the checkpoint another 9, leaving ~100 MB for every
+forward pass the service will ever run. Peak RSS scoring a 141-frame clip, by windows per
+forward:
+
+| chunk | peak RSS | vs 512 MB | latency |
+|---:|---:|---|---:|
+| 112 | 681 MB | **OOM — container killed** | 2464 ms |
+| 32 | 521 MB | OOM | 2096 ms |
+| 16 | 469 MB | +43 MB | 2081 ms |
+| **8** (default) | **449 MB** | **+63 MB** | **1892 ms** |
+
+Chunking is not a speed/memory trade — the small chunks are *faster*, since the working set
+stays in cache. `INFERENCE_CHUNK_SIZE` raises it on an instance with real memory; the
+chunks are independent forward passes over the same windows, so scores are unchanged.
+
+**Latency**, live, on Render's shared CPU (roughly 3.5× the local figures):
+
+| endpoint | clip | server time |
+|---|---|---|
+| `/analyze` | 94 frames | 3.8 s |
+| `/analyze` | 141 frames | 7.3 s |
+| `/faithfulness` | 1 warning, `num_random=3` | 9.4 s |
+
+**Cold start.** The container spins down after ~15 minutes idle; the next request takes
+30–60 s and the client shows a cold-start message rather than "failed to fetch". If you see
+intermittent 404s or 503s on endpoints that worked a moment ago, that is a redeploy in
+progress, not a bug — Render's router answers for the container while it restarts.
 
 ## 3. Frontend → Vercel
 
@@ -69,10 +99,16 @@ On [vercel.com](https://vercel.com): **Add New → Project** → import the repo
 |---|---|
 | Framework | Next.js (auto-detected) |
 | **Root directory** | **`frontend`** ← must be set; the repo root is not a Next app |
-| Environment variable | `NEXT_PUBLIC_API_URL` = your Render URL, e.g. `https://fbimpact-api.onrender.com` |
+| Environment variable | `NEXT_PUBLIC_API_URL` = `https://fbimpact-api.onrender.com` |
 
 `NEXT_PUBLIC_API_URL` is inlined at build time, so **changing it requires a redeploy**, not
-just a restart.
+just a restart. With no value set the UI shows a "no backend configured" card listing these
+steps, rather than failing against `localhost` from an HTTPS page.
+
+A bare project named `fbimpact` already exists on the account. Connect the repo under
+**Settings → Git** rather than creating a second one — or delete it and use
+**Add New → Project → Import**, which reaches the same place in fewer clicks and enables
+auto-deploy on push.
 
 ## 4. Refreshing the deployed model
 

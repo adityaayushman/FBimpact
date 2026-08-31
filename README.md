@@ -78,6 +78,8 @@ decision logic and metrics needed somewhere to live that was neither data nor mo
 ## Live demo
 
 Frontend on Vercel, API on Render — see [`DEPLOY.md`](DEPLOY.md).
+The API is live at **https://fbimpact-api.onrender.com** ([`/docs`](https://fbimpact-api.onrender.com/docs));
+allow 30–60 s for the free tier's cold start.
 
 **Pose estimation runs in the browser** (TF.js MoveNet, which emits COCO-17 — exactly the
 layout in [`data/skeleton.py`](data/skeleton.py)), and only skeletons are sent to the API.

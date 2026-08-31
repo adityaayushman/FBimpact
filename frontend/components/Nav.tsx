@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 const SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "demo", label: "Live demo" },
+  { id: "results", label: "Results" },
   { id: "research", label: "Research" },
   { id: "pipeline", label: "Pipeline" },
   { id: "method", label: "Method" },
@@ -17,7 +18,7 @@ const SECTIONS = [
  * Uses IntersectionObserver rather than a scroll handler so highlighting costs
  * nothing on the main thread while the 3D scene is running.
  */
-export default function Nav({ apiOk }: { apiOk: boolean | null }) {
+export default function Nav({ apiOk, attempt = 0 }: { apiOk: boolean | null; attempt?: number }) {
   const [active, setActive] = useState("overview");
 
   useEffect(() => {
@@ -67,12 +68,18 @@ export default function Nav({ apiOk }: { apiOk: boolean | null }) {
         </div>
 
         <span className="status" style={{ marginLeft: "auto", flexShrink: 0 }} title={
-          apiOk === null ? "Connecting to the inference API" :
-          apiOk ? "Inference API reachable" : "Inference API unreachable"
+          apiOk === null
+            ? "The API sleeps when idle and takes up to a minute to wake"
+            : apiOk ? "Inference API reachable" : "Inference API unreachable"
         }>
           <span className={`status-dot ${apiOk === null ? "wait" : apiOk ? "ok" : "bad"}`} />
           <span className="mono" style={{ fontSize: 11 }}>
-            {apiOk === null ? "connecting" : apiOk ? "api live" : "api down"}
+            {apiOk === null
+              // "connecting" reads as instantaneous; waking a sleeping free-tier
+              // container is not, and a visitor who is not told that reads the
+              // delay as a broken site.
+              ? (attempt > 1 ? `waking · try ${attempt}` : "waking api…")
+              : apiOk ? "api live" : "api down"}
           </span>
         </span>
       </div>

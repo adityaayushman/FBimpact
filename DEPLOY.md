@@ -99,11 +99,16 @@ On [vercel.com](https://vercel.com): **Add New → Project** → import the repo
 |---|---|
 | Framework | Next.js (auto-detected) |
 | **Root directory** | **`frontend`** ← must be set; the repo root is not a Next app |
-| Environment variable | `NEXT_PUBLIC_API_URL` = `https://fbimpact-api.onrender.com` |
+| Environment variables | none required |
 
-`NEXT_PUBLIC_API_URL` is inlined at build time, so **changing it requires a redeploy**, not
-just a restart. With no value set the UI shows a "no backend configured" card listing these
-steps, rather than failing against `localhost` from an HTTPS page.
+**No environment variable is needed.** The frontend defaults to
+`https://fbimpact-api.onrender.com`. There is one public backend at a fixed URL, so requiring
+every deployment to configure it bought nothing and cost a broken page whenever it was
+missed — `NEXT_PUBLIC_*` is inlined at build time, so a deploy made without it stays broken
+until someone rebuilds.
+
+Set `NEXT_PUBLIC_API_URL` only to point at a **different** backend, such as your own uvicorn
+during development. Changing it then requires a rebuild, not just a restart.
 
 A bare project named `fbimpact` already exists on the account. Connect the repo under
 **Settings → Git** rather than creating a second one — or delete it and use

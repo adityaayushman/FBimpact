@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  api, API_CONFIGURED, API_URL,
+  api, API_URL,
   type Analysis, type ClipSummary, type Faithfulness, type Health, type Keypoints, type Warning,
 } from "@/lib/api";
 import FaithfulnessChart from "./FaithfulnessChart";
@@ -19,7 +19,15 @@ interface Source {
   isFall: boolean;
 }
 
-export default function DemoPane({ health, bootError }: { health: Health | null; bootError: string | null }) {
+export default function DemoPane({
+  health,
+  bootError,
+  waking = false,
+}: {
+  health: Health | null;
+  bootError: string | null;
+  waking?: boolean;
+}) {
   const [clips, setClips] = useState<ClipSummary[]>([]);
   const [source, setSource] = useState<Source | null>(null);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -30,13 +38,18 @@ export default function DemoPane({ health, bootError }: { health: Health | null;
   const [checks, setChecks] = useState<Record<number, Faithfulness>>({});
   const [checking, setChecking] = useState<number | null>(null);
 
+  // Deliberately waits for the health handshake rather than firing in parallel.
+  // Both requests would otherwise race the same cold start, and the one without
+  // retries would fail and report the API down while the other was still
+  // patiently waking it.
   useEffect(() => {
+    if (!health) return;
     let cancelled = false;
     api.clips()
       .then((c) => { if (!cancelled) setClips(c); })
       .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : String(e)); });
     return () => { cancelled = true; };
-  }, []);
+  }, [health]);
 
   /* -- playback ---------------------------------------------------------- */
   const rafRef = useRef<number | null>(null);
@@ -143,20 +156,26 @@ export default function DemoPane({ health, bootError }: { health: Health | null;
         </div>
       </div>
 
+      {waking && (
+        <div className="notice" style={{ marginBottom: 16, display: "flex", gap: 11, alignItems: "center" }}>
+          <span className="spinner" />
+          <span>
+            Waking the inference API. It sleeps when idle on the free tier and takes up to a
+            minute to start — the demo clips will appear as soon as it answers.
+          </span>
+        </div>
+      )}
+
       {(error || bootError) && (
         <div className="notice danger" style={{ marginBottom: 16 }}>
           <div>{error ?? bootError}</div>
-          {API_CONFIGURED ? (
-            <p className="mono" style={{ margin: "9px 0 0", fontSize: 11.5, color: "var(--text-3)" }}>
-              {API_URL}
-            </p>
-          ) : (
-            <ol style={{ margin: "9px 0 0", paddingLeft: 18, fontSize: 12.5, color: "var(--text-3)" }}>
-              <li>Deploy the API using <code>render.yaml</code>.</li>
-              <li>Set <code>NEXT_PUBLIC_API_URL</code> in the Vercel project.</li>
-              <li>Redeploy — the value is inlined at build time.</li>
-            </ol>
-          )}
+          <p style={{ margin: "9px 0 0", fontSize: 12.5, color: "var(--text-3)" }}>
+            <span className="mono">{API_URL}</span> ·{" "}
+            <button className="btn" style={{ padding: "3px 10px", fontSize: 12 }}
+                    onClick={() => window.location.reload()}>
+              Retry
+            </button>
+          </p>
         </div>
       )}
 
@@ -167,7 +186,9 @@ export default function DemoPane({ health, bootError }: { health: Health | null;
             <h3 className="card-title">Demo clips</h3>
             <p className="card-sub">Bundled with the API — no upload needed.</p>
 
-            {clips.length === 0 && !error && <div className="empty">Loading…</div>}
+            {clips.length === 0 && !error && (
+              <div className="empty">{waking ? "Waiting for the API…" : "Loading…"}</div>
+            )}
 
             {falls.length > 0 && <div className="group-head">Falls</div>}
             {falls.map((c) => (

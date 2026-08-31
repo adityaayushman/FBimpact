@@ -6,20 +6,26 @@
  * leaves the device.
  */
 
+/**
+ * The deployed inference API.
+ *
+ * This is the default rather than a required environment variable. There is one
+ * public backend and its URL is fixed, so making every deployment configure it
+ * bought nothing and cost a broken page whenever it was missed - Next inlines
+ * `NEXT_PUBLIC_*` at build time, so a deploy made without it stays broken until
+ * someone rebuilds.
+ *
+ * Set `NEXT_PUBLIC_API_URL` to override it, which is what local development
+ * against your own uvicorn does.
+ */
+const DEFAULT_API_URL = "https://fbimpact-api.onrender.com";
+
 const RAW_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
 
-/**
- * Whether a backend was configured at build time.
- *
- * `NEXT_PUBLIC_API_URL` is inlined by Next at build time, so a deployment made
- * before the backend existed has no way to pick one up later without a
- * redeploy. Tracking that explicitly lets the UI say "no backend configured"
- * instead of surfacing a mixed-content failure against localhost, which is what
- * the bare fallback produces on an HTTPS page and which reads like a bug.
- */
-export const API_CONFIGURED = RAW_API_URL.length > 0;
+export const API_URL = (RAW_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 
-export const API_URL = (RAW_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+/** True when running against the built-in public backend rather than an override. */
+export const API_IS_DEFAULT = RAW_API_URL.length === 0;
 
 /** [T][17][3] of (x, y, confidence) in pixels. */
 export type Keypoints = number[][][];
@@ -130,19 +136,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     });
   } catch (cause) {
-    if (!API_CONFIGURED && typeof window !== "undefined" && window.location.protocol === "https:") {
-      throw new Error(
-        "No backend is configured for this deployment. Deploy the API (see DEPLOY.md), " +
-          "then set NEXT_PUBLIC_API_URL in the Vercel project and redeploy - the value is " +
-          "inlined at build time, so a restart alone will not pick it up."
-      );
-    }
-    // A free-tier container that has spun down takes ~30-60s to answer its first
-    // request, and the fetch fails outright rather than returning a status - so
-    // say that, instead of "failed to fetch".
+    // The API sleeps on the free tier and takes 30-60s to answer the first
+    // request after waking. Say that, rather than "failed to fetch".
     throw new Error(
-      `Cannot reach the API at ${API_URL}. If it is hosted on Render's free tier ` +
-        `it may be cold-starting; wait ~30s and retry.`
+      `Cannot reach the API at ${API_URL}. It sleeps when idle and takes up to a ` +
+        `minute to wake, so this usually clears on a retry.`
     );
   }
   if (!response.ok) {
@@ -159,7 +157,28 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => request<Health>("/health"),
+  /**
+   * Health check that tolerates a cold start.
+   *
+   * Render holds the connection open while a sleeping container boots, so one
+   * fetch usually succeeds after ~50 s. But a proxy or a flaky link can drop it
+   * first, and the page would then report "api down" for a service that is
+   * merely waking. Retrying a few times costs nothing and removes the most
+   * common false alarm about the backend being broken.
+   */
+  health: async (attempts = 3, onAttempt?: (n: number) => void): Promise<Health> => {
+    let lastError: unknown;
+    for (let i = 0; i < attempts; i += 1) {
+      onAttempt?.(i + 1);
+      try {
+        return await request<Health>("/health");
+      } catch (error) {
+        lastError = error;
+        if (i < attempts - 1) await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
+    throw lastError;
+  },
 
   skeleton: () => request<SkeletonSpec>("/skeleton"),
 

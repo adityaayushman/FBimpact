@@ -9,15 +9,17 @@ import MethodPane from "@/components/MethodPane";
 import Nav from "@/components/Nav";
 import PipelinePane from "@/components/PipelinePane";
 import ResearchPane from "@/components/ResearchPane";
+import ResultsPane from "@/components/ResultsPane";
 import { PROJECT } from "@/lib/content";
 
 export default function Page() {
   const [health, setHealth] = useState<Health | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    api.health()
+    api.health(3, (n) => { if (!cancelled) setAttempt(n); })
       .then((h) => { if (!cancelled) { setHealth(h); setBootError(null); } })
       .catch((e) => { if (!cancelled) setBootError(e instanceof Error ? e.message : String(e)); });
     return () => { cancelled = true; };
@@ -26,11 +28,12 @@ export default function Page() {
   return (
     <>
       <div className="backdrop" aria-hidden />
-      <Nav apiOk={health ? true : bootError ? false : null} />
+      <Nav apiOk={health ? true : bootError ? false : null} attempt={attempt} />
 
       <main className="shell">
         <Hero />
-        <DemoPane health={health} bootError={bootError} />
+        <DemoPane health={health} bootError={bootError} waking={!health && !bootError} />
+        <ResultsPane />
         <ResearchPane />
         <PipelinePane />
         <MethodPane />

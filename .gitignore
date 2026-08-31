@@ -39,3 +39,7 @@ next-env.d.ts
 
 # Machine-generated tool permission allowlists, full of local absolute paths.
 .claude/
+
+# Pose-estimator weights: downloaded on demand, never committed.
+*.pt
+!backend/model/best.pt

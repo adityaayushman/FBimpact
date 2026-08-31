@@ -1,0 +1,66 @@
+# UR Fall Detection — the real-data benchmark (Section 13, transfer check).
+#
+# Prerequisites:
+#   python scripts/download_urfd.py --out d:/tmp/urfd
+#   python scripts/cache_urfd.py   --root d:/tmp/urfd --out data/cache/urfd
+#
+# Camera 0 runs at 30 fps, so the frame-count defaults from default.yaml carry
+# over unchanged — unlike UP-Fall at ~18 fps, where every one has to be
+# re-derived because lead time is reported in seconds.
+#
+# t* comes from the dataset's own per-frame annotation (first frame marked
+# "lying"), never from the skeleton the model consumes. See data/urfd.py for why
+# that distinction is what makes lead time meaningful rather than circular.
+#
+# Splits are SEQUENCE-independent, not subject-independent: UR Fall does not
+# publish which volunteer performed which sequence, so subject grouping is not
+# constructible. That is a weaker guarantee and is reported as such — it is also
+# why the proposal lists this dataset as a transfer check rather than the
+# primary benchmark.
+
+_base_: default.yaml
+
+run:
+  name: urfd
+
+data:
+  cache_dir: data/cache/urfd
+  source: urfd
+  split:
+    mode: folds
+    num_folds: 5
+    fold: 0
+    val_fraction: 0.25
+    seed: 0
+
+features:
+  window: 30                 # 1.0 s at 30 fps
+  stride: 3                  # denser than the fixture: only 30 real falls exist
+  temporal_jitter: 2
+  # Real pose estimation drops joints far more often than the fixture does,
+  # especially once a person is on the floor. Trusting a low-confidence joint is
+  # worse than interpolating across it.
+  conf_threshold: 0.35
+
+labels:
+  w_pre: 20                  # 0.67 s at 30 fps
+
+loss:
+  w_pre_seconds: 0.67
+
+augment:
+  # Real data is scarcer here, so augmentation carries more of the load.
+  noise_std: 0.015
+  scale_range: [0.85, 1.15]
+
+train:
+  epochs: 45
+  patience: 12
+  batch_size: 64
+
+decision:
+  refractory_frames: 30      # ~1 s
+  max_false_alarms_per_hour: 2.0
+
+explain:
+  max_warnings: 40

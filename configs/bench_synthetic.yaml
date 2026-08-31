@@ -1,0 +1,34 @@
+# The synthetic benchmark used for the ablation grid.
+#
+# 20 subjects, 120 falls, 200 hard-negative ADLs, split leave-subjects-out over
+# 5 folds. Results from this config are labelled "synthetic benchmark" wherever
+# they are reported: the fixture is procedurally generated, so it measures
+# whether the pipeline and the objective behave as designed, not how the method
+# performs on human falls. UR Fall is the real-data check.
+
+_base_: default.yaml
+
+run:
+  name: bench
+  results_dir: results
+
+data:
+  cache_dir: data/cache/synthetic_bench
+  source: synthetic
+  split:
+    mode: folds
+    num_folds: 5
+    fold: 0
+    val_fraction: 0.25
+    seed: 0
+
+train:
+  epochs: 30
+  patience: 8
+  batch_size: 64
+
+decision:
+  # A tighter budget than the default: with 200 ADL clips there is enough
+  # negative time for one alarm per hour to be a meaningful constraint rather
+  # than a rounding error.
+  max_false_alarms_per_hour: 2.0

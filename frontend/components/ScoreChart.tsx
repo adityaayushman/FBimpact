@@ -79,8 +79,8 @@ export default function ScoreChart({ analysis, frame, onScrub, height = 190 }: P
 
       {ticks.map((t) => (
         <g key={t}>
-          <line x1={PAD.left} y1={y(t)} x2={width - PAD.right} y2={y(t)} stroke="var(--grid)" strokeWidth={1} />
-          <text x={PAD.left - 6} y={y(t) + 3.5} textAnchor="end" fontSize={10} fill="var(--text-faint)" fontFamily="var(--mono)">
+          <line x1={PAD.left} y1={y(t)} x2={width - PAD.right} y2={y(t)} stroke="var(--grid-line)" strokeWidth={1} />
+          <text x={PAD.left - 6} y={y(t) + 3.5} textAnchor="end" fontSize={10} fill="var(--text-4)" fontFamily="var(--mono)">
             {t.toFixed(2)}
           </text>
         </g>
@@ -93,15 +93,21 @@ export default function ScoreChart({ analysis, frame, onScrub, height = 190 }: P
           y={height - 8}
           textAnchor="middle"
           fontSize={10}
-          fill="var(--text-faint)"
+          fill="var(--text-4)"
           fontFamily="var(--mono)"
         >
           {s}s
         </text>
       ))}
 
-      <path d={area} fill="var(--accent)" opacity={0.1} />
-      <path d={path} fill="none" stroke="var(--accent)" strokeWidth={1.6} strokeLinejoin="round" />
+      <defs>
+        <linearGradient id="scoreFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.34" />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#scoreFill)" />
+      <path d={path} fill="none" stroke="var(--accent)" strokeWidth={1.8} strokeLinejoin="round" />
 
       {/* Decision threshold. */}
       <line
@@ -150,7 +156,7 @@ export default function ScoreChart({ analysis, frame, onScrub, height = 190 }: P
             strokeWidth={1.2}
             strokeDasharray="2 3"
           />
-          <circle cx={x(w.frame)} cy={y(w.score)} r={4} fill="var(--imminent)" stroke="var(--surface)" strokeWidth={1.5} />
+          <circle cx={x(w.frame)} cy={y(w.score)} r={4} fill="var(--imminent)" stroke="var(--bg-0)" strokeWidth={1.5} />
           {w.lead_time !== null && (
             <text
               x={x(w.frame) + 5}

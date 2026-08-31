@@ -59,7 +59,7 @@ export default function VideoUpload({ maxFrames, disabled, onExtracted, onError 
 
   return (
     <div>
-      <label className="file-drop">
+      <label className="drop">
         <input
           type="file"
           accept="video/*"
@@ -70,12 +70,13 @@ export default function VideoUpload({ maxFrames, disabled, onExtracted, onError 
             if (file) void handleFile(file);
           }}
         />
-        {busy ? `Estimating poses… ${pct}%` : "Choose a video file"}
+        {busy ? `Estimating poses... ${pct}%` : "Choose a video file"}
       </label>
 
-      <p className="hint" style={{ marginTop: 8, marginBottom: 0 }}>
-        Posed in your browser with MoveNet; the video never leaves this device. Frame rate is
-        assumed to be 30 fps — lead time is in seconds, so a different source rate scales it.
+      <p className="card-sub" style={{ marginTop: 9, marginBottom: 0 }}>
+        Posed in your browser with MoveNet; the video never leaves this device. The source frame
+        rate is assumed to be 30&nbsp;fps &mdash; lead time is reported in seconds, so a different
+        rate would scale it.
       </p>
 
       {/* Never displayed: it exists only as a decode target. */}

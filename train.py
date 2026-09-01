@@ -157,6 +157,22 @@ def main(argv: list[str] | None = None) -> Path:
 
     # -- data ------------------------------------------------------------------
     clips = load_clips(cfg)
+
+    # The config's `data.source` is a declaration; the cache is the ground truth.
+    # Overriding cache_dir on the command line without also overriding source
+    # would otherwise bake a false provenance into the checkpoint - and that
+    # field is what the deployed API reports as "trained on".
+    actual_sources = sorted({c.source for c in clips})
+    declared = cfg.get("data", {}).get("source")
+    if actual_sources and list(actual_sources) != [declared]:
+        resolved = actual_sources[0] if len(actual_sources) == 1 else "+".join(actual_sources)
+        logger.warning(
+            "data.source says %r but the cache contains %s — recording %r",
+            declared, actual_sources, resolved,
+        )
+        cfg["data"]["source"] = resolved
+        save_config(cfg, run_dir / "config.yaml")
+
     bundle = build_datasets(cfg, clips)
     logger.info("%s", bundle.split.describe())
     logger.info(

@@ -26,10 +26,71 @@ export const ABSTRACT =
   "removing the main barrier to in-home cameras.";
 
 export const HERO_STATS = [
-  { value: "0.47 s", label: "median lead time before impact, demo checkpoint" },
-  { value: "393 k", label: "parameters — runs real-time on modest hardware" },
+  { value: "0.53 s", label: "mean lead time on real falls (UR Fall, 5-fold)" },
+  { value: "0.78", label: "recall across all 30 real falls tested" },
   { value: "0 px", label: "pixels leaving the device: skeletons only" },
-  { value: "17", label: "joints, each testable as evidence" },
+  { value: "393 k", label: "parameters — real-time on modest hardware" },
+];
+
+/**
+ * What the experiments actually found.
+ *
+ * The headline is negative: the project's own novel component did not help.
+ * That is stated first and plainly rather than buried under the ablations that
+ * did work, because a results page that leads with its successes and files its
+ * central failure under "limitations" is not reporting, it is marketing.
+ */
+export const FINDINGS = [
+  {
+    verdict: "negative" as const,
+    rq: "RQ3",
+    title: "The pre-impact objective did not buy lead time",
+    body:
+      "On real data the time-weighted loss made things worse on every axis. Setting λ = 0 — " +
+      "the same architecture with plain class-weighted cross-entropy — reached recall 0.783 " +
+      "and 0.533 s of lead time, against 0.642 and 0.459 s with the objective switched on. " +
+      "The reproduced baseline beat both on recall at 0.808. The answer to RQ3 is that the " +
+      "objective costs recall and lead time rather than trading one for the other.",
+  },
+  {
+    verdict: "positive" as const,
+    rq: "Ablation",
+    title: "Temporal modelling and velocity are doing the work",
+    body:
+      "Removing temporal modelling collapses recall from 0.783 to 0.365 and lead time to " +
+      "0.336 s; removing velocity features drops recall to 0.512 and pushes false alarms to " +
+      "267 per hour. The architecture is earning its keep even though the novel objective is " +
+      "not — anticipation is coming from motion over the window, exactly as designed.",
+  },
+  {
+    verdict: "negative" as const,
+    rq: "Deployment",
+    title: "False-alarm rates are nowhere near deployable",
+    body:
+      "Every variant fires between 64 and 267 times per hour of normal activity. A care " +
+      "setting would tolerate a small number per day. Nothing here is close, and the " +
+      "operating-point curve shows no threshold that fixes it without destroying recall.",
+  },
+  {
+    verdict: "caution" as const,
+    rq: "RQ2",
+    title: "Faithfulness gaps are positive but inside the noise",
+    body:
+      "Deletion gaps run from +0.006 to +0.095 across variants, with standard deviations of " +
+      "the same magnitude. The joint rankings are not clearly beating a random ordering. " +
+      "Notably the gradient-based attribution used by the no-grounding variant scores as well " +
+      "as the attention head built for the purpose.",
+  },
+  {
+    verdict: "caution" as const,
+    rq: "Power",
+    title: "Thirty falls is too few to be confident",
+    body:
+      "Per-fold recall ranges from 0.12 to 1.00 for the same variant, because each fold tests " +
+      "about six falls. The fold-to-fold spread is larger than every difference between " +
+      "variants, so these numbers rank methods weakly at best. UP-Fall, with 17 subjects, is " +
+      "the benchmark that would settle it.",
+  },
 ];
 
 /* -- the gap ------------------------------------------------------------- */
@@ -182,8 +243,26 @@ export const LIMITATIONS = [
 export const DEPLOYMENT_FACTS = [
   { label: "Backbone", value: "Causal ST-GCN" },
   { label: "Parameters", value: "393,046" },
+  { label: "Trained on", value: "UR Fall, fold 0" },
   { label: "Receptive field", value: "25 frames ≤ 30-frame window" },
   { label: "Batch-1 latency", value: "16.3 ms GPU / 35.0 ms CPU" },
   { label: "Peak inference RSS", value: "449 MB (chunked)" },
   { label: "Test suite", value: "49 passing" },
 ];
+
+/**
+ * Provenance of the deployed checkpoint.
+ *
+ * Fold 0 is an arbitrary, pre-committed choice - not the best of the five.
+ * Fold 3 reached recall 1.000 against fold 0's 0.875, and picking it would have
+ * made the demo look better while making the demo a lie about the method.
+ */
+export const DEMO_CHECKPOINT = {
+  variant: "− pre-impact loss (λ = 0)",
+  why:
+    "The best-performing configuration that still produces joint evidence. The pre-impact " +
+    "objective measurably hurt on this data, so deploying it would mean shipping a worse model " +
+    "to make the write-up sound better.",
+  fold: "Fold 0 of 5 — arbitrary and fixed in advance, not the best. Fold 3 scored higher.",
+  metrics: "recall 0.875 · lead 0.429 s · 75.7 false alarms per hour · frame AUC 0.987",
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import { API_URL, type Health } from "@/lib/api";
-import { DEPLOYMENT_FACTS, PROJECT } from "@/lib/content";
+import { DEMO_CHECKPOINT, DEPLOYMENT_FACTS, PROJECT } from "@/lib/content";
 
 const ENDPOINTS = [
   { method: "GET", path: "/health", body: "Liveness, the loaded model's identity, and the frozen operating point." },
@@ -101,6 +101,25 @@ export default function ApiPane({ health }: { health: Health | null }) {
             </table>
           </div>
         </div>
+      </div>
+
+      <div className="glass pad" style={{ marginTop: 16 }}>
+        <h3 className="card-title">Which checkpoint is deployed, and why</h3>
+        <p className="card-sub" style={{ marginBottom: 10 }}>
+          The live model is <b style={{ color: "var(--text)" }}>{DEMO_CHECKPOINT.variant}</b> —{" "}
+          {DEMO_CHECKPOINT.why}
+        </p>
+        <table className="data">
+          <tbody>
+            <tr><td>Fold</td><td className="num">{DEMO_CHECKPOINT.fold}</td></tr>
+            <tr><td>Held-out performance</td><td className="num">{DEMO_CHECKPOINT.metrics}</td></tr>
+          </tbody>
+        </table>
+        <p className="card-sub" style={{ marginTop: 10, marginBottom: 0 }}>
+          The demo clips come from that same held-out fold, so nothing you see was in its
+          training set. <code>prepare_demo.py</code> enforces this and says so loudly when a
+          fold has too few falls to do it.
+        </p>
       </div>
 
       <div className="glass pad" style={{ marginTop: 16 }}>

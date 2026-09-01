@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import results from "@/lib/results.json";
+import { FINDINGS } from "@/lib/content";
 
 /**
  * Measured results.
@@ -86,12 +87,43 @@ export default function ResultsPane() {
   return (
     <section id="results" className="pane">
       <span className="eyebrow">Results</span>
-      <h2 className="pane-title">Measured, with variance</h2>
+      <h2 className="pane-title">What the experiments found</h2>
       <p className="pane-lede">
-        Every cell is a mean ± standard deviation across seeds, not a single run — a one-run
-        table cannot distinguish a real effect from seed noise, which is exactly the claim these
-        rows are making. The operating point (τ, k) was chosen on a validation split under a
-        false-alarm budget and frozen before the test set was touched.
+        The headline is negative: <b>the novel component of this project did not work.</b> On
+        real falls the pre-impact objective cost recall and lead time rather than trading one
+        for the other, and the reproduced baseline beat it. That is stated first because a
+        results page that leads with its successes and files its central failure under
+        &ldquo;limitations&rdquo; is not reporting, it is marketing.
+      </p>
+
+      <div className="stack" style={{ marginBottom: 30 }}>
+        {FINDINGS.map((f) => {
+          const colour =
+            f.verdict === "negative" ? "var(--impact)"
+              : f.verdict === "positive" ? "var(--calm)" : "var(--watch)";
+          return (
+            <div key={f.title} className="glass pad" style={{ borderLeft: `3px solid ${colour}` }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "baseline",
+                            flexWrap: "wrap", marginBottom: 6 }}>
+                <span className="chip mono" style={{ color: colour, borderColor: colour }}>
+                  {f.verdict === "negative" ? "does not work"
+                    : f.verdict === "positive" ? "works" : "inconclusive"}
+                </span>
+                <h3 className="card-title" style={{ margin: 0 }}>{f.title}</h3>
+                <span className="readout" style={{ marginLeft: "auto" }}>{f.rq}</span>
+              </div>
+              <p className="card-sub" style={{ margin: 0 }}>{f.body}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <h2 className="pane-title">The tables</h2>
+      <p className="pane-lede">
+        Every cell is a mean ± standard deviation, never a single run. The operating point
+        (τ, k) was chosen on a validation split under a false-alarm budget and frozen before
+        the test set was touched. On UR Fall the grid sweeps all five folds, so every one of
+        the 30 real falls is tested exactly once.
       </p>
 
       {BENCHMARKS.length === 0 ? (

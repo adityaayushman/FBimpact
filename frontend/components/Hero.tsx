@@ -57,10 +57,22 @@ export default function Hero() {
           <span className="eyebrow">Vision · privacy-preserving · explanation-verified</span>
 
           <h1 className="hero-title">
-            Predict the fall <span className="grad">before impact</span> — and prove which joints said so.
+            Predict the fall <span className="grad">before impact</span> — and test whether the
+            evidence is real.
           </h1>
 
           <p className="hero-lede">{ABSTRACT}</p>
+
+          {/* The result is negative and the landing view says so. A visitor
+              should not have to scroll to the tables to learn that the novel
+              component did not beat the baseline it was built to beat. */}
+          <p className="notice warn" style={{ marginBottom: 22, fontSize: 13.5 }}>
+            <b style={{ color: "var(--text)" }}>Result: the novel component did not work.</b>{" "}
+            On real falls the pre-impact objective cost recall and lead time, and the reproduced
+            baseline beat it. The ablations show temporal modelling and velocity features are
+            doing the anticipation. <a href="#results" style={{ color: "var(--accent)" }}>
+            See the measured tables →</a>
+          </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 26 }}>
             <a className="btn primary" href="#demo">Run the live demo</a>

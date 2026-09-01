@@ -81,9 +81,13 @@ def pick_real(clips: list[ClipRecord]) -> list[ClipRecord]:
     # many of them is a deliberate lie-down, the hardest negative available.
     adls.sort(key=lambda c: -(c.meta.get("lying_frames", 0) or 0))
 
-    hard = [c for c in adls if (c.meta.get("lying_frames", 0) or 0) > 0][: N_REAL_ADLS - 1]
-    upright = [c for c in adls if (c.meta.get("lying_frames", 0) or 0) == 0][:1]
-    return falls[:N_REAL_FALLS] + hard + upright
+    # Hard negatives first, then fill the remaining slots with upright activity.
+    # A fold may contain only one or two lie-downs, and taking a fixed count of
+    # each would silently under-fill the picker rather than substituting.
+    hard = [c for c in adls if (c.meta.get("lying_frames", 0) or 0) > 0]
+    upright = [c for c in adls if (c.meta.get("lying_frames", 0) or 0) == 0]
+    negatives = (hard + upright)[:N_REAL_ADLS]
+    return falls[:N_REAL_FALLS] + negatives
 
 
 def main(argv: list[str] | None = None) -> None:

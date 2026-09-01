@@ -150,9 +150,12 @@ export default function DemoPane({
         </svg>
         <div>
           <strong>Research prototype — not a medical device.</strong> The deployed checkpoint is
-          trained on a <b>synthetic fixture</b>, not on real fall data, so nothing it outputs
-          carries clinical meaning. Public fall datasets use acted falls by young volunteers.
-          This demo exists to show the pipeline and the faithfulness test, not to make a safety claim.
+          trained on <b>UR Fall</b>: real video, but falls <b>acted</b> by young volunteers, not
+          recorded elderly falls. The clips below are from its <b>held-out fold</b> — sequences
+          it never trained on. Across full cross-validation this model fires{" "}
+          <b>60–340 false alarms per hour</b> of normal activity, which is nowhere near
+          deployable. It exists to show the pipeline and the faithfulness test, not to make a
+          safety claim.
         </div>
       </div>
 

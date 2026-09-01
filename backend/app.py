@@ -27,8 +27,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | 
 logger = logging.getLogger("api")
 
 DISCLAIMER = (
-    "Research prototype, NOT a medical device. The bundled checkpoint is trained on a "
-    "synthetic fixture, not on real fall data, and its outputs carry no clinical meaning."
+    "Research prototype, NOT a medical device. The bundled checkpoint is trained on UR Fall, "
+    "a public dataset of falls ACTED by young volunteers - not recorded elderly falls. Across "
+    "5-fold cross-validation the model fires 60-340 false alarms per hour of normal activity, "
+    "which is orders of magnitude away from deployable. Outputs carry no clinical meaning."
 )
 
 app = FastAPI(

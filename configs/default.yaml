@@ -19,6 +19,7 @@ data:
   split:
     mode: single             # single | folds
     num_folds: 5
+    fold: 0                  # which fold is the test set, when mode = folds
     val_fraction: 0.2
     test_fraction: 0.2
     seed: 0

@@ -75,17 +75,22 @@ def load_completed(path: Path) -> list[dict]:
     return rows
 
 
-def run_one(config: str, seed: int, overrides: list[str], out_root: str, explain: bool) -> dict:
-    """Train and evaluate one (config, seed) pair; returns its flat result row."""
-    run_dir = train_module.main(
-        ["--config", config, "--seed", str(seed), "--out", out_root, "--set", *overrides]
-    )
-    argv = ["--checkpoint", str(run_dir / "best.pt"), "--split", "test"]
-    if explain:
-        argv.append("--explain")
-    results = eval_module.main(argv)
+def run_one(
+    config: str, seed: int, fold: int | None, overrides: list[str], out_root: str, explain: bool
+) -> dict:
+    """Train and evaluate one (config, seed, fold) cell; returns its flat result row."""
+    argv = ["--config", config, "--seed", str(seed), "--out", out_root]
+    if fold is not None:
+        argv += ["--fold", str(fold)]
+    run_dir = train_module.main(argv + ["--set", *overrides])
 
-    row = {"config": Path(config).stem, "seed": seed, "run_dir": str(run_dir)}
+    eval_argv = ["--checkpoint", str(run_dir / "best.pt"), "--split", "test"]
+    if explain:
+        eval_argv.append("--explain")
+    results = eval_module.main(eval_argv)
+
+    row = {"config": Path(config).stem, "seed": seed, "fold": fold if fold is not None else 0,
+           "run_dir": str(run_dir)}
     row.update({k: v for k, v in results["report"].items() if not isinstance(v, (dict, list))})
     if "faithfulness" in results:
         row.update({f"faith_{k}": v for k, v in results["faithfulness"].items()
@@ -97,6 +102,10 @@ def main(argv: list[str] | None = None) -> Path:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--configs", nargs="*", default=DEFAULT_CONFIGS)
     parser.add_argument("--seeds", nargs="*", type=int, default=[0, 1, 2])
+    parser.add_argument("--folds", nargs="*", type=int, default=None,
+                        help="cross-validation folds to sweep, e.g. --folds 0 1 2 3 4. "
+                             "With few test clips per fold, sweeping folds so every clip is "
+                             "tested exactly once says more than repeating one fold across seeds.")
     parser.add_argument("--set", nargs="*", default=[], metavar="KEY=VALUE",
                         help="overrides applied to every run")
     parser.add_argument("--out", default="results/ablations")
@@ -111,39 +120,47 @@ def main(argv: list[str] | None = None) -> Path:
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
 
+    folds: list[int | None] = list(args.folds) if args.folds else [None]
+
     rows: list[dict] = []
-    done: set[tuple[str, int]] = set()
+    done: set[tuple[str, int, int]] = set()
     if args.resume:
         rows = load_completed(out_root / "runs.csv")
-        done = {(str(r["config"]), int(float(r["seed"]))) for r in rows if r.get("seed") is not None}
+        done = {
+            (str(r["config"]), int(float(r["seed"])), int(float(r.get("fold") or 0)))
+            for r in rows if r.get("seed") is not None
+        }
         if done:
             print(f"resuming: {len(done)} run(s) already complete, skipping those\n")
 
     failures: list[dict] = []
-    total = len(args.configs) * len(args.seeds)
+    total = len(args.configs) * len(args.seeds) * len(folds)
     index = 0
 
     for config in args.configs:
         for seed in args.seeds:
-            index += 1
-            if (Path(config).stem, seed) in done:
-                print(f"[{index}/{total}] {config} seed={seed} — already done, skipping")
-                continue
-            print(f"\n{'=' * 78}\n[{index}/{total}] {config} seed={seed}\n{'=' * 78}")
-            try:
-                rows.append(
-                    run_one(config, seed, args.set, str(out_root), not args.no_explain)
-                )
-            except Exception as exc:
-                failures.append({"config": config, "seed": seed, "error": repr(exc)})
-                print(f"FAILED: {config} seed={seed}")
-                traceback.print_exc(limit=3)
-                if not args.keep_going:
-                    raise
+            for fold in folds:
+                index += 1
+                tag = f"{config} seed={seed}" + (f" fold={fold}" if fold is not None else "")
+                if (Path(config).stem, seed, fold or 0) in done:
+                    print(f"[{index}/{total}] {tag} — already done, skipping")
+                    continue
+                print(f"\n{'=' * 78}\n[{index}/{total}] {tag}\n{'=' * 78}")
+                try:
+                    rows.append(
+                        run_one(config, seed, fold, args.set, str(out_root), not args.no_explain)
+                    )
+                except Exception as exc:
+                    failures.append({"config": config, "seed": seed, "fold": fold,
+                                     "error": repr(exc)})
+                    print(f"FAILED: {tag}")
+                    traceback.print_exc(limit=3)
+                    if not args.keep_going:
+                        raise
 
-            # Written after every run, so an interrupted grid still leaves usable
-            # partial results rather than nothing.
-            save_csv(rows, out_root / "runs.csv")
+                # Written after every run, so an interrupted grid still leaves
+                # usable partial results rather than nothing.
+                save_csv(rows, out_root / "runs.csv")
 
     # -- aggregate across seeds ------------------------------------------------
     columns = REPORT_COLUMNS + [f"faith_{c}" for c in FAITHFULNESS_COLUMNS]

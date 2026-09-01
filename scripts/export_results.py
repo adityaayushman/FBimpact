@@ -24,15 +24,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from data.clips import load_cache, summarise  # noqa: E402
 
-# Display names and ordering for the ablation table. The key is the config stem
-# written by run_ablations.py.
+# Display names and ordering for the ablation table. The key is the config file
+# *stem* as written into runs.csv by run_ablations.py - so `no_temporal`, from
+# configs/ablations/no_temporal.yaml, not the `ablation_no_temporal` run name.
 VARIANTS = [
     ("ours_preimpact", "Ours — pre-impact loss + grounding head", "ours"),
     ("baseline_stgcn", "Baseline — ST-GCN, plain classification loss", "baseline"),
-    ("ablation_no_preimpact_loss", "− pre-impact loss (λ = 0)", "ablation"),
-    ("ablation_no_temporal", "− temporal modelling", "ablation"),
-    ("ablation_no_velocity", "− velocity features", "ablation"),
-    ("ablation_no_grounding", "− grounding head", "ablation"),
+    ("no_preimpact_loss", "− pre-impact loss (λ = 0)", "ablation"),
+    ("no_temporal", "− temporal modelling", "ablation"),
+    ("no_velocity", "− velocity features", "ablation"),
+    ("no_grounding", "− grounding head", "ablation"),
 ]
 
 NUMERIC = [

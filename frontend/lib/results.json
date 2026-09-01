@@ -1,4 +1,326 @@
 {
-  "generated_utc": "2026-08-31T20:59:00+00:00",
-  "benchmarks": []
+  "generated_utc": "2026-09-01T13:46:02+00:00",
+  "benchmarks": [
+    {
+      "id": "synthetic",
+      "name": "Synthetic benchmark",
+      "kind": "synthetic",
+      "caveat": "Procedurally generated skeletons, not human falls. These numbers show that the pipeline and the pre-impact objective behave as designed \u2014 they say nothing about performance on real falls. The normal activities are deliberately hard negatives: sitting down, bending to pick something up and lying down are all controlled descents.",
+      "dataset": {
+        "clips": 320,
+        "falls": 120,
+        "adls": 200,
+        "subjects": 20,
+        "minutes": 21.4
+      },
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "rows": [
+        {
+          "variant": "ours_preimpact",
+          "label": "Ours \u2014 pre-impact loss + grounding head",
+          "role": "ours",
+          "runs": 3,
+          "recall": {
+            "mean": 0.94444,
+            "std": 0.01964
+          },
+          "mean_lead_time": {
+            "mean": 0.55009,
+            "std": 0.00458
+          },
+          "median_lead_time": {
+            "mean": 0.54444,
+            "std": 0.01571
+          },
+          "false_alarms_per_hour": {
+            "mean": 23.18094,
+            "std": 8.1957
+          },
+          "specificity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.99639,
+            "std": 0.0005
+          },
+          "frame_f1": {
+            "mean": 0.93166,
+            "std": 0.0142
+          },
+          "faith_deletion_gap": {
+            "mean": -0.04985,
+            "std": 0.19203
+          },
+          "faith_insertion_gap": {
+            "mean": 0.00698,
+            "std": 0.10412
+          },
+          "faith_deletion_auc": {
+            "mean": 0.34125,
+            "std": 0.17512
+          },
+          "faith_insertion_auc": {
+            "mean": 0.25352,
+            "std": 0.10762
+          }
+        },
+        {
+          "variant": "baseline_stgcn",
+          "label": "Baseline \u2014 ST-GCN, plain classification loss",
+          "role": "baseline",
+          "runs": 3,
+          "recall": {
+            "mean": 0.98611,
+            "std": 0.01964
+          },
+          "mean_lead_time": {
+            "mean": 0.54934,
+            "std": 0.02775
+          },
+          "median_lead_time": {
+            "mean": 0.54444,
+            "std": 0.04157
+          },
+          "false_alarms_per_hour": {
+            "mean": 5.79524,
+            "std": 8.1957
+          },
+          "specificity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.99529,
+            "std": 0.00192
+          },
+          "frame_f1": {
+            "mean": 0.92446,
+            "std": 0.00816
+          },
+          "faith_deletion_gap": {
+            "mean": -0.05474,
+            "std": 0.06699
+          },
+          "faith_insertion_gap": {
+            "mean": 0.13354,
+            "std": 0.12839
+          },
+          "faith_deletion_auc": {
+            "mean": 0.37671,
+            "std": 0.08412
+          },
+          "faith_insertion_auc": {
+            "mean": 0.45637,
+            "std": 0.13039
+          }
+        },
+        {
+          "variant": "no_preimpact_loss",
+          "label": "\u2212 pre-impact loss (\u03bb = 0)",
+          "role": "ablation",
+          "runs": 3,
+          "recall": {
+            "mean": 0.94444,
+            "std": 0.05197
+          },
+          "mean_lead_time": {
+            "mean": 0.56014,
+            "std": 0.00905
+          },
+          "median_lead_time": {
+            "mean": 0.56111,
+            "std": 0.02833
+          },
+          "false_alarms_per_hour": {
+            "mean": 17.38571,
+            "std": 14.19537
+          },
+          "specificity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.99667,
+            "std": 0.00027
+          },
+          "frame_f1": {
+            "mean": 0.91076,
+            "std": 0.01854
+          },
+          "faith_deletion_gap": {
+            "mean": 0.10669,
+            "std": 0.13826
+          },
+          "faith_insertion_gap": {
+            "mean": 0.04268,
+            "std": 0.143
+          },
+          "faith_deletion_auc": {
+            "mean": 0.18448,
+            "std": 0.04682
+          },
+          "faith_insertion_auc": {
+            "mean": 0.31204,
+            "std": 0.25602
+          }
+        },
+        {
+          "variant": "no_temporal",
+          "label": "\u2212 temporal modelling",
+          "role": "ablation",
+          "runs": 3,
+          "recall": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "mean_lead_time": {
+            "mean": 0.49907,
+            "std": 0.01249
+          },
+          "median_lead_time": {
+            "mean": 0.47222,
+            "std": 0.00786
+          },
+          "false_alarms_per_hour": {
+            "mean": 28.97618,
+            "std": 21.68378
+          },
+          "specificity": {
+            "mean": 0.95833,
+            "std": 0.03118
+          },
+          "frame_auc": {
+            "mean": 0.98261,
+            "std": 0.0079
+          },
+          "frame_f1": {
+            "mean": 0.86693,
+            "std": 0.02038
+          },
+          "faith_deletion_gap": {
+            "mean": 0.05279,
+            "std": 0.01649
+          },
+          "faith_insertion_gap": {
+            "mean": 0.07639,
+            "std": 0.11543
+          },
+          "faith_deletion_auc": {
+            "mean": 0.18889,
+            "std": 0.08655
+          },
+          "faith_insertion_auc": {
+            "mean": 0.31709,
+            "std": 0.16466
+          }
+        },
+        {
+          "variant": "no_velocity",
+          "label": "\u2212 velocity features",
+          "role": "ablation",
+          "runs": 3,
+          "recall": {
+            "mean": 0.98611,
+            "std": 0.01964
+          },
+          "mean_lead_time": {
+            "mean": 0.53818,
+            "std": 0.01243
+          },
+          "median_lead_time": {
+            "mean": 0.52222,
+            "std": 0.01571
+          },
+          "false_alarms_per_hour": {
+            "mean": 5.79524,
+            "std": 8.1957
+          },
+          "specificity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.99645,
+            "std": 0.00027
+          },
+          "frame_f1": {
+            "mean": 0.93988,
+            "std": 0.00885
+          },
+          "faith_deletion_gap": {
+            "mean": 0.04509,
+            "std": 0.04617
+          },
+          "faith_insertion_gap": {
+            "mean": -0.05301,
+            "std": 0.06406
+          },
+          "faith_deletion_auc": {
+            "mean": 0.31816,
+            "std": 0.31066
+          },
+          "faith_insertion_auc": {
+            "mean": 0.28631,
+            "std": 0.31086
+          }
+        },
+        {
+          "variant": "no_grounding",
+          "label": "\u2212 grounding head",
+          "role": "ablation",
+          "runs": 3,
+          "recall": {
+            "mean": 0.95833,
+            "std": 0.03402
+          },
+          "mean_lead_time": {
+            "mean": 0.54703,
+            "std": 0.03201
+          },
+          "median_lead_time": {
+            "mean": 0.54444,
+            "std": 0.04157
+          },
+          "false_alarms_per_hour": {
+            "mean": 17.38571,
+            "std": 14.19537
+          },
+          "specificity": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.99511,
+            "std": 0.00131
+          },
+          "frame_f1": {
+            "mean": 0.90995,
+            "std": 0.00951
+          },
+          "faith_deletion_gap": {
+            "mean": 0.1145,
+            "std": 0.0737
+          },
+          "faith_insertion_gap": {
+            "mean": 0.18204,
+            "std": 0.05244
+          },
+          "faith_deletion_auc": {
+            "mean": 0.18031,
+            "std": 0.06685
+          },
+          "faith_insertion_auc": {
+            "mean": 0.47636,
+            "std": 0.09463
+          }
+        }
+      ],
+      "split": "Leave-subjects-out, 5 folds (fold 0 reported)"
+    }
+  ]
 }

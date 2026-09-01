@@ -46,6 +46,35 @@ REPORT_COLUMNS = [
 FAITHFULNESS_COLUMNS = ["deletion_auc", "insertion_auc", "deletion_gap", "insertion_gap"]
 
 
+def load_completed(path: Path) -> list[dict]:
+    """Rows from a previous invocation's `runs.csv`, for `--resume`.
+
+    A full grid is 18 trainings and takes hours, so losing it to an interrupted
+    shell is expensive and entirely avoidable. Numeric columns are restored to
+    floats because the aggregation reads them as numbers.
+    """
+    if not path.exists():
+        return []
+    import csv
+
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    for row in rows:
+        for key, value in list(row.items()):
+            if key in ("config", "run_dir"):
+                continue
+            text = (value or "").strip()
+            if not text:
+                row[key] = None
+                continue
+            try:
+                row[key] = float(text)
+            except ValueError:
+                pass  # genuinely non-numeric (a nested dict written as JSON)
+    return rows
+
+
 def run_one(config: str, seed: int, overrides: list[str], out_root: str, explain: bool) -> dict:
     """Train and evaluate one (config, seed) pair; returns its flat result row."""
     run_dir = train_module.main(
@@ -75,12 +104,21 @@ def main(argv: list[str] | None = None) -> Path:
                         help="skip Stage E/F, which dominates evaluation time")
     parser.add_argument("--keep-going", action="store_true",
                         help="continue after a failed run instead of stopping")
+    parser.add_argument("--resume", action="store_true",
+                        help="skip (config, seed) pairs already present in runs.csv")
     args = parser.parse_args(argv)
 
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict] = []
+    done: set[tuple[str, int]] = set()
+    if args.resume:
+        rows = load_completed(out_root / "runs.csv")
+        done = {(str(r["config"]), int(float(r["seed"]))) for r in rows if r.get("seed") is not None}
+        if done:
+            print(f"resuming: {len(done)} run(s) already complete, skipping those\n")
+
     failures: list[dict] = []
     total = len(args.configs) * len(args.seeds)
     index = 0
@@ -88,6 +126,9 @@ def main(argv: list[str] | None = None) -> Path:
     for config in args.configs:
         for seed in args.seeds:
             index += 1
+            if (Path(config).stem, seed) in done:
+                print(f"[{index}/{total}] {config} seed={seed} — already done, skipping")
+                continue
             print(f"\n{'=' * 78}\n[{index}/{total}] {config} seed={seed}\n{'=' * 78}")
             try:
                 rows.append(

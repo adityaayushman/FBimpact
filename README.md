@@ -36,7 +36,36 @@ on it belongs in the paper. Its ADL set is weighted towards hard negatives (sitt
 bending to pick up, lying down) so a model that fires on any downward motion fails early
 rather than at submission.
 
-## Real data (UP-Fall, the primary benchmark)
+## Real data (UR Fall — the one you can reproduce today)
+
+UR Fall is the only public fall dataset here that ships **per-frame annotations**, which is
+what makes it usable without a re-annotation campaign. No access request, no forms.
+
+```bash
+python scripts/download_urfd.py --out d:/tmp/urfd        # 70 sequences, 4.5 GB
+python scripts/cache_urfd.py --root d:/tmp/urfd --out data/cache/urfd
+python scripts/run_ablations.py --seeds 0 1 2 --out results/urfd \
+       --set data.cache_dir=data/cache/urfd data.split.mode=folds
+python scripts/export_results.py                          # -> frontend/lib/results.json
+```
+
+`t*` is the first frame the dataset annotates as **lying**. Two properties make that
+defensible: it is not derived from the skeleton the model consumes (which would score the
+model against a target computed from its own inputs), and an annotator marks "lying" at or
+*after* true ground contact, so the error shortens measured lead time rather than inflating
+it — the bias runs against the project's own claim.
+
+Verified across all 30 fall sequences: every one yields a `t*`, positioned 40–93% through its
+clip, and **every one has ≥33 pre-impact frames** — more than the 30-frame window, so no fall
+is unanticipatable by construction. 16 of the 40 ADL sequences contain *deliberate* lie-downs;
+those are the hardest negatives in the set and are never labelled positive.
+
+**Splits are sequence-independent, not subject-independent.** UR Fall publishes no
+sequence-to-volunteer mapping, so subject grouping cannot be constructed. That is a weaker
+guarantee than the protocol demands and is stated wherever these results appear — it is also
+why §13 lists this dataset as a transfer check rather than the primary benchmark.
+
+## UP-Fall (the primary benchmark)
 
 ```bash
 # 1. Skeletons. The only step that touches pixels.

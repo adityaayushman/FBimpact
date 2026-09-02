@@ -16,7 +16,11 @@ import { FINDINGS } from "@/lib/content";
 interface Stat { mean: number | null; std: number | null }
 interface Row {
   variant: string; label: string; role: string; runs: number;
-  [metric: string]: Stat | string | number;
+  num_false_alarms?: number | null;
+  num_falls?: number | null;
+  num_warned?: number | null;
+  negative_hours?: number | null;
+  [metric: string]: Stat | string | number | null | undefined;
 }
 interface Benchmark {
   id: string; name: string; kind: string; caveat: string;
@@ -54,7 +58,9 @@ function Table({ benchmark }: { benchmark: Benchmark }) {
             {COLUMNS.map((c) => (
               <th key={c.key} className="num" title={c.hint}>{c.head}</th>
             ))}
-            <th className="num">Seeds</th>
+            <th className="num" title="absolute counts — the rate above is quantised">
+              Falls&nbsp;/&nbsp;FAs
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -71,7 +77,9 @@ function Table({ benchmark }: { benchmark: Benchmark }) {
                   {fmt(row[c.key] as Stat, c.digits, c.suffix)}
                 </td>
               ))}
-              <td className="num dim">{row.runs}</td>
+              <td className="num dim" title="falls warned of falls tested / total false triggers">
+                {row.num_warned ?? "—"}/{row.num_falls ?? "—"} · {row.num_false_alarms ?? "—"}
+              </td>
             </tr>
           ))}
         </tbody>

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-09-01T21:25:19+00:00",
+  "generated_utc": "2026-09-02T08:23:27+00:00",
   "benchmarks": [
     {
       "id": "synthetic",
@@ -67,7 +67,11 @@
           "faith_insertion_auc": {
             "mean": 0.25352,
             "std": 0.10762
-          }
+          },
+          "num_false_alarms": 4.0,
+          "num_falls": 72.0,
+          "num_warned": 68.0,
+          "negative_hours": 0.1726
         },
         {
           "variant": "baseline_stgcn",
@@ -117,7 +121,11 @@
           "faith_insertion_auc": {
             "mean": 0.45637,
             "std": 0.13039
-          }
+          },
+          "num_false_alarms": 1.0,
+          "num_falls": 72.0,
+          "num_warned": 71.0,
+          "negative_hours": 0.1726
         },
         {
           "variant": "no_preimpact_loss",
@@ -167,7 +175,11 @@
           "faith_insertion_auc": {
             "mean": 0.31204,
             "std": 0.25602
-          }
+          },
+          "num_false_alarms": 3.0,
+          "num_falls": 72.0,
+          "num_warned": 68.0,
+          "negative_hours": 0.1726
         },
         {
           "variant": "no_temporal",
@@ -217,7 +229,11 @@
           "faith_insertion_auc": {
             "mean": 0.31709,
             "std": 0.16466
-          }
+          },
+          "num_false_alarms": 5.0,
+          "num_falls": 72.0,
+          "num_warned": 72.0,
+          "negative_hours": 0.1726
         },
         {
           "variant": "no_velocity",
@@ -267,7 +283,11 @@
           "faith_insertion_auc": {
             "mean": 0.28631,
             "std": 0.31086
-          }
+          },
+          "num_false_alarms": 1.0,
+          "num_falls": 72.0,
+          "num_warned": 71.0,
+          "negative_hours": 0.1726
         },
         {
           "variant": "no_grounding",
@@ -317,7 +337,11 @@
           "faith_insertion_auc": {
             "mean": 0.47636,
             "std": 0.09463
-          }
+          },
+          "num_false_alarms": 3.0,
+          "num_falls": 72.0,
+          "num_warned": 69.0,
+          "negative_hours": 0.1726
         }
       ],
       "split": "Leave-subjects-out, 5 folds (fold 0 reported)"
@@ -386,7 +410,11 @@
           "faith_insertion_auc": {
             "mean": 0.31924,
             "std": 0.09771
-          }
+          },
+          "num_false_alarms": 16.0,
+          "num_falls": 30.0,
+          "num_warned": 18.0,
+          "negative_hours": 0.0966
         },
         {
           "variant": "baseline_stgcn",
@@ -436,7 +464,11 @@
           "faith_insertion_auc": {
             "mean": 0.28455,
             "std": 0.0858
-          }
+          },
+          "num_false_alarms": 12.0,
+          "num_falls": 30.0,
+          "num_warned": 25.0,
+          "negative_hours": 0.0966
         },
         {
           "variant": "no_preimpact_loss",
@@ -486,7 +518,11 @@
           "faith_insertion_auc": {
             "mean": 0.41888,
             "std": 0.06831
-          }
+          },
+          "num_false_alarms": 19.0,
+          "num_falls": 30.0,
+          "num_warned": 24.0,
+          "negative_hours": 0.0966
         },
         {
           "variant": "no_temporal",
@@ -536,7 +572,11 @@
           "faith_insertion_auc": {
             "mean": 0.58091,
             "std": 0.21416
-          }
+          },
+          "num_false_alarms": 7.0,
+          "num_falls": 30.0,
+          "num_warned": 10.0,
+          "negative_hours": 0.0966
         },
         {
           "variant": "no_velocity",
@@ -586,7 +626,11 @@
           "faith_insertion_auc": {
             "mean": 0.48177,
             "std": 0.18704
-          }
+          },
+          "num_false_alarms": 25.0,
+          "num_falls": 30.0,
+          "num_warned": 16.0,
+          "negative_hours": 0.0966
         },
         {
           "variant": "no_grounding",
@@ -636,7 +680,11 @@
           "faith_insertion_auc": {
             "mean": 0.37741,
             "std": 0.07694
-          }
+          },
+          "num_false_alarms": 8.0,
+          "num_falls": 30.0,
+          "num_warned": 23.0,
+          "negative_hours": 0.0966
         }
       ],
       "split": "Sequence-independent, 5 folds (fold 0 reported)"

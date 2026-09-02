@@ -132,43 +132,63 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default="frontend/lib/results.json")
     args = parser.parse_args(argv)
 
+    # Real benchmarks first: they are what the claims rest on, and a reader
+    # landing on a procedurally generated fixture would reasonably assume the
+    # numbers describe human falls.
+    DEFINITIONS = [
+        dict(
+            key="le2i", name="Le2i / ImViA", kind="real",
+            results="le2i", cache="le2i",
+            split="Clip-independent, 5 folds pooled (every clip tested once)",
+            caveat=(
+                "Real video of acted falls across two scenes, and the largest real benchmark "
+                "here at 99 falls against UR Fall's 30. The impact frame is the annotated fall "
+                "END frame — from the dataset's own annotation, never from the skeleton the "
+                "model consumes, which would make lead time circular. Three falls have too few "
+                "frames before impact for a full window to exist; they are kept as guaranteed "
+                "misses rather than dropped, which costs about three points of recall equally "
+                "across variants. Le2i publishes no clip-to-actor mapping, so splits are "
+                "clip-independent — weaker than subject-independent."
+            ),
+        ),
+        dict(
+            key="urfd", name="UR Fall Detection", kind="real",
+            results="urfd", cache="urfd",
+            split="Sequence-independent, 5 folds pooled (every clip tested once)",
+            caveat=(
+                "Real video of acted falls (Kwolek & Kepski). The impact frame is the first "
+                "frame the dataset's own annotation marks 'lying' — never derived from the "
+                "skeleton the model consumes. That label lands at or after true ground contact, "
+                "so it shortens measured lead time rather than inflating it. With only 30 falls, "
+                "per-fold recall ranges from 0.12 to 1.00 and the fold spread is wider than "
+                "every difference between variants. UR Fall publishes no per-sequence subject "
+                "identity, so splits are sequence-independent."
+            ),
+        ),
+        dict(
+            key="synthetic", name="Synthetic fixture", kind="synthetic",
+            results="bench", cache="synthetic_bench",
+            split="Leave-subjects-out, 5 folds (fold 0 reported)",
+            caveat=(
+                "Procedurally generated skeletons, not human falls. These numbers show the "
+                "pipeline and objective behave as designed and say nothing about performance on "
+                "real falls — near-ceiling recall leaves the variants nothing to separate them. "
+                "The normal activities are deliberately hard negatives: sitting, bending and "
+                "lying down are all controlled descents."
+            ),
+        ),
+    ]
+
     benchmarks = []
-
-    synthetic = build_benchmark(
-        key="synthetic",
-        name="Synthetic benchmark",
-        kind="synthetic",
-        caveat=(
-            "Procedurally generated skeletons, not human falls. These numbers show that the "
-            "pipeline and the pre-impact objective behave as designed — they say nothing about "
-            "performance on real falls. The normal activities are deliberately hard negatives: "
-            "sitting down, bending to pick something up and lying down are all controlled descents."
-        ),
-        results_dir=root / "results" / "bench",
-        cache_dir=root / "data" / "cache" / "synthetic_bench",
-    )
-    if synthetic:
-        synthetic["split"] = "Leave-subjects-out, 5 folds (fold 0 reported)"
-        benchmarks.append(synthetic)
-
-    urfd = build_benchmark(
-        key="urfd",
-        name="UR Fall Detection",
-        kind="real",
-        caveat=(
-            "Real video of acted falls (Kwolek & Kepski). The impact frame comes from the "
-            "dataset's own per-frame annotation — the first frame marked 'lying' — never from "
-            "the skeleton the model consumes, which would make lead time circular. That label "
-            "lands at or after true ground contact, so it shortens measured lead time rather "
-            "than inflating it. UR Fall publishes no per-sequence subject identity, so splits "
-            "are sequence-independent, a weaker guarantee than subject-independent."
-        ),
-        results_dir=root / "results" / "urfd",
-        cache_dir=root / "data" / "cache" / "urfd",
-    )
-    if urfd:
-        urfd["split"] = "Sequence-independent, 5 folds (fold 0 reported)"
-        benchmarks.append(urfd)
+    for spec in DEFINITIONS:
+        built = build_benchmark(
+            key=spec["key"], name=spec["name"], kind=spec["kind"], caveat=spec["caveat"],
+            results_dir=root / "results" / spec["results"],
+            cache_dir=root / "data" / "cache" / spec["cache"],
+        )
+        if built:
+            built["split"] = spec["split"]
+            benchmarks.append(built)
 
     payload = {
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),

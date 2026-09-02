@@ -85,6 +85,44 @@ Falls with no annotated `t*` are **dropped, not guessed**: a heuristic `t*` deri
 same skeleton the model consumes would make lead time partly circular. A partially annotated
 cache degrades to a smaller experiment rather than a wrong one.
 
+## Results — the novel component does not work
+
+Measured on **UR Fall**, 3 seeds × 5 folds, every one of the 30 falls tested exactly once per
+seed. Recall is pooled (warned ÷ tested), not the mean of per-fold rates, because folds hold
+between 3 and 8 falls each.
+
+| variant | recall | lead time | seeds×folds |
+|---|---:|---:|---:|
+| − pre-impact loss (λ = 0) | **0.767** | 0.491 s | 15 |
+| − grounding head | 0.767 | 0.531 s | 5 |
+| baseline ST-GCN | 0.711 | 0.523 s | 15 |
+| **ours (λ = 1.5 + grounding)** | **0.633** | 0.489 s | 15 |
+| − velocity features | 0.533 | 0.477 s | 5 |
+| − temporal modelling | 0.333 | 0.336 s | 5 |
+
+**RQ3 is answered negatively, and the answer is seed-stable.** Switching the pre-impact
+objective off raises recall from 0.633 to 0.767 and costs no lead time (0.489 → 0.491 s). λ=0
+wins on recall in **3 of 3 seeds**. The objective this project exists to test makes the system
+worse.
+
+**What does work** is the architecture. Removing temporal modelling halves recall (0.333) and
+collapses lead time to 0.336 s; removing velocity features drops recall to 0.533. Anticipation
+genuinely comes from motion over the window, as designed.
+
+**What the data cannot settle.** Seed-to-seed spread is comparable to the gaps between
+methods — the baseline's own recall swings 0.600–0.833 on initialisation alone. A single-seed
+run of this grid previously showed the baseline beating everything; three seeds reversed it.
+Thirty falls is too few to rank methods confidently, which is why Le2i (99 falls) was added.
+
+**False alarms are not measurable on UR Fall.** All five folds together hold 5.8 minutes of
+normal activity, so one trigger moves the rate by ~52/hour. The baseline's "100 per hour" is
+12 actual triggers. The [operating-point curve](scripts/export_curve.py) pools all folds and
+shows the baseline reaching *zero* false alarms over those minutes at recall 0.600 and 0.44 s
+lead — better than a per-hour figure implies, and still not something six minutes can settle.
+
+Regenerate with `python scripts/export_results.py` and `python scripts/export_curve.py`; both
+read the run directories, so every published number traces to a run on disk.
+
 ## Layout
 
 | Path | Stage | What lives here |
@@ -194,6 +232,27 @@ enough to change which joints an explanation names — `infer.py` and `eval.py` 
 different top-3 joints for the same warning on the same clip. Offline metrics are therefore a
 mild **upper bound** on live behaviour. `data.stream.compare_offline` measures this per clip;
 report it rather than assuming it away.
+
+## Running the grids
+
+A full grid is 30–60 trainings and takes hours. Two things make that survivable:
+
+```bash
+# --resume skips (config, seed, fold) triples already in runs.csv
+python scripts/run_ablations.py --seeds 0 --folds 0 1 2 3 4 --out results/le2i --resume --set ...
+```
+
+**Run one grid at a time.** Two concurrent grids exhaust a 6 GB GPU and both die with CUDA
+OOM; a Next.js build alongside a grid exhausts system commit and both die with
+`paging file is too small`. Both happened here.
+
+**Detach long jobs from your shell.** On Windows, `Start-Process powershell -File run.ps1
+-WindowStyle Hidden` keeps the grid alive when the terminal that launched it goes away. With
+`--resume` an interrupted grid loses at most the run in flight.
+
+`--folds` matters when a benchmark is small: UR Fall has 30 falls, so testing one fold covers
+six of them and quantises recall to steps of 0.167. Sweeping folds so every clip is tested
+exactly once says considerably more than repeating fold 0 across seeds.
 
 ## Reproducing a run
 

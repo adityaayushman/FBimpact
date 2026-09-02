@@ -1,0 +1,74 @@
+# Le2i / ImViA — the larger real-data benchmark (Section 13).
+#
+# Prerequisites:
+#   python scripts/download_le2i.py --out d:/tmp/le2i
+#   python scripts/cache_le2i.py --archive d:/tmp/le2i/falldataset-imvia.zip \
+#                                --out data/cache/le2i
+#
+# 130 annotated clips: 99 falls and 31 normal, against UR Fall's 30 and 40. The
+# extra falls are the point — on UR Fall, per-fold recall ranged 0.12 to 1.00
+# because each fold tested about six of them, a spread wider than every
+# difference between variants.
+#
+# Le2i records at 25 fps, not 30, so every frame-count parameter below is
+# re-derived rather than inherited. Lead time is reported in seconds; a window
+# copied from a 30 fps config would silently mean something else here.
+#
+# t* is the annotated fall END frame, from the dataset's own annotation rather
+# than from the skeleton the model consumes. See data/le2i.py.
+#
+# Splits are CLIP-independent, not subject-independent: Le2i publishes no
+# clip-to-actor mapping. Weaker than the protocol asks for, and stated wherever
+# these results appear.
+
+_base_: default.yaml
+
+run:
+  name: le2i
+
+data:
+  cache_dir: data/cache/le2i
+  source: le2i
+  split:
+    mode: folds
+    num_folds: 5
+    fold: 0
+    val_fraction: 0.25
+    seed: 0
+
+features:
+  window: 25                 # 1.0 s at 25 fps
+  stride: 4
+  temporal_jitter: 2
+  # Le2i frames are 320x240, well below UR Fall's resolution, so the pose
+  # estimator is less confident throughout and a high threshold would discard
+  # usable joints rather than only bad ones.
+  conf_threshold: 0.30
+
+labels:
+  w_pre: 17                  # ~0.68 s at 25 fps, matching the other benchmarks
+
+loss:
+  w_pre_seconds: 0.68
+
+augment:
+  noise_std: 0.015
+  scale_range: [0.85, 1.15]
+
+model:
+  # Receptive field = 1 + (kernel_size - 1) * sum(dilations) = 25, which is the
+  # full window here. Keep these in step if either changes.
+  blocks: [[64, 1], [64, 1], [128, 1], [128, 1]]
+  kernel_size: 7
+
+train:
+  epochs: 45
+  patience: 12
+  batch_size: 64
+
+decision:
+  refractory_frames: 25      # ~1 s
+  max_false_alarms_per_hour: 2.0
+
+explain:
+  max_warnings: 40

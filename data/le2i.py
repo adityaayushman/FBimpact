@@ -22,6 +22,19 @@ shortens measured lead time rather than inflating it.
 
 Le2i publishes no subject identity either, so splits are **clip-independent**,
 which is weaker than subject-independent. Stated wherever the results appear.
+
+Verified against the archive before any result depended on it: 130 matched
+video/annotation pairs across Home and Coffee room, 99 with a fall and 31
+without, none unparseable and none with the end frame before the start. The
+annotated falls last a median of 23 frames - 0.92 s at 25 fps - which matches
+the ballistic phase seen in UR Fall.
+
+Three of the 99 falls have fewer than 30 frames before `t*`, so a full window of
+history cannot exist before impact and they are unanticipatable by construction.
+They are kept rather than dropped: they become guaranteed misses, which
+depresses absolute recall by about three points and does so identically for
+every variant, so comparisons are unaffected and the error runs against the
+project's own claim. Excluding them would flatter every number instead.
 """
 
 from __future__ import annotations

@@ -18,6 +18,7 @@ in how the bytes reach the decoder.
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 import tempfile
 import time
@@ -154,7 +155,11 @@ def main(argv: list[str] | None = None) -> int:
                     with tempfile.NamedTemporaryFile(
                         dir=scratch, suffix=suffix, delete=False
                     ) as handle:
-                        handle.write(archive.read(entry["video"]))
+                        # Copied in chunks rather than via archive.read(): some
+                        # Le2i clips are hundreds of MB and reading one whole
+                        # into memory raises MemoryError on a 6 GB machine.
+                        with archive.open(entry["video"]) as source:
+                            shutil.copyfileobj(source, handle, length=1 << 22)
                         temp = Path(handle.name)
 
                     t0 = time.perf_counter()

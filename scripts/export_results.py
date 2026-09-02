@@ -42,6 +42,13 @@ NUMERIC = [
     "faith_deletion_gap", "faith_insertion_gap", "faith_deletion_auc", "faith_insertion_auc",
 ]
 
+# Summed rather than averaged. A per-hour rate over a few minutes of negative
+# time is quantised so coarsely that it invites over-reading: on UR Fall one
+# single false trigger moves the rate by about 52/hour. Publishing the absolute
+# counts beside the rate is what stops "100 false alarms per hour" being read as
+# a hundred events rather than the twelve it actually is.
+TOTALS = ["num_false_alarms", "num_falls", "num_warned", "negative_hours"]
+
 
 def read_table(path: Path) -> list[dict]:
     if not path.exists():
@@ -72,6 +79,13 @@ def build_benchmark(
         return None
 
     by_variant = {r.get("variant"): r for r in table}
+
+    # Per-run rows, so totals can be summed rather than read off an average.
+    runs = read_table(results_dir / "runs.csv")
+    per_variant: dict[str, list[dict]] = {}
+    for run in runs:
+        per_variant.setdefault(str(run.get("config")), []).append(run)
+
     rows = []
     for stem, label, role in VARIANTS:
         raw = by_variant.get(stem)
@@ -81,6 +95,11 @@ def build_benchmark(
                        "runs": int(float(raw.get("n_runs") or 0))}
         for metric in NUMERIC:
             entry[metric] = {"mean": num(raw, f"{metric}_mean"), "std": num(raw, f"{metric}_std")}
+
+        for metric in TOTALS:
+            values = [num(r, metric) for r in per_variant.get(stem, [])]
+            present = [v for v in values if v is not None]
+            entry[metric] = round(sum(present), 4) if present else None
         rows.append(entry)
 
     if not rows:

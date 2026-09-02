@@ -65,11 +65,16 @@ export const FINDINGS = [
   {
     verdict: "negative" as const,
     rq: "Deployment",
-    title: "False-alarm rates are nowhere near deployable",
+    title: "False alarms are far too frequent — but the rate is not measurable here",
     body:
-      "Every variant fires between 64 and 267 times per hour of normal activity. A care " +
-      "setting would tolerate a small number per day. Nothing here is close, and the " +
-      "operating-point curve shows no threshold that fixes it without destroying recall.",
+      "Per-hour rates run from 64 to 267 across variants, which sounds precise and is not. " +
+      "All five UR Fall folds together contain 5.8 minutes of normal activity, so one single " +
+      "false trigger moves the rate by roughly 52 per hour. The reproduced baseline's " +
+      "'100 per hour' is 12 actual triggers, against 25 of 30 falls correctly warned. " +
+      "The direction is unambiguous — a care setting " +
+      "would tolerate a few per day, and every variant is far above that — but the magnitude " +
+      "is not resolvable from six minutes of negative data. Absolute counts are shown beside " +
+      "the rate for this reason.",
   },
   {
     verdict: "caution" as const,

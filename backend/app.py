@@ -29,8 +29,9 @@ logger = logging.getLogger("api")
 DISCLAIMER = (
     "Research prototype, NOT a medical device. The bundled checkpoint is trained on UR Fall, "
     "a public dataset of falls ACTED by young volunteers - not recorded elderly falls. Across "
-    "5-fold cross-validation the model fires 60-340 false alarms per hour of normal activity, "
-    "which is orders of magnitude away from deployable. Outputs carry no clinical meaning."
+    "5-fold cross-validation it produced 12 false alarms in 5.8 minutes of normal activity; "
+    "that is far above what any care setting would tolerate, and too little negative data to "
+    "put a reliable per-hour figure on. Outputs carry no clinical meaning."
 )
 
 app = FastAPI(

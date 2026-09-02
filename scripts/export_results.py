@@ -22,7 +22,31 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from data.clips import load_cache, summarise  # noqa: E402
+
+def _cache_summary(cache_dir: Path) -> dict | None:
+    """Dataset counts for a cache, or None if they cannot be read.
+
+    Imported lazily and defensively. Everything this script actually needs is in
+    the CSVs; the clip counts are decoration. But `data.clips` is reached through
+    the package `__init__`, which imports torch, and that fails outright when a
+    training job is holding the machine's memory - which is exactly when someone
+    is most likely to be re-exporting results. Losing a "320 clips" caption is
+    an acceptable cost; failing the whole export is not.
+    """
+    try:
+        from data.clips import load_cache, summarise
+    except Exception as exc:  # torch missing, or no memory to load it
+        print(f"  (dataset counts unavailable: {type(exc).__name__})")
+        return None
+
+    try:
+        stats = summarise(load_cache(cache_dir))
+    except (FileNotFoundError, ValueError):
+        return None
+    return {
+        "clips": stats["clips"], "falls": stats["falls"], "adls": stats["adls"],
+        "subjects": stats["subjects"], "minutes": round(stats["total_hours"] * 60, 1),
+    }
 
 # Display names and ordering for the ablation table. The key is the config file
 # *stem* as written into runs.csv by run_ablations.py - so `no_temporal`, from
@@ -71,51 +95,63 @@ def num(row: dict, key: str):
     return round(value, 5)
 
 
+def _mean_std(values: list[float]) -> dict:
+    if not values:
+        return {"mean": None, "std": None}
+    mean = sum(values) / len(values)
+    if len(values) == 1:
+        return {"mean": round(mean, 5), "std": 0.0}
+    variance = sum((v - mean) ** 2 for v in values) / len(values)
+    return {"mean": round(mean, 5), "std": round(variance ** 0.5, 5)}
+
+
 def build_benchmark(
     key: str, name: str, kind: str, caveat: str, results_dir: Path, cache_dir: Path
 ) -> dict | None:
-    table = read_table(results_dir / "ablation_table.csv")
-    if not table:
+    # Aggregated from runs.csv, NOT from ablation_table.csv. The runner rewrites
+    # that table with only the variants of its most recent invocation, so a
+    # follow-up run over a subset of configs silently deletes the others from the
+    # published table - which is exactly what happened when extra seeds were
+    # added for three variants and the other three vanished from the site.
+    # runs.csv is append-only across invocations and is the real record.
+    runs = read_table(results_dir / "runs.csv")
+    if not runs:
         return None
 
-    by_variant = {r.get("variant"): r for r in table}
-
-    # Per-run rows, so totals can be summed rather than read off an average.
-    runs = read_table(results_dir / "runs.csv")
     per_variant: dict[str, list[dict]] = {}
     for run in runs:
         per_variant.setdefault(str(run.get("config")), []).append(run)
 
     rows = []
     for stem, label, role in VARIANTS:
-        raw = by_variant.get(stem)
-        if not raw:
+        group = per_variant.get(stem)
+        if not group:
             continue
-        entry: dict = {"variant": stem, "label": label, "role": role,
-                       "runs": int(float(raw.get("n_runs") or 0))}
+        entry: dict = {"variant": stem, "label": label, "role": role, "runs": len(group)}
         for metric in NUMERIC:
-            entry[metric] = {"mean": num(raw, f"{metric}_mean"), "std": num(raw, f"{metric}_std")}
+            values = [v for v in (num(r, metric) for r in group) if v is not None]
+            entry[metric] = _mean_std(values)
 
         for metric in TOTALS:
             values = [num(r, metric) for r in per_variant.get(stem, [])]
             present = [v for v in values if v is not None]
             entry[metric] = round(sum(present), 4) if present else None
+
+        # Pooled recall: warned falls over falls tested, rather than the mean of
+        # per-fold recalls. Folds hold unequal numbers of falls - UR Fall's range
+        # from 3 to 8 - so averaging the per-fold rates weights a three-fall fold
+        # as heavily as an eight-fall one. Pooling weights every fall equally,
+        # which is what "recall over the dataset" should mean.
+        warned, falls = entry.get("num_warned"), entry.get("num_falls")
+        entry["recall_pooled"] = (
+            round(warned / falls, 4) if warned is not None and falls else None
+        )
         rows.append(entry)
 
     if not rows:
         return None
 
-    dataset = None
-    if cache_dir.exists():
-        try:
-            stats = summarise(load_cache(cache_dir))
-            dataset = {
-                "clips": stats["clips"], "falls": stats["falls"], "adls": stats["adls"],
-                "subjects": stats["subjects"],
-                "minutes": round(stats["total_hours"] * 60, 1),
-            }
-        except (FileNotFoundError, ValueError):
-            dataset = None
+    dataset = _cache_summary(cache_dir) if cache_dir.exists() else None
 
     seeds = sorted({int(float(r["seed"])) for r in read_table(results_dir / "runs.csv")
                     if (r.get("seed") or "").strip()})

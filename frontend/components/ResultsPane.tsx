@@ -40,7 +40,7 @@ function fmt(stat: Stat | undefined, digits = 3, suffix = ""): string {
 }
 
 const COLUMNS: { key: string; head: string; digits: number; suffix?: string; hint: string }[] = [
-  { key: "recall", head: "Recall", digits: 3, hint: "falls warned before impact — primary metric" },
+  { key: "recall", head: "Recall", digits: 3, hint: "mean of per-fold recall ± sd across folds and seeds" },
   { key: "mean_lead_time", head: "Lead time", digits: 3, suffix: " s", hint: "over correctly warned falls only" },
   { key: "false_alarms_per_hour", head: "FA / h", digits: 2, hint: "per hour of genuinely normal time" },
   { key: "specificity", head: "Specificity", digits: 3, hint: "ADL clips with no trigger at all" },
@@ -78,8 +78,12 @@ function Table({ benchmark }: { benchmark: Benchmark }) {
                   {fmt(row[c.key] as Stat, c.digits, c.suffix)}
                 </td>
               ))}
-              <td className="num dim" title="falls warned of falls tested / total false triggers">
-                {row.num_warned ?? "—"}/{row.num_falls ?? "—"} · {row.num_false_alarms ?? "—"}
+              <td className="num dim" title="falls warned / falls tested (pooled recall) · total false triggers">
+                {row.num_warned ?? "—"}/{row.num_falls ?? "—"}
+                {typeof row.recall_pooled === "number" && (
+                  <span style={{ color: "var(--text-2)" }}> ={row.recall_pooled.toFixed(3)}</span>
+                )}
+                {" · "}{row.num_false_alarms ?? "—"} FA
               </td>
             </tr>
           ))}

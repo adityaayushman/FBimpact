@@ -64,17 +64,27 @@ export const FINDINGS = [
   },
   {
     verdict: "negative" as const,
-    rq: "Deployment",
-    title: "False alarms are far too frequent — but the rate is not measurable here",
+    rq: "RQ3",
+    title: "The baseline dominates at every threshold, not just the chosen one",
     body:
-      "Per-hour rates run from 64 to 267 across variants, which sounds precise and is not. " +
-      "All five UR Fall folds together contain 5.8 minutes of normal activity, so one single " +
-      "false trigger moves the rate by roughly 52 per hour. The reproduced baseline's " +
-      "'100 per hour' is 12 actual triggers, against 25 of 30 falls correctly warned. " +
-      "The direction is unambiguous — a care setting " +
-      "would tolerate a few per day, and every variant is far above that — but the magnitude " +
-      "is not resolvable from six minutes of negative data. Absolute counts are shown beside " +
-      "the rate for this reason.",
+      "Sweeping the full operating-point curve — all five folds pooled, each model scoring only " +
+      "its own held-out clips — puts the baseline above both other variants across the entire " +
+      "range. At a budget of five false alarms it reaches recall 0.833 against 0.733 for λ = 0 " +
+      "and 0.633 for the pre-impact objective. The negative result is therefore not an artefact " +
+      "of the frozen operating point; there is no threshold at which the objective wins.",
+  },
+  {
+    verdict: "caution" as const,
+    rq: "Deployment",
+    title: "False-alarm rates are not measurable from six minutes",
+    body:
+      "Per-hour rates from 64 to 267 sound precise and are not. All five folds together hold " +
+      "5.8 minutes of normal activity, so one trigger moves the rate by roughly 52 per hour, " +
+      "and the baseline's '100 per hour' is 12 actual triggers. The curve does show the " +
+      "baseline reaching zero false alarms over those minutes at recall 0.600 and 0.44 s of " +
+      "lead — better than a per-hour figure suggests. Whether that survives hours of real " +
+      "activity is exactly what this data cannot answer, so absolute counts are published " +
+      "beside every rate.",
   },
   {
     verdict: "caution" as const,

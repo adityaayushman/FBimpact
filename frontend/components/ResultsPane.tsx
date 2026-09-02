@@ -3,6 +3,7 @@
 import { useState } from "react";
 import results from "@/lib/results.json";
 import { FINDINGS } from "@/lib/content";
+import OperatingCurve from "./OperatingCurve";
 
 /**
  * Measured results.
@@ -225,8 +226,13 @@ export default function ResultsPane() {
             </div>
           </div>
 
+          <div style={{ marginTop: 16 }}>
+            <OperatingCurve />
+          </div>
+
           <p className="card-sub" style={{ marginTop: 14 }}>
-            Generated from the run directories by <code>scripts/export_results.py</code> ·{" "}
+            Generated from the run directories by <code>scripts/export_results.py</code> and{" "}
+            <code>scripts/export_curve.py</code> ·{" "}
             <span className="mono">{results.generated_utc}</span>
           </p>
         </>

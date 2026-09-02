@@ -1,6 +1,135 @@
 {
-  "generated_utc": "2026-09-02T09:17:01+00:00",
+  "generated_utc": "2026-09-02T19:36:56+00:00",
   "benchmarks": [
+    {
+      "id": "le2i",
+      "name": "Le2i / ImViA",
+      "kind": "real",
+      "caveat": "Real video of acted falls across two scenes, and the largest real benchmark here at 99 falls against UR Fall's 30. The impact frame is the annotated fall END frame \u2014 from the dataset's own annotation, never from the skeleton the model consumes, which would make lead time circular. Three falls have too few frames before impact for a full window to exist; they are kept as guaranteed misses rather than dropped, which costs about three points of recall equally across variants. Le2i publishes no clip-to-actor mapping, so splits are clip-independent \u2014 weaker than subject-independent.",
+      "dataset": {
+        "clips": 130,
+        "falls": 99,
+        "adls": 31,
+        "subjects": 130,
+        "minutes": 28.4
+      },
+      "seeds": [
+        0
+      ],
+      "rows": [
+        {
+          "variant": "ours_preimpact",
+          "label": "Ours \u2014 pre-impact loss + grounding head",
+          "role": "ours",
+          "runs": 2,
+          "recall": {
+            "mean": 0.65,
+            "std": 0.05
+          },
+          "mean_lead_time": {
+            "mean": 0.42301,
+            "std": 0.02504
+          },
+          "median_lead_time": {
+            "mean": 0.47,
+            "std": 0.01
+          },
+          "false_alarms_per_hour": {
+            "mean": 219.55374,
+            "std": 34.62016
+          },
+          "specificity": {
+            "mean": 0.75,
+            "std": 0.08333
+          },
+          "frame_auc": {
+            "mean": 0.98788,
+            "std": 0.00131
+          },
+          "frame_f1": {
+            "mean": 0.78534,
+            "std": 0.01926
+          },
+          "faith_deletion_gap": {
+            "mean": 0.10351,
+            "std": 0.04551
+          },
+          "faith_insertion_gap": {
+            "mean": 0.13683,
+            "std": 0.02659
+          },
+          "faith_deletion_auc": {
+            "mean": 0.58284,
+            "std": 0.18294
+          },
+          "faith_insertion_auc": {
+            "mean": 0.75789,
+            "std": 0.10479
+          },
+          "num_false_alarms": 28.0,
+          "num_falls": 40.0,
+          "num_warned": 26.0,
+          "negative_hours": 0.1308,
+          "recall_pooled": 0.65
+        },
+        {
+          "variant": "baseline_stgcn",
+          "label": "Baseline \u2014 ST-GCN, plain classification loss",
+          "role": "baseline",
+          "runs": 5,
+          "recall": {
+            "mean": 0.68579,
+            "std": 0.12706
+          },
+          "mean_lead_time": {
+            "mean": 0.38962,
+            "std": 0.07681
+          },
+          "median_lead_time": {
+            "mean": 0.411,
+            "std": 0.10906
+          },
+          "false_alarms_per_hour": {
+            "mean": 125.6923,
+            "std": 77.78691
+          },
+          "specificity": {
+            "mean": 0.90667,
+            "std": 0.08273
+          },
+          "frame_auc": {
+            "mean": 0.98592,
+            "std": 0.00671
+          },
+          "frame_f1": {
+            "mean": 0.78107,
+            "std": 0.06862
+          },
+          "faith_deletion_gap": {
+            "mean": -0.11049,
+            "std": 0.16958
+          },
+          "faith_insertion_gap": {
+            "mean": -0.07414,
+            "std": 0.11675
+          },
+          "faith_deletion_auc": {
+            "mean": 0.71201,
+            "std": 0.24015
+          },
+          "faith_insertion_auc": {
+            "mean": 0.48898,
+            "std": 0.17036
+          },
+          "num_false_alarms": 39.0,
+          "num_falls": 99.0,
+          "num_warned": 67.0,
+          "negative_hours": 0.3439,
+          "recall_pooled": 0.6768
+        }
+      ],
+      "split": "Clip-independent, 5 folds pooled (every clip tested once)"
+    },
     {
       "id": "urfd",
       "name": "UR Fall Detection",
@@ -23,163 +152,166 @@
           "variant": "ours_preimpact",
           "label": "Ours \u2014 pre-impact loss + grounding head",
           "role": "ours",
-          "runs": 5,
+          "runs": 15,
           "recall": {
-            "mean": 0.64167,
-            "std": 0.28577
+            "mean": 0.635,
+            "std": 0.20102
           },
           "mean_lead_time": {
-            "mean": 0.45856,
-            "std": 0.06728
+            "mean": 0.48878,
+            "std": 0.06349
           },
           "median_lead_time": {
-            "mean": 0.49,
-            "std": 0.08981
+            "mean": 0.51889,
+            "std": 0.08185
           },
           "false_alarms_per_hour": {
-            "mean": 131.56304,
-            "std": 144.68347
+            "mean": 135.54374,
+            "std": 106.58282
           },
           "specificity": {
-            "mean": 0.84369,
-            "std": 0.20165
+            "mean": 0.8234,
+            "std": 0.1967
           },
           "frame_auc": {
-            "mean": 0.93296,
-            "std": 0.04878
+            "mean": 0.93168,
+            "std": 0.05487
           },
           "frame_f1": {
-            "mean": 0.53369,
-            "std": 0.31584
+            "mean": 0.62254,
+            "std": 0.2256
           },
           "faith_deletion_gap": {
-            "mean": 0.09066,
-            "std": 0.04413
+            "mean": 0.05803,
+            "std": 0.08888
           },
           "faith_insertion_gap": {
-            "mean": 0.01687,
-            "std": 0.11117
+            "mean": 0.01366,
+            "std": 0.11381
           },
           "faith_deletion_auc": {
-            "mean": 0.17104,
-            "std": 0.0682
+            "mean": 0.21096,
+            "std": 0.09113
           },
           "faith_insertion_auc": {
-            "mean": 0.31924,
-            "std": 0.09771
+            "mean": 0.28214,
+            "std": 0.17193
           },
-          "num_false_alarms": 32.0,
-          "num_falls": 54.0,
-          "num_warned": 36.0,
-          "negative_hours": 0.1768
+          "num_false_alarms": 45.0,
+          "num_falls": 90.0,
+          "num_warned": 57.0,
+          "negative_hours": 0.2898,
+          "recall_pooled": 0.6333
         },
         {
           "variant": "baseline_stgcn",
           "label": "Baseline \u2014 ST-GCN, plain classification loss",
           "role": "baseline",
-          "runs": 5,
+          "runs": 15,
           "recall": {
-            "mean": 0.80833,
-            "std": 0.1965
+            "mean": 0.68778,
+            "std": 0.21862
           },
           "mean_lead_time": {
-            "mean": 0.49893,
-            "std": 0.01806
+            "mean": 0.52342,
+            "std": 0.05825
           },
           "median_lead_time": {
-            "mean": 0.51333,
-            "std": 0.03232
+            "mean": 0.52889,
+            "std": 0.06425
           },
           "false_alarms_per_hour": {
-            "mean": 100.0747,
-            "std": 106.85336
+            "mean": 141.99888,
+            "std": 131.86805
           },
           "specificity": {
-            "mean": 0.83258,
-            "std": 0.20038
+            "mean": 0.83039,
+            "std": 0.19199
           },
           "frame_auc": {
-            "mean": 0.95208,
-            "std": 0.05021
+            "mean": 0.94081,
+            "std": 0.06028
           },
           "frame_f1": {
-            "mean": 0.67629,
-            "std": 0.11087
+            "mean": 0.68449,
+            "std": 0.16494
           },
           "faith_deletion_gap": {
-            "mean": 0.00565,
-            "std": 0.09329
+            "mean": 0.02811,
+            "std": 0.08909
           },
           "faith_insertion_gap": {
-            "mean": 0.00164,
-            "std": 0.05984
+            "mean": 0.05824,
+            "std": 0.09698
           },
           "faith_deletion_auc": {
-            "mean": 0.27014,
-            "std": 0.09581
+            "mean": 0.25217,
+            "std": 0.08485
           },
           "faith_insertion_auc": {
-            "mean": 0.28455,
-            "std": 0.0858
+            "mean": 0.33516,
+            "std": 0.18072
           },
           "num_false_alarms": 46.0,
           "num_falls": 90.0,
           "num_warned": 64.0,
-          "negative_hours": 0.2898
+          "negative_hours": 0.2898,
+          "recall_pooled": 0.7111
         },
         {
           "variant": "no_preimpact_loss",
           "label": "\u2212 pre-impact loss (\u03bb = 0)",
           "role": "ablation",
-          "runs": 5,
+          "runs": 15,
           "recall": {
-            "mean": 0.78333,
-            "std": 0.17756
+            "mean": 0.75944,
+            "std": 0.13485
           },
           "mean_lead_time": {
-            "mean": 0.53276,
-            "std": 0.08768
+            "mean": 0.4912,
+            "std": 0.10483
           },
           "median_lead_time": {
-            "mean": 0.54,
-            "std": 0.08794
+            "mean": 0.50111,
+            "std": 0.1039
           },
           "false_alarms_per_hour": {
-            "mean": 171.9355,
-            "std": 116.09254
+            "mean": 158.6281,
+            "std": 107.55521
           },
           "specificity": {
-            "mean": 0.71313,
-            "std": 0.2065
+            "mean": 0.75766,
+            "std": 0.19294
           },
           "frame_auc": {
-            "mean": 0.95421,
-            "std": 0.04988
+            "mean": 0.94619,
+            "std": 0.05159
           },
           "frame_f1": {
-            "mean": 0.70849,
-            "std": 0.1819
+            "mean": 0.6952,
+            "std": 0.16024
           },
           "faith_deletion_gap": {
-            "mean": 0.09527,
-            "std": 0.05167
+            "mean": 0.02961,
+            "std": 0.10626
           },
           "faith_insertion_gap": {
-            "mean": 0.12319,
-            "std": 0.04
+            "mean": 0.04039,
+            "std": 0.12875
           },
           "faith_deletion_auc": {
-            "mean": 0.15316,
-            "std": 0.06817
+            "mean": 0.20489,
+            "std": 0.11441
           },
           "faith_insertion_auc": {
-            "mean": 0.41888,
-            "std": 0.06831
+            "mean": 0.29366,
+            "std": 0.19885
           },
-          "num_false_alarms": 19.0,
-          "num_falls": 30.0,
-          "num_warned": 24.0,
-          "negative_hours": 0.0966
+          "num_false_alarms": 52.0,
+          "num_falls": 90.0,
+          "num_warned": 69.0,
+          "negative_hours": 0.2898,
+          "recall_pooled": 0.7667
         },
         {
           "variant": "no_temporal",
@@ -191,7 +323,7 @@
             "std": 0.16282
           },
           "mean_lead_time": {
-            "mean": 0.33556,
+            "mean": 0.33555,
             "std": 0.1675
           },
           "median_lead_time": {
@@ -212,10 +344,10 @@
           },
           "frame_f1": {
             "mean": 0.27996,
-            "std": 0.06966
+            "std": 0.06967
           },
           "faith_deletion_gap": {
-            "mean": 0.07668,
+            "mean": 0.07667,
             "std": 0.14706
           },
           "faith_insertion_gap": {
@@ -233,7 +365,8 @@
           "num_false_alarms": 7.0,
           "num_falls": 30.0,
           "num_warned": 10.0,
-          "negative_hours": 0.0966
+          "negative_hours": 0.0966,
+          "recall_pooled": 0.3333
         },
         {
           "variant": "no_velocity",
@@ -257,11 +390,11 @@
             "std": 148.46186
           },
           "specificity": {
-            "mean": 0.78157,
+            "mean": 0.78156,
             "std": 0.09417
           },
           "frame_auc": {
-            "mean": 0.92482,
+            "mean": 0.92483,
             "std": 0.05347
           },
           "frame_f1": {
@@ -282,12 +415,13 @@
           },
           "faith_insertion_auc": {
             "mean": 0.48177,
-            "std": 0.18704
+            "std": 0.18705
           },
           "num_false_alarms": 25.0,
           "num_falls": 30.0,
           "num_warned": 16.0,
-          "negative_hours": 0.0966
+          "negative_hours": 0.0966,
+          "recall_pooled": 0.5333
         },
         {
           "variant": "no_grounding",
@@ -341,7 +475,8 @@
           "num_false_alarms": 8.0,
           "num_falls": 30.0,
           "num_warned": 23.0,
-          "negative_hours": 0.0966
+          "negative_hours": 0.0966,
+          "recall_pooled": 0.7667
         }
       ],
       "split": "Sequence-independent, 5 folds pooled (every clip tested once)"
@@ -379,7 +514,7 @@
           },
           "median_lead_time": {
             "mean": 0.54444,
-            "std": 0.01571
+            "std": 0.01572
           },
           "false_alarms_per_hour": {
             "mean": 23.18094,
@@ -411,12 +546,13 @@
           },
           "faith_insertion_auc": {
             "mean": 0.25352,
-            "std": 0.10762
+            "std": 0.10763
           },
           "num_false_alarms": 4.0,
           "num_falls": 72.0,
           "num_warned": 68.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 0.9444
         },
         {
           "variant": "baseline_stgcn",
@@ -445,14 +581,14 @@
           },
           "frame_auc": {
             "mean": 0.99529,
-            "std": 0.00192
+            "std": 0.00193
           },
           "frame_f1": {
-            "mean": 0.92446,
-            "std": 0.00816
+            "mean": 0.92447,
+            "std": 0.00815
           },
           "faith_deletion_gap": {
-            "mean": -0.05474,
+            "mean": -0.05475,
             "std": 0.06699
           },
           "faith_insertion_gap": {
@@ -470,7 +606,8 @@
           "num_false_alarms": 1.0,
           "num_falls": 72.0,
           "num_warned": 71.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 0.9861
         },
         {
           "variant": "no_preimpact_loss",
@@ -498,7 +635,7 @@
             "std": 0.0
           },
           "frame_auc": {
-            "mean": 0.99667,
+            "mean": 0.99666,
             "std": 0.00027
           },
           "frame_f1": {
@@ -524,7 +661,8 @@
           "num_false_alarms": 3.0,
           "num_falls": 72.0,
           "num_warned": 68.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 0.9444
         },
         {
           "variant": "no_temporal",
@@ -541,11 +679,11 @@
           },
           "median_lead_time": {
             "mean": 0.47222,
-            "std": 0.00786
+            "std": 0.00785
           },
           "false_alarms_per_hour": {
             "mean": 28.97618,
-            "std": 21.68378
+            "std": 21.68379
           },
           "specificity": {
             "mean": 0.95833,
@@ -578,7 +716,8 @@
           "num_false_alarms": 5.0,
           "num_falls": 72.0,
           "num_warned": 72.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 1.0
         },
         {
           "variant": "no_velocity",
@@ -611,7 +750,7 @@
           },
           "frame_f1": {
             "mean": 0.93988,
-            "std": 0.00885
+            "std": 0.00886
           },
           "faith_deletion_gap": {
             "mean": 0.04509,
@@ -626,13 +765,14 @@
             "std": 0.31066
           },
           "faith_insertion_auc": {
-            "mean": 0.28631,
+            "mean": 0.28632,
             "std": 0.31086
           },
           "num_false_alarms": 1.0,
           "num_falls": 72.0,
           "num_warned": 71.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 0.9861
         },
         {
           "variant": "no_grounding",
@@ -660,7 +800,7 @@
             "std": 0.0
           },
           "frame_auc": {
-            "mean": 0.99511,
+            "mean": 0.9951,
             "std": 0.00131
           },
           "frame_f1": {
@@ -686,7 +826,8 @@
           "num_false_alarms": 3.0,
           "num_falls": 72.0,
           "num_warned": 69.0,
-          "negative_hours": 0.1726
+          "negative_hours": 0.1726,
+          "recall_pooled": 0.9583
         }
       ],
       "split": "Leave-subjects-out, 5 folds (fold 0 reported)"

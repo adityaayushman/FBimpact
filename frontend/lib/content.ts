@@ -44,13 +44,26 @@ export const FINDINGS = [
   {
     verdict: "negative" as const,
     rq: "RQ3",
-    title: "The pre-impact objective did not buy lead time",
+    title: "The pre-impact objective hurts, in every seed tested",
     body:
-      "On real data the time-weighted loss made things worse on every axis. Setting λ = 0 — " +
-      "the same architecture with plain class-weighted cross-entropy — reached recall 0.783 " +
-      "and 0.533 s of lead time, against 0.642 and 0.459 s with the objective switched on. " +
-      "The reproduced baseline beat both on recall at 0.808. The answer to RQ3 is that the " +
-      "objective costs recall and lead time rather than trading one for the other.",
+      "Over three seeds on UR Fall, each pooling all five folds, λ = 0 — the same architecture " +
+      "and grounding head with plain class-weighted cross-entropy — reached recall 0.767 ± 0.047 " +
+      "against 0.633 ± 0.072 with the time-weighted objective switched on, and won on recall in " +
+      "3 of 3 seeds. Lead time did not compensate: 0.491 s against 0.489 s. The answer to RQ3 is " +
+      "that the objective costs recall and buys nothing, and that result is stable across seeds " +
+      "rather than an artefact of one run.",
+  },
+  {
+    verdict: "caution" as const,
+    rq: "Correction",
+    title: "Seed variance is large enough to have flipped an earlier conclusion",
+    body:
+      "From a single seed this page previously reported that the reproduced baseline beat both " +
+      "variants on recall. Across three seeds that no longer holds: λ = 0 beats the baseline in " +
+      "2 of 3 seeds (0.767 against 0.711), and the baseline's own recall swings from 0.600 to " +
+      "0.833 depending only on initialisation. The seed-to-seed spread is comparable to the " +
+      "gaps between methods, which is precisely why a single run cannot rank them — and why the " +
+      "earlier single-seed claim has been withdrawn rather than quietly left in place.",
   },
   {
     verdict: "positive" as const,

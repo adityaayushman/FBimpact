@@ -68,10 +68,10 @@ export default function Hero() {
               component did not beat the baseline it was built to beat. */}
           <p className="notice warn" style={{ marginBottom: 22, fontSize: 13.5 }}>
             <b style={{ color: "var(--text)" }}>Result: the novel component did not work.</b>{" "}
-            On real falls the pre-impact objective cost recall and lead time, and the reproduced
-            baseline beat it. The ablations show temporal modelling and velocity features are
-            doing the anticipation. <a href="#results" style={{ color: "var(--accent)" }}>
-            See the measured tables →</a>
+            On real falls, across three seeds, switching the pre-impact objective off raised
+            recall from 0.633 to 0.767 and cost no lead time — it won in 3 of 3 seeds. The
+            ablations show temporal modelling and velocity features are doing the anticipation.{" "}
+            <a href="#results" style={{ color: "var(--accent)" }}>See the measured tables →</a>
           </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 26 }}>

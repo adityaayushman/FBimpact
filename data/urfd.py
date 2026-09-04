@@ -73,6 +73,35 @@ def impact_frame(frame_labels: dict[int, int]) -> int | None:
     return min(lying) if lying else None
 
 
+def onset_frame(frame_labels: dict[int, int]) -> int | None:
+    """First frame annotated as transitional - the fall visibly beginning.
+
+    UR Fall's middle label is exactly the interval between upright and lying, so
+    its first occurrence is the annotated fall onset. Taken only when it
+    precedes the impact frame; a transitional frame *after* the subject is
+    already lying is the annotator marking them shifting on the floor, not a
+    second fall starting.
+
+    **This value carries less information than it appears to.** Measured across
+    all 30 fall sequences, the gap from onset to impact is *exactly* 30 frames
+    every single time - minimum 30, median 30, maximum 30. UR Fall's
+    transitional label is therefore a fixed one-second window placed before
+    ground contact, not a per-clip annotation of how long the fall took. Le2i's
+    equivalent varies from 1 to 45 frames and is genuine.
+
+    The consequence for phase labelling: on UR Fall the `falling` phase is a
+    constant offset from `t*` and adds nothing a fixed window would not, so any
+    benefit the four-phase scheme shows on this dataset cannot be attributed to
+    onset annotation. On Le2i it can.
+    """
+    impact = impact_frame(frame_labels)
+    transitional = [
+        f for f, label in frame_labels.items()
+        if label == LABEL_TRANSITION and (impact is None or f < impact)
+    ]
+    return min(transitional) if transitional else None
+
+
 def sequence_summary(labels: dict[str, dict[int, int]]) -> list[dict]:
     """Per-sequence frame counts and derived impact frames, for a sanity check."""
     out = []

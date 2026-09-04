@@ -1,0 +1,80 @@
+# The combined real-data benchmark: UR Fall + Le2i.
+#
+#   200 clips | 129 falls | 71 normal | ~26 min of negative time
+#
+# Against the individual sets that is 4.3x UR Fall's falls and 1.3x Le2i's, and
+# it is the largest real benchmark this project can assemble without a dataset
+# that requires an access request.
+#
+# Pooling two datasets recorded at different frame rates is safe here because
+# every clip carries its own `fps` and every frame-count parameter is converted
+# to seconds before use. What is NOT safe is a single `window` in frames meaning
+# different durations in each half, so the window is set from the slower rate
+# (25 fps) and is slightly shorter in seconds on the UR Fall half - 0.83 s
+# against 1.00 s. That is the conservative direction: less history, not more.
+#
+# Splits are clip/sequence-independent, not subject-independent. Neither dataset
+# publishes a clip-to-actor mapping. Stated wherever these results appear.
+
+_base_: default.yaml
+
+run:
+  name: combined
+
+data:
+  cache_dir:
+    - data/cache/urfd
+    - data/cache/le2i
+  source: combined
+  split:
+    mode: folds
+    num_folds: 5
+    fold: 0
+    val_fraction: 0.25
+    seed: 0
+
+features:
+  window: 25
+  stride: 4
+  # Le2i is 320x240 and UR Fall 640x480, so the pooled set contains genuinely
+  # lower-confidence joints; the threshold follows the weaker source rather than
+  # discarding half of one dataset.
+  conf_threshold: 0.30
+  temporal_jitter: 2
+  # Positions, velocity, acceleration, bone vectors and rates, trunk angle and
+  # rate, centre-of-mass height and rate. See data/features.py for why each set
+  # of channels is expected to earn its place.
+  feature_set: full
+
+labels:
+  w_pre: 17                  # 0.68 s at 25 fps
+
+loss:
+  w_pre_seconds: 0.68
+  # The pre-impact time weighting is OFF. Measured on UR Fall across three seeds
+  # it cost 13 points of recall and bought no lead time, and the same direction
+  # held on Le2i. Keeping it on here would mean carrying a component the
+  # evidence says is harmful.
+  lam: 0.0
+
+augment:
+  noise_std: 0.015
+  scale_range: [0.85, 1.15]
+
+model:
+  # Receptive field = 1 + (kernel_size - 1) * sum(dilations) = 25 = the window.
+  blocks: [[64, 1], [64, 1], [128, 1], [128, 1]]
+  kernel_size: 7
+  attention: true
+
+train:
+  epochs: 45
+  patience: 12
+  batch_size: 64
+
+decision:
+  refractory_frames: 25
+  max_false_alarms_per_hour: 2.0
+
+explain:
+  max_warnings: 40

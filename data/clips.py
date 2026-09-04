@@ -40,6 +40,16 @@ class ClipRecord:
     impact_frame: int | None = None
     """`t*`, first frame of ground contact. Required when `label == "fall"`."""
 
+    onset_frame: int | None = None
+    """First frame at which the fall is visibly under way, when the dataset
+    annotates it - UR Fall's first `transition` label, Le2i's fall-start frame.
+
+    Optional, and separate from `impact_frame` on purpose. `t*` alone supports
+    only a binary imminent/normal split; onset additionally separates *about to
+    lose balance* from *already falling*, which is what the phase labels in
+    `data.labels` are built on. A clip without it still works: it simply has no
+    `falling` phase, and its frames before `t*` are all labelled imminent."""
+
     activity: str = "unknown"
     """Dataset-specific activity name, kept for per-activity error analysis."""
 
@@ -71,6 +81,21 @@ class ClipRecord:
                 )
         else:
             self.impact_frame = None
+            self.onset_frame = None
+
+        if self.onset_frame is not None:
+            if not 0 <= self.onset_frame < self.num_frames:
+                raise ValueError(
+                    f"{self.clip_id}: onset_frame {self.onset_frame} outside "
+                    f"clip of {self.num_frames} frames"
+                )
+            if self.impact_frame is not None and self.onset_frame > self.impact_frame:
+                # A fall that lands before it starts is an annotation error, not
+                # a clip worth silently training on.
+                raise ValueError(
+                    f"{self.clip_id}: onset_frame {self.onset_frame} is after "
+                    f"impact_frame {self.impact_frame}"
+                )
 
     @property
     def num_frames(self) -> int:

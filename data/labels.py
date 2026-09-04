@@ -35,6 +35,11 @@ class LabelConfig:
     post_impact: str = "ignore"
     """One of `POST_IMPACT_POLICIES`; see the module docstring."""
 
+    phases: bool = False
+    """Also emit four-phase labels (see `data.phases`) alongside the binary ones.
+    The binary target is unchanged either way, so turning this on adds a training
+    signal without altering what lead time is measured against."""
+
     def __post_init__(self) -> None:
         if self.w_pre < 1:
             raise ValueError(f"w_pre must be >= 1, got {self.w_pre}")

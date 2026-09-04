@@ -1,0 +1,14 @@
+# CONTROL arm for the combined-benchmark comparison.
+#
+# Identical to combined.yaml in every respect except the feature set, which is
+# the (x, y, vx, vy) representation every earlier result used. This is what the
+# richer features have to beat, on the same data, the same folds and the same
+# schedule — so any difference is attributable to the features alone.
+
+_base_: combined.yaml
+
+run:
+  name: combined_xyv
+
+features:
+  feature_set: xyv

@@ -23,8 +23,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
-def _cache_summary(cache_dir: Path) -> dict | None:
-    """Dataset counts for a cache, or None if they cannot be read.
+def _cache_summary(cache_dirs: Path | list[Path]) -> dict | None:
+    """Dataset counts for one cache or several pooled, or None if unreadable.
+
+    A benchmark built from more than one cache must summarise all of them: the
+    combined benchmark reporting UR Fall's 30 falls while being evaluated on 129
+    would understate the evidence behind its own numbers by a factor of four.
 
     Imported lazily and defensively. Everything this script actually needs is in
     the CSVs; the clip counts are decoration. But `data.clips` is reached through
@@ -39,10 +43,17 @@ def _cache_summary(cache_dir: Path) -> dict | None:
         print(f"  (dataset counts unavailable: {type(exc).__name__})")
         return None
 
-    try:
-        stats = summarise(load_cache(cache_dir))
-    except (FileNotFoundError, ValueError):
+    paths = [cache_dirs] if isinstance(cache_dirs, Path) else list(cache_dirs)
+    clips = []
+    for path in paths:
+        try:
+            clips.extend(load_cache(path))
+        except (FileNotFoundError, ValueError):
+            continue
+    if not clips:
         return None
+
+    stats = summarise(clips)
     return {
         "clips": stats["clips"], "falls": stats["falls"], "adls": stats["adls"],
         "subjects": stats["subjects"], "minutes": round(stats["total_hours"] * 60, 1),
@@ -52,6 +63,13 @@ def _cache_summary(cache_dir: Path) -> dict | None:
 # *stem* as written into runs.csv by run_ablations.py - so `no_temporal`, from
 # configs/ablations/no_temporal.yaml, not the `ablation_no_temporal` run name.
 VARIANTS = [
+    # Combined-benchmark arms. Each differs from the one above it in exactly one
+    # thing, so the table reads as a chain of single changes rather than a set
+    # of unrelated configurations.
+    ("combined_xyv", "Control — (x, y, vx, vy) features", "baseline"),
+    ("combined", "+ richer features (14 channels)", "ours"),
+    ("combined_phases", "+ four-phase supervision", "ours"),
+    # Single-dataset ablation grid.
     ("ours_preimpact", "Ours — pre-impact loss + grounding head", "ours"),
     ("baseline_stgcn", "Baseline — ST-GCN, plain classification loss", "baseline"),
     ("no_preimpact_loss", "− pre-impact loss (λ = 0)", "ablation"),
@@ -106,7 +124,8 @@ def _mean_std(values: list[float]) -> dict:
 
 
 def build_benchmark(
-    key: str, name: str, kind: str, caveat: str, results_dir: Path, cache_dir: Path
+    key: str, name: str, kind: str, caveat: str,
+    results_dir: Path, cache_dir: Path | list[Path]
 ) -> dict | None:
     # Aggregated from runs.csv, NOT from ablation_table.csv. The runner rewrites
     # that table with only the variants of its most recent invocation, so a
@@ -151,7 +170,7 @@ def build_benchmark(
     if not rows:
         return None
 
-    dataset = _cache_summary(cache_dir) if cache_dir.exists() else None
+    dataset = _cache_summary(cache_dir)
 
     seeds = sorted({int(float(r["seed"])) for r in read_table(results_dir / "runs.csv")
                     if (r.get("seed") or "").strip()})
@@ -172,6 +191,21 @@ def main(argv: list[str] | None = None) -> int:
     # landing on a procedurally generated fixture would reasonably assume the
     # numbers describe human falls.
     DEFINITIONS = [
+        dict(
+            key="combined", name="UR Fall + Le2i (combined)", kind="real",
+            results="combined", cache=["urfd", "le2i"],
+            split="Clip-independent, 5 folds pooled (every clip tested once)",
+            caveat=(
+                "The largest real benchmark assembled here: 200 clips, 129 falls and roughly "
+                "26 minutes of normal activity, pooling both public datasets. Safe to pool "
+                "because every clip carries its own frame rate and all frame counts are "
+                "converted to seconds; the window follows the slower source, so the faster half "
+                "gets less history rather than more. The three rows differ in exactly one thing "
+                "each — feature set, then phase supervision — so any gap is attributable. "
+                "Neither dataset publishes a clip-to-actor mapping, so splits are "
+                "clip-independent, which is weaker than subject-independent."
+            ),
+        ),
         dict(
             key="le2i", name="Le2i / ImViA", kind="real",
             results="le2i", cache="le2i",
@@ -220,7 +254,11 @@ def main(argv: list[str] | None = None) -> int:
         built = build_benchmark(
             key=spec["key"], name=spec["name"], kind=spec["kind"], caveat=spec["caveat"],
             results_dir=root / "results" / spec["results"],
-            cache_dir=root / "data" / "cache" / spec["cache"],
+            cache_dir=(
+                [root / "data" / "cache" / c for c in spec["cache"]]
+                if isinstance(spec["cache"], list)
+                else root / "data" / "cache" / spec["cache"]
+            ),
         )
         if built:
             built["split"] = spec["split"]

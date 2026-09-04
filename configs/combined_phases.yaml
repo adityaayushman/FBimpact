@@ -1,0 +1,23 @@
+# PHASE arm: full features plus four-phase supervision.
+#
+# Differs from combined.yaml only in switching the phase head and phase targets
+# on, so the comparison isolates the extra supervision rather than confounding
+# it with a feature change.
+#
+# The binary head is untouched and still drives the decision rule, so lead time
+# measures the same quantity in all three arms and the metrics stay comparable.
+
+_base_: combined.yaml
+
+run:
+  name: combined_phases
+
+labels:
+  phases: true
+
+model:
+  phase_head: true
+
+loss:
+  phase_weight: 0.5
+  consistency_weight: 0.1

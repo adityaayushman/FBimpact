@@ -35,6 +35,24 @@ class DataBundle:
         clips = self.test_clips.clips or self.val_clips.clips
         return float(clips[0].fps) if clips else 30.0
 
+    def phase_distribution(self) -> dict[str, float]:
+        """Phase frequencies over the **training** clips only.
+
+        Class weights derived from validation or test frames would leak their
+        label distribution into training, which on a set this small is not a
+        negligible amount of information.
+        """
+        from .phases import PhaseConfig, phase_distribution, phase_labels
+
+        config = PhaseConfig(
+            w_pre=self.label_cfg.w_pre,
+            include_grounded=self.label_cfg.post_impact == "ignore",
+        )
+        return phase_distribution([
+            phase_labels(c.num_frames, c.impact_frame, c.onset_frame, config)
+            for c in self.train.clips
+        ])
+
 
 def load_clips(cfg: dict) -> list[ClipRecord]:
     """Load the skeleton cache(s) named by the config, applying onset annotations.

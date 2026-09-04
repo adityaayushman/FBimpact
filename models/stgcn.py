@@ -52,6 +52,12 @@ class STGCNConfig:
     """False for the `- grounding head` ablation (mean-pools joints instead)."""
 
     attention_hidden: int = 32
+
+    phase_head: bool = False
+    """Add a four-way phase classifier beside the imminence logit. The binary
+    output is unchanged and still drives the decision rule, so lead time keeps
+    measuring the same quantity; the phase head only adds supervision."""
+
     temporal_pool: bool = False
     """True for the `- temporal modelling` ablation. It does two things
     together, and both are needed for the ablation to mean anything: the
@@ -116,7 +122,15 @@ class STGCN(nn.Module):
         self.joint_attention = (
             JointAttention(in_c, hidden=cfg.attention_hidden) if cfg.attention else None
         )
-        self.head = nn.Conv1d(in_c, 1, kernel_size=1)
+
+        if cfg.phase_head:
+            from .heads import MultiTaskHead
+
+            self.multitask = MultiTaskHead(in_c)
+            self.head = None
+        else:
+            self.multitask = None
+            self.head = nn.Conv1d(in_c, 1, kernel_size=1)
 
     # -- forward ---------------------------------------------------------------
 
@@ -163,17 +177,26 @@ class STGCN(nn.Module):
             # mean and give every frame the same score.
             pooled = pooled.mean(dim=-1, keepdim=True).expand_as(pooled)
 
-        logits = self.head(pooled).squeeze(1)                       # [N*M, T]
+        phase_logits = None
+        if self.multitask is not None:
+            logits, phase_logits = self.multitask(pooled)           # [N*M,T], [N*M,P,T]
+        else:
+            logits = self.head(pooled).squeeze(1)                   # [N*M, T]
 
         if m > 1:
             # Several people in frame: the clip is imminent if anyone is falling.
             logits = logits.view(n, m, -1).max(dim=1).values
             attention = attention.view(n, m, *attention.shape[1:]).mean(dim=1)
             features = features.view(n, m, *features.shape[1:]).mean(dim=1)
+            if phase_logits is not None:
+                phase_logits = phase_logits.view(n, m, *phase_logits.shape[1:]).mean(dim=1)
 
         if not return_aux:
             return logits
-        return logits, {"attention": attention, "features": features}
+        aux = {"attention": attention, "features": features}
+        if phase_logits is not None:
+            aux["phase_logits"] = phase_logits
+        return logits, aux
 
     # -- convenience -----------------------------------------------------------
 

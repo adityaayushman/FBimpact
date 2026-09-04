@@ -59,15 +59,32 @@ def _prepare(
     clip: ClipRecord,
     features_cfg: FeatureConfig,
     label_cfg: LabelConfig,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Gap-fill and centre one clip; returns `(xy [T,V,2], labels [T], tti [T])`."""
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Gap-fill and centre one clip.
+
+    Returns `(xy [T,V,2], labels [T], tti [T], phases [T])`. The phase array is
+    all-`IGNORE_INDEX` when phases are switched off, so downstream code can pass
+    it through unconditionally and the loss simply finds nothing to score.
+    """
     xy, _ = interpolate_low_confidence(
         clip.keypoints[..., :2], clip.keypoints[..., 2], features_cfg.conf_threshold
     )
     xy, _, _ = centre_and_scale(xy)
     labels = frame_labels(clip.num_frames, clip.impact_frame, label_cfg)
     tti = time_to_impact(clip.num_frames, clip.impact_frame, clip.fps)
-    return xy, labels, tti
+
+    if label_cfg.phases:
+        from .phases import PhaseConfig, phase_labels
+
+        phases = phase_labels(
+            clip.num_frames, clip.impact_frame, clip.onset_frame,
+            PhaseConfig(w_pre=label_cfg.w_pre,
+                        include_grounded=label_cfg.post_impact == "ignore"),
+        )
+    else:
+        phases = np.full(clip.num_frames, IGNORE_INDEX, dtype=np.int64)
+
+    return xy, labels, tti, phases
 
 
 def _to_features(xy: np.ndarray, fps: float, feature_set: str) -> np.ndarray:
@@ -100,7 +117,7 @@ class WindowDataset(Dataset):
         self.augmenter = augmenter or Augmenter(enabled=False)
         self.seed = seed
 
-        self._cache: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+        self._cache: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = {}
         self.index: list[tuple[int, int]] = []
         for clip_idx, clip in enumerate(self.clips):
             starts = window_starts(
@@ -126,7 +143,7 @@ class WindowDataset(Dataset):
     def __getitem__(self, item: int) -> dict:
         clip_idx, start = self.index[item]
         clip = self.clips[clip_idx]
-        xy, labels, tti = self._clip_arrays(clip_idx)
+        xy, labels, tti, phases = self._clip_arrays(clip_idx)
         window = self.features_cfg.window
 
         # Seeded per item so a run is reproducible regardless of worker count.
@@ -148,6 +165,9 @@ class WindowDataset(Dataset):
                 np.ascontiguousarray(labels[start : start + window])
             ),
             "tti": torch.from_numpy(np.ascontiguousarray(tti[start : start + window])),
+            "phases": torch.from_numpy(
+                np.ascontiguousarray(phases[start : start + window])
+            ),
             "clip_idx": clip_idx,
             "start": start,
         }
@@ -156,7 +176,7 @@ class WindowDataset(Dataset):
         """Fraction of non-ignored frames that are positive, for class weighting."""
         pos = total = 0
         for clip_idx, start in self.index:
-            _, labels, _ = self._clip_arrays(clip_idx)
+            _, labels, _, _ = self._clip_arrays(clip_idx)
             chunk = labels[start : start + self.features_cfg.window]
             counted = chunk[chunk != IGNORE_INDEX]
             pos += int((counted == 1).sum())
@@ -187,9 +207,11 @@ class ClipDataset(Dataset):
 
     def __getitem__(self, item: int) -> dict:
         clip = self.clips[item]
-        xy, labels, tti = _prepare(clip, self.features_cfg, self.label_cfg)
+        xy, labels, tti, phases = _prepare(clip, self.features_cfg, self.label_cfg)
         features = _to_features(xy, clip.fps, self.features_cfg.resolved_feature_set)
-        features, labels, tti = pad_clip(features, labels, tti, self.features_cfg.window)
+        features, labels, tti, phases = pad_clip(
+            features, labels, tti, self.features_cfg.window, phases
+        )
 
         window = self.features_cfg.window
         starts = window_starts(features.shape[1], window, stride=1)
@@ -201,6 +223,7 @@ class ClipDataset(Dataset):
             "starts": np.asarray(starts, dtype=np.int64),
             "labels": labels,
             "tti": tti,
+            "phases": phases,
             "n_padded": features.shape[1] - clip.num_frames,
         }
 
@@ -211,6 +234,7 @@ def collate_windows(batch: list[dict]) -> dict:
         "features": torch.stack([b["features"] for b in batch]).unsqueeze(-1),
         "labels": torch.stack([b["labels"] for b in batch]),
         "tti": torch.stack([b["tti"] for b in batch]),
+        "phases": torch.stack([b["phases"] for b in batch]),
         "clip_idx": torch.tensor([b["clip_idx"] for b in batch], dtype=torch.long),
         "start": torch.tensor([b["start"] for b in batch], dtype=torch.long),
     }

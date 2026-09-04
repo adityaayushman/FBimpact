@@ -220,10 +220,36 @@ def main(argv: list[str] | None = None) -> Path:
             receptive_field, bundle.features_cfg.window,
         )
 
-    criterion = build_loss(cfg["loss"])
-    if criterion.config.pos_weight is None:
+    # The phase head and the phase term travel together: a phase loss with no
+    # phase logits would silently contribute nothing, and a phase head with no
+    # phase loss would train on noise.
+    use_phases = bool(cfg["model"].get("phase_head", False)) and bundle.label_cfg.phases
+    if bool(cfg["model"].get("phase_head", False)) and not bundle.label_cfg.phases:
+        raise ValueError(
+            "model.phase_head is on but labels.phases is off — the phase head "
+            "would receive no targets. Set labels.phases: true."
+        )
+
+    if use_phases:
+        from losses.multitask import build_multitask_loss
+
+        criterion = build_multitask_loss(cfg["loss"])
+        binary_cfg = criterion.binary_loss.config
+        distribution = bundle.phase_distribution()
+        weights = criterion.set_phase_weights_from_distribution(distribution)
+        logger.info(
+            "phase distribution: %s",
+            ", ".join(f"{k} {v:.2%}" for k, v in distribution.items()),
+        )
+        logger.info("phase class weights: %s", weights)
+    else:
+        criterion = build_loss(cfg["loss"])
+        binary_cfg = criterion.config
+
+    if binary_cfg.pos_weight is None:
         prior = bundle.train.positive_fraction()
-        weight = criterion.set_pos_weight_from_prior(prior)
+        target = criterion.binary_loss if use_phases else criterion
+        weight = target.set_pos_weight_from_prior(prior)
         logger.info("positive frame fraction %.4f -> pos_weight %.2f", prior, weight)
 
     optimizer = torch.optim.Adam(
@@ -260,8 +286,15 @@ def main(argv: list[str] | None = None) -> Path:
 
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type=device.type, enabled=use_amp):
-                logits = model(features)
-                loss, _ = criterion(logits.float(), labels, tti)
+                if use_phases:
+                    logits, aux = model(features, return_aux=True)
+                    loss, batch_stats = criterion(
+                        logits.float(), labels, tti,
+                        aux.get("phase_logits"), batch["phases"].to(device, non_blocking=True),
+                    )
+                else:
+                    logits = model(features)
+                    loss, batch_stats = criterion(logits.float(), labels, tti)
 
             scaler.scale(loss).backward()
             if float(train_cfg.get("grad_clip", 0.0)) > 0:

@@ -29,11 +29,19 @@ features:
   stride: 5                  # training stride; inference is always 1
   conf_threshold: 0.30
   with_velocity: true
+  # null derives the feature set from with_velocity (xyv / xy), which is what
+  # every result before this key existed was trained on. Set explicitly to
+  # xy | xyv | xyva | full — see data/features.py.
+  feature_set: null
   temporal_jitter: 2
 
 labels:
   w_pre: 20                  # Section 9: imminent window in frames
   post_impact: ignore        # ignore | negative | positive
+  # Emit four-phase labels alongside the binary ones. The binary target is
+  # unchanged either way, so this adds supervision without altering what lead
+  # time is measured against. Requires model.phase_head.
+  phases: false
 
 augment:
   enabled: true
@@ -57,6 +65,10 @@ model:
   edge_importance: true
   attention: true
   attention_hidden: 32
+  # Four-way phase classifier beside the imminence logit. Requires labels.phases;
+  # train.py refuses the mismatched combination rather than training a head with
+  # no targets.
+  phase_head: false
   temporal_pool: false
 
 loss:
@@ -66,6 +78,10 @@ loss:
   max_pos_weight: 20.0
   focal_gamma: 0.0
   label_smoothing: 0.0
+  # Multi-task terms. phase_weight 0 recovers the binary objective exactly, which
+  # is what makes the phase head an ablatable component rather than a rewrite.
+  phase_weight: 0.5
+  consistency_weight: 0.1
 
 train:
   epochs: 40

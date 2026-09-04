@@ -93,20 +93,35 @@ def slice_windows(
     ]
 
 
-def pad_clip(features: np.ndarray, labels: np.ndarray, tti: np.ndarray, window: int):
+def pad_clip(
+    features: np.ndarray,
+    labels: np.ndarray,
+    tti: np.ndarray,
+    window: int,
+    phases: np.ndarray | None = None,
+):
     """Left-pad a clip that is shorter than one window by repeating frame 0.
 
     Used at inference so that a short clip still produces a score stream rather
     than nothing at all. Padded frames are labelled `IGNORE_INDEX` so they can
     never contribute to a metric.
+
+    Every per-frame array must be padded together. Padding the features and
+    labels but not the phases would leave the phase array shorter than the
+    stream it annotates, and the misalignment would be silent - each phase would
+    describe a frame `pad` positions later than the one it belongs to.
     """
     from .labels import IGNORE_INDEX
 
     num_frames = features.shape[1]
     if num_frames >= window:
-        return features, labels, tti
+        return (features, labels, tti) if phases is None else (features, labels, tti, phases)
+
     pad = window - num_frames
     features = np.concatenate([np.repeat(features[:, :1, :], pad, axis=1), features], axis=1)
     labels = np.concatenate([np.full(pad, IGNORE_INDEX, dtype=labels.dtype), labels])
     tti = np.concatenate([np.full(pad, tti[0], dtype=tti.dtype), tti])
-    return features, labels, tti
+    if phases is None:
+        return features, labels, tti
+    phases = np.concatenate([np.full(pad, IGNORE_INDEX, dtype=phases.dtype), phases])
+    return features, labels, tti, phases

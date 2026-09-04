@@ -37,10 +37,41 @@ class DataBundle:
 
 
 def load_clips(cfg: dict) -> list[ClipRecord]:
-    """Load the skeleton cache named by the config, applying onset annotations."""
+    """Load the skeleton cache(s) named by the config, applying onset annotations.
+
+    `cache_dir` accepts a list as well as a single path, which is how the
+    combined benchmark is built. Pooling caches is safe because every clip
+    carries its own `fps` and every frame-count parameter is converted to
+    seconds before use - Le2i at 25 fps and UR Fall at 30 fps can share a
+    training set without one silently rescaling the other's lead times.
+
+    Clip ids are namespaced by source (`urfd_*`, `le2i_*`), so a collision would
+    be a genuine duplicate rather than two datasets using the same numbering;
+    it is raised rather than silently deduplicated.
+    """
     data_cfg = cfg.get("data", {})
-    cache_dir = Path(data_cfg.get("cache_dir", "data/cache/synthetic"))
-    clips = load_cache(cache_dir)
+    configured = data_cfg.get("cache_dir", "data/cache/synthetic")
+    cache_dirs = [configured] if isinstance(configured, (str, Path)) else list(configured)
+
+    clips: list[ClipRecord] = []
+    seen: dict[str, str] = {}
+    for entry in cache_dirs:
+        loaded = load_cache(Path(entry))
+        for clip in loaded:
+            if clip.clip_id in seen:
+                raise ValueError(
+                    f"duplicate clip id {clip.clip_id!r} in {entry} and {seen[clip.clip_id]}"
+                )
+            seen[clip.clip_id] = str(entry)
+        clips.extend(loaded)
+
+    if len(cache_dirs) > 1:
+        by_source: dict[str, int] = {}
+        for clip in clips:
+            by_source[clip.source] = by_source.get(clip.source, 0) + 1
+        print(f"[data] pooled {len(clips)} clips from {len(cache_dirs)} caches: {by_source}")
+
+    cache_dir = Path(cache_dirs[0])
 
     onsets_path = data_cfg.get("onsets")
     if onsets_path:

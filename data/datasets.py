@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 from .augment import Augmenter
 from .clips import ClipRecord
 from .labels import IGNORE_INDEX, LabelConfig, frame_labels, time_to_impact
-from .normalize import DEFAULT_CONF_THRESHOLD, add_velocity, centre_and_scale, interpolate_low_confidence
+from .normalize import DEFAULT_CONF_THRESHOLD, centre_and_scale, interpolate_low_confidence
 from .windows import Window, pad_clip, window_starts
 
 
@@ -31,14 +31,28 @@ class FeatureConfig:
 
     conf_threshold: float = DEFAULT_CONF_THRESHOLD
     with_velocity: bool = True
-    """False for the `- velocity features` ablation."""
+    """False for the `- velocity features` ablation. Ignored when
+    `feature_set` is set explicitly, which supersedes it."""
+
+    feature_set: str | None = None
+    """One of `data.features.FEATURE_SETS`. None keeps the original behaviour,
+    selecting `xyv` or `xy` from `with_velocity`, so every existing config and
+    checkpoint keeps meaning exactly what it did."""
 
     temporal_jitter: int = 0
     """Max random shift of the window start, in frames, at training time."""
 
     @property
+    def resolved_feature_set(self) -> str:
+        if self.feature_set is not None:
+            return self.feature_set
+        return "xyv" if self.with_velocity else "xy"
+
+    @property
     def in_channels(self) -> int:
-        return 4 if self.with_velocity else 2
+        from .features import channels_for
+
+        return channels_for(self.resolved_feature_set)
 
 
 def _prepare(
@@ -56,13 +70,11 @@ def _prepare(
     return xy, labels, tti
 
 
-def _to_features(
-    xy: np.ndarray, fps: float, with_velocity: bool
-) -> np.ndarray:
-    """`[T, V, 2]` -> `[C, T, V]`."""
-    if with_velocity:
-        return add_velocity(xy, fps=fps)
-    return np.transpose(xy, (2, 0, 1)).astype(np.float32)
+def _to_features(xy: np.ndarray, fps: float, feature_set: str) -> np.ndarray:
+    """`[T, V, 2]` -> `[C, T, V]` for the named feature set."""
+    from .features import build_features
+
+    return build_features(xy, fps=fps, feature_set=feature_set)
 
 
 class WindowDataset(Dataset):
@@ -126,7 +138,7 @@ class WindowDataset(Dataset):
             start = int(np.clip(start + shift, 0, clip.num_frames - window))
 
         xy = self.augmenter(xy, rng)
-        features = _to_features(xy, clip.fps, self.features_cfg.with_velocity)
+        features = _to_features(xy, clip.fps, self.features_cfg.resolved_feature_set)
 
         return {
             "features": torch.from_numpy(
@@ -176,7 +188,7 @@ class ClipDataset(Dataset):
     def __getitem__(self, item: int) -> dict:
         clip = self.clips[item]
         xy, labels, tti = _prepare(clip, self.features_cfg, self.label_cfg)
-        features = _to_features(xy, clip.fps, self.features_cfg.with_velocity)
+        features = _to_features(xy, clip.fps, self.features_cfg.resolved_feature_set)
         features, labels, tti = pad_clip(features, labels, tti, self.features_cfg.window)
 
         window = self.features_cfg.window

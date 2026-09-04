@@ -169,9 +169,19 @@ class PreImpactLoss(nn.Module):
         return loss, stats
 
 
+# Keys that belong to the multi-task objective in `losses.multitask`. They live
+# in the shared `loss` block of every config, so they reach this builder even
+# when the phase head is off - at which point they are simply inert. Rejecting
+# them would make the default config unusable for binary training, which is
+# exactly what happened: every phases-off arm of the combined comparison died at
+# start-up. Ignoring them silently is right here and only here, because the
+# multi-task builder validates the same keys when they actually do something.
+MULTITASK_KEYS = frozenset({"phase_weight", "consistency_weight", "phase_class_weights"})
+
+
 def build_loss(cfg: dict | None) -> PreImpactLoss:
-    """Build the loss from the `loss` block of a run config."""
-    cfg = dict(cfg or {})
+    """Build the binary loss from the `loss` block of a run config."""
+    cfg = {k: v for k, v in dict(cfg or {}).items() if k not in MULTITASK_KEYS}
     fields = set(PreImpactLossConfig.__dataclass_fields__)
     unknown = set(cfg) - fields
     if unknown:

@@ -84,16 +84,46 @@ def _backward_diff(x: np.ndarray, fps: float, clip: float | None = None) -> np.n
     return out
 
 
-def bone_vectors(xy: np.ndarray) -> np.ndarray:
-    """Per-joint bone vector: the offset from each joint to its parent.
+# Explicit parent for each joint, as a spanning tree over the skeleton graph.
+#
+# `BONES` is a graph, not a tree: joint 12 (right hip) is a child of both joint 6
+# and joint 11. Deriving bones by iterating `BONES` leaves such joints holding
+# whichever bone came last - a silent dependence on declaration order.
+#
+# A parent is either a joint index or a **tuple of joints whose midpoint is the
+# parent**. The tuple form exists because COCO-17 has no pelvis or neck joint,
+# and inventing an asymmetric substitute breaks the left/right flip
+# augmentation: hanging the head off the left shoulder means a mirrored skeleton
+# is a *different* tree, not a reflected one, and the bone features stop being
+# mirror images. Both hips hang off the mid-hip and the nose off the
+# mid-shoulder, so every parent relation is preserved under the flip.
+JOINT_PARENTS: dict[int, int | tuple[int, ...]] = {
+    11: (11, 12), 12: (11, 12),          # hips, from the mid-hip
+    5: 11, 6: 12,                        # shoulders from the same-side hip
+    7: 5, 9: 7, 8: 6, 10: 8,             # arms
+    13: 11, 15: 13, 14: 12, 16: 14,      # legs
+    0: (5, 6),                           # nose from the mid-shoulder
+    1: 0, 2: 0, 3: 1, 4: 2,              # eyes and ears from the nose
+}
 
-    `[T, V, 2]`. Joints appearing as a child in `BONES` get that bone; the
-    remaining root joints get zero, which is the correct "no parent" value
-    rather than a fabricated one.
+
+def bone_vectors(xy: np.ndarray) -> np.ndarray:
+    """Per-joint bone vector: the offset from each joint to its parent. `[T, V, 2]`.
+
+    Translation invariant by construction, which is the point: absolute joint
+    positions confound posture with where in the room the person is standing,
+    whereas a bone describes limb orientation - what "trunk lean" and "knee
+    buckling" actually are. Midpoint parents preserve that, because a midpoint of
+    observed joints shifts with them.
     """
     bones = np.zeros_like(xy)
-    for parent, child in BONES:
-        bones[:, child, :] = xy[:, child, :] - xy[:, parent, :]
+    for child, parent in JOINT_PARENTS.items():
+        anchor = (
+            xy[:, list(parent), :].mean(axis=1)
+            if isinstance(parent, tuple)
+            else xy[:, parent, :]
+        )
+        bones[:, child, :] = xy[:, child, :] - anchor
     return bones
 
 

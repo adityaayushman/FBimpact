@@ -1,6 +1,80 @@
 {
-  "generated_utc": "2026-09-02T19:36:56+00:00",
+  "generated_utc": "2026-09-04T21:03:11+00:00",
   "benchmarks": [
+    {
+      "id": "combined",
+      "name": "UR Fall + Le2i (combined)",
+      "kind": "real",
+      "caveat": "The largest real benchmark assembled here: 200 clips, 129 falls and roughly 26 minutes of normal activity, pooling both public datasets. Safe to pool because every clip carries its own frame rate and all frame counts are converted to seconds; the window follows the slower source, so the faster half gets less history rather than more. The three rows differ in exactly one thing each \u2014 feature set, then phase supervision \u2014 so any gap is attributable. Neither dataset publishes a clip-to-actor mapping, so splits are clip-independent, which is weaker than subject-independent.",
+      "dataset": {
+        "clips": 200,
+        "falls": 129,
+        "adls": 71,
+        "subjects": 200,
+        "minutes": 35.1
+      },
+      "seeds": [
+        0
+      ],
+      "rows": [
+        {
+          "variant": "combined_xyv",
+          "label": "Control \u2014 (x, y, vx, vy) features",
+          "role": "baseline",
+          "runs": 5,
+          "recall": {
+            "mean": 0.66774,
+            "std": 0.08413
+          },
+          "mean_lead_time": {
+            "mean": 0.42723,
+            "std": 0.03646
+          },
+          "median_lead_time": {
+            "mean": 0.4665,
+            "std": 0.02206
+          },
+          "false_alarms_per_hour": {
+            "mean": 329.59965,
+            "std": 73.96788
+          },
+          "specificity": {
+            "mean": 0.59055,
+            "std": 0.09704
+          },
+          "frame_auc": {
+            "mean": 0.9803,
+            "std": 0.00854
+          },
+          "frame_f1": {
+            "mean": 0.67563,
+            "std": 0.06221
+          },
+          "faith_deletion_gap": {
+            "mean": 0.05735,
+            "std": 0.08901
+          },
+          "faith_insertion_gap": {
+            "mean": 0.08843,
+            "std": 0.06417
+          },
+          "faith_deletion_auc": {
+            "mean": 0.61898,
+            "std": 0.06392
+          },
+          "faith_insertion_auc": {
+            "mean": 0.7213,
+            "std": 0.16703
+          },
+          "num_false_alarms": 135.0,
+          "num_falls": 129.0,
+          "num_warned": 87.0,
+          "negative_hours": 0.4293,
+          "recall_pooled": 0.6744
+        }
+      ],
+      "split": "Clip-independent, 5 folds pooled (every clip tested once)"
+    },
     {
       "id": "le2i",
       "name": "Le2i / ImViA",
@@ -21,56 +95,56 @@
           "variant": "ours_preimpact",
           "label": "Ours \u2014 pre-impact loss + grounding head",
           "role": "ours",
-          "runs": 2,
+          "runs": 5,
           "recall": {
-            "mean": 0.65,
-            "std": 0.05
+            "mean": 0.65199,
+            "std": 0.06234
           },
           "mean_lead_time": {
-            "mean": 0.42301,
-            "std": 0.02504
+            "mean": 0.39202,
+            "std": 0.03179
           },
           "median_lead_time": {
-            "mean": 0.47,
-            "std": 0.01
+            "mean": 0.40466,
+            "std": 0.05583
           },
           "false_alarms_per_hour": {
-            "mean": 219.55374,
-            "std": 34.62016
+            "mean": 170.01491,
+            "std": 88.06343
           },
           "specificity": {
-            "mean": 0.75,
-            "std": 0.08333
+            "mean": 0.8,
+            "std": 0.19436
           },
           "frame_auc": {
-            "mean": 0.98788,
-            "std": 0.00131
+            "mean": 0.98683,
+            "std": 0.00324
           },
           "frame_f1": {
-            "mean": 0.78534,
-            "std": 0.01926
+            "mean": 0.75496,
+            "std": 0.03058
           },
           "faith_deletion_gap": {
-            "mean": 0.10351,
-            "std": 0.04551
+            "mean": 0.06137,
+            "std": 0.06982
           },
           "faith_insertion_gap": {
-            "mean": 0.13683,
-            "std": 0.02659
+            "mean": 0.09731,
+            "std": 0.05828
           },
           "faith_deletion_auc": {
-            "mean": 0.58284,
-            "std": 0.18294
+            "mean": 0.57968,
+            "std": 0.14133
           },
           "faith_insertion_auc": {
-            "mean": 0.75789,
-            "std": 0.10479
+            "mean": 0.69833,
+            "std": 0.10276
           },
-          "num_false_alarms": 28.0,
-          "num_falls": 40.0,
-          "num_warned": 26.0,
-          "negative_hours": 0.1308,
-          "recall_pooled": 0.65
+          "num_false_alarms": 56.0,
+          "num_falls": 99.0,
+          "num_warned": 64.0,
+          "negative_hours": 0.3439,
+          "recall_pooled": 0.6465
         },
         {
           "variant": "baseline_stgcn",
@@ -126,6 +200,116 @@
           "num_warned": 67.0,
           "negative_hours": 0.3439,
           "recall_pooled": 0.6768
+        },
+        {
+          "variant": "no_preimpact_loss",
+          "label": "\u2212 pre-impact loss (\u03bb = 0)",
+          "role": "ablation",
+          "runs": 1,
+          "recall": {
+            "mean": 0.85,
+            "std": 0.0
+          },
+          "mean_lead_time": {
+            "mean": 0.40608,
+            "std": 0.0
+          },
+          "median_lead_time": {
+            "mean": 0.52,
+            "std": 0.0
+          },
+          "false_alarms_per_hour": {
+            "mean": 158.5145,
+            "std": 0.0
+          },
+          "specificity": {
+            "mean": 0.66667,
+            "std": 0.0
+          },
+          "frame_auc": {
+            "mean": 0.98648,
+            "std": 0.0
+          },
+          "frame_f1": {
+            "mean": 0.73455,
+            "std": 0.0
+          },
+          "faith_deletion_gap": {
+            "mean": 0.06112,
+            "std": 0.0
+          },
+          "faith_insertion_gap": {
+            "mean": 0.07635,
+            "std": 0.0
+          },
+          "faith_deletion_auc": {
+            "mean": 0.78694,
+            "std": 0.0
+          },
+          "faith_insertion_auc": {
+            "mean": 0.89573,
+            "std": 0.0
+          },
+          "num_false_alarms": 12.0,
+          "num_falls": 20.0,
+          "num_warned": 17.0,
+          "negative_hours": 0.0757,
+          "recall_pooled": 0.85
+        },
+        {
+          "variant": "no_temporal",
+          "label": "\u2212 temporal modelling",
+          "role": "ablation",
+          "runs": 4,
+          "recall": {
+            "mean": 0.30057,
+            "std": 0.13078
+          },
+          "mean_lead_time": {
+            "mean": 0.29342,
+            "std": 0.07606
+          },
+          "median_lead_time": {
+            "mean": 0.285,
+            "std": 0.09421
+          },
+          "false_alarms_per_hour": {
+            "mean": 12.79183,
+            "std": 14.87159
+          },
+          "specificity": {
+            "mean": 0.95833,
+            "std": 0.07217
+          },
+          "frame_auc": {
+            "mean": 0.98021,
+            "std": 0.0061
+          },
+          "frame_f1": {
+            "mean": 0.40811,
+            "std": 0.12106
+          },
+          "faith_deletion_gap": {
+            "mean": -0.05251,
+            "std": 0.02173
+          },
+          "faith_insertion_gap": {
+            "mean": -0.03763,
+            "std": 0.04748
+          },
+          "faith_deletion_auc": {
+            "mean": 0.91229,
+            "std": 0.04658
+          },
+          "faith_insertion_auc": {
+            "mean": 0.82437,
+            "std": 0.0948
+          },
+          "num_false_alarms": 3.0,
+          "num_falls": 78.0,
+          "num_warned": 24.0,
+          "negative_hours": 0.2883,
+          "recall_pooled": 0.3077
         }
       ],
       "split": "Clip-independent, 5 folds pooled (every clip tested once)"

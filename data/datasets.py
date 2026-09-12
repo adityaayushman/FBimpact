@@ -8,6 +8,7 @@ over shuffled windows.
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass
 
 import numpy as np
@@ -103,6 +104,16 @@ class WindowDataset(Dataset):
     window without falling off the end of the clip.
     """
 
+    # Prepared clips are cached because `__getitem__` is called once per window
+    # and re-normalising a whole clip for each of its ~80 windows is wasteful.
+    # The cache is bounded rather than unlimited: with 200 pooled clips it would
+    # otherwise hold every one, and `positive_fraction()` walks all of them
+    # before training starts, so the peak lands at the worst possible moment.
+    # An LRU of this size keeps the hit rate high - windows are drawn from a
+    # shuffled order, but each clip contributes many of them - while capping the
+    # footprint at something a memory-constrained machine can carry.
+    MAX_CACHED_CLIPS = 48
+
     def __init__(
         self,
         clips: list[ClipRecord],
@@ -110,14 +121,18 @@ class WindowDataset(Dataset):
         label_cfg: LabelConfig | None = None,
         augmenter: Augmenter | None = None,
         seed: int = 0,
+        max_cached_clips: int | None = None,
     ) -> None:
         self.clips = list(clips)
         self.features_cfg = features_cfg or FeatureConfig()
         self.label_cfg = label_cfg or LabelConfig()
         self.augmenter = augmenter or Augmenter(enabled=False)
         self.seed = seed
+        self.max_cached_clips = max_cached_clips or self.MAX_CACHED_CLIPS
 
-        self._cache: dict[int, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = {}
+        self._cache: "OrderedDict[int, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]" = (
+            OrderedDict()
+        )
         self.index: list[tuple[int, int]] = []
         for clip_idx, clip in enumerate(self.clips):
             starts = window_starts(
@@ -134,11 +149,16 @@ class WindowDataset(Dataset):
         return len(self.index)
 
     def _clip_arrays(self, clip_idx: int):
-        if clip_idx not in self._cache:
-            self._cache[clip_idx] = _prepare(
-                self.clips[clip_idx], self.features_cfg, self.label_cfg
-            )
-        return self._cache[clip_idx]
+        cached = self._cache.get(clip_idx)
+        if cached is not None:
+            self._cache.move_to_end(clip_idx)
+            return cached
+
+        prepared = _prepare(self.clips[clip_idx], self.features_cfg, self.label_cfg)
+        self._cache[clip_idx] = prepared
+        while len(self._cache) > self.max_cached_clips:
+            self._cache.popitem(last=False)
+        return prepared
 
     def __getitem__(self, item: int) -> dict:
         clip_idx, start = self.index[item]

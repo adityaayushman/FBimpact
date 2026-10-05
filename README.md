@@ -25,6 +25,10 @@
 
 ---
 
+<p align="center">
+  <img src="FBimpact/demo.webp" alt="FBimpact demo" width="420" />
+</p>
+
 Vision-based, privacy-preserving fall **anticipation** for elderly care: predict a fall
 *before impact* from ordinary video, and name the body joints whose instability signalled
 it — with a test that checks whether that evidence is actually faithful.

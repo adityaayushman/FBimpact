@@ -1,4 +1,29 @@
-# Pre-Impact Fall Anticipation with Grounded Skeletal Evidence
+<div align="center">
+
+# 🧓 Pre-Impact Fall Anticipation
+
+**Privacy-preserving fall anticipation for elderly care: an ST-GCN on skeletal pose predicts a fall before impact and names the joints that signalled it.**
+
+<p>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" />
+  <img src="https://img.shields.io/badge/ST--GCN-6A1B9A?style=for-the-badge&logo=pytorch&logoColor=white" />
+  <img src="https://img.shields.io/badge/TensorFlow.js-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+</p>
+
+<p>
+  <a href="https://fbimpact-api.onrender.com/docs"><img src="https://img.shields.io/badge/Live_API-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
+</p>
+
+<p>
+  <img src="https://img.shields.io/github/stars/adityaayushman/FBimpact?style=social" /> <img src="https://img.shields.io/github/last-commit/adityaayushman/FBimpact?style=flat-square" /> <img src="https://img.shields.io/github/languages/top/adityaayushman/FBimpact?style=flat-square" />
+</p>
+
+</div>
+
+---
 
 Vision-based, privacy-preserving fall **anticipation** for elderly care: predict a fall
 *before impact* from ordinary video, and name the body joints whose instability signalled

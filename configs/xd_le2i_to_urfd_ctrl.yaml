@@ -1,0 +1,19 @@
+# Realistic-data protocol: train on Le2i, test on every UR Fall clip.  Arm: xyv control.
+#
+# No test clip shares a dataset (or, for the leave-scene-out protocols, a room and
+# camera) with any training clip, so this measures transfer to a place the model
+# has never seen. It is a harder and more honest question than a random split
+# inside one dataset. Single split, so run with --folds 0.
+
+_base_: combined_xyv.yaml
+
+run:
+  name: xd_le2i_to_urfd_ctrl
+
+data:
+  split:
+    mode: holdout
+    val_fraction: 0.25
+    seed: 0
+    test:
+      source: urfd

@@ -1,0 +1,19 @@
+# Realistic-data protocol: train on UR Fall, test on every Le2i clip.  Arm: four-phase arm C.
+#
+# No test clip shares a dataset (or, for the leave-scene-out protocols, a room and
+# camera) with any training clip, so this measures transfer to a place the model
+# has never seen. It is a harder and more honest question than a random split
+# inside one dataset. Single split, so run with --folds 0.
+
+_base_: combined_phases.yaml
+
+run:
+  name: xd_urfd_to_le2i_phases
+
+data:
+  split:
+    mode: holdout
+    val_fraction: 0.25
+    seed: 0
+    test:
+      source: le2i

@@ -47,22 +47,26 @@ def score_clip(
     """
     windows: torch.Tensor = item["windows"]                    # [N, C, T, V]
     n_windows, _, window_len, _ = windows.shape
+    has_phases = getattr(model, "multitask", None) is not None
 
-    outputs = []
+    outputs, phase_outputs = [], []
     for start in range(0, n_windows, chunk_size):
         batch = windows[start : start + chunk_size].to(device).unsqueeze(-1)  # [n,C,T,V,1]
         with torch.autocast(device_type=device.type, enabled=amp and device.type == "cuda"):
-            logits = model(batch)
+            if has_phases:
+                logits, aux = model(batch, return_aux=True)
+            else:
+                logits, aux = model(batch), None
         outputs.append(torch.sigmoid(logits.float()).cpu())
+        if aux is not None and "phase_logits" in aux:
+            # [n, P, T] -> probabilities over phases -> [n, T, P]
+            phase_outputs.append(torch.softmax(aux["phase_logits"].float(), dim=1).permute(0, 2, 1).cpu())
     probs = torch.cat(outputs).numpy()                          # [N, T]
 
-    padded_len = n_windows + window_len - 1
-    stream = np.empty(padded_len, dtype=np.float32)
-    # Leading frames: no window ends on them, so use the first window's own
-    # early positions - which are themselves causal, having seen only frames 0..f.
-    stream[: window_len - 1] = probs[0, : window_len - 1]
-    # Every remaining frame takes the last position of the window ending on it.
-    stream[window_len - 1 :] = probs[:, -1]
+    stream = _align_to_frames(probs, window_len)
+    phase_stream = (
+        _align_to_frames(torch.cat(phase_outputs).numpy(), window_len) if phase_outputs else None
+    )
 
     n_padded = int(item["n_padded"])
     clip: ClipRecord = item["clip"]
@@ -71,7 +75,25 @@ def score_clip(
         scores=stream[n_padded:],
         labels=np.asarray(item["labels"])[n_padded:],
         tti=np.asarray(item["tti"])[n_padded:],
+        phases=None if phase_stream is None else phase_stream[n_padded:],
     )
+
+
+def _align_to_frames(per_window: np.ndarray, window_len: int) -> np.ndarray:
+    """Turn per-window outputs `[N, T, ...]` into one value per clip frame.
+
+    Shared by the imminence score and the phase probabilities so the two can never
+    be aligned differently: a phase stream shifted by even a frame against the
+    score it is displayed beside would look like the model disagreeing with itself.
+    """
+    n_windows = per_window.shape[0]
+    stream = np.empty((n_windows + window_len - 1, *per_window.shape[2:]), dtype=np.float32)
+    # Leading frames: no window ends on them, so use the first window's own
+    # early positions - which are themselves causal, having seen only frames 0..f.
+    stream[: window_len - 1] = per_window[0, : window_len - 1]
+    # Every remaining frame takes the last position of the window ending on it.
+    stream[window_len - 1 :] = per_window[:, -1]
+    return stream
 
 
 @torch.no_grad()

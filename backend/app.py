@@ -28,19 +28,18 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from . import inference
+from . import inference, model_card
 from .validation import ApiError, validate
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)-7s | %(message)s")
 logger = logging.getLogger("api")
 
 DISCLAIMER = (
-    "Research prototype, NOT a medical device. The bundled checkpoint is trained on UR Fall, "
-    "a public dataset of falls ACTED by young volunteers - not recorded elderly falls. Across "
-    "5-fold cross-validation this variant warned on 24 of 30 falls but produced 19 false alarms "
-    "in 5.8 minutes of normal activity; that is far above what any care setting would tolerate, "
-    "and too little negative data to put a reliable per-hour figure on. Outputs carry no "
-    "clinical meaning."
+    "Research prototype, NOT a medical device. The models are trained on public datasets of "
+    "falls ACTED by young volunteers - not recorded elderly falls. False alarms on normal "
+    "activity are a central weakness and far above what any care setting would tolerate; the "
+    "measured counts and the protocol behind them are published on the project site and are "
+    "deliberately not repeated here. Outputs carry no clinical meaning."
 )
 
 # 600 frames x 17 joints x 3 numbers is a few hundred kB of JSON, so 2 MB is
@@ -224,6 +223,12 @@ def ready() -> JSONResponse:
     """
     loaded = inference.load_model.cache_info().currsize > 0
     return JSONResponse({"ready": loaded}, status_code=200 if loaded else 503)
+
+
+@app.get("/model-card")
+def model_card_endpoint() -> dict:
+    """What the loaded checkpoint is, built from the checkpoint itself."""
+    return model_card.build_card(_load().info, inference.SCHEMA_VERSION, DISCLAIMER)
 
 
 @app.get("/skeleton")

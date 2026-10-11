@@ -162,3 +162,13 @@ def test_the_slot_is_released_after_an_error(client):
     client.post("/analyze", json={"keypoints": []})
     assert app_module._analysis_slot.acquire(blocking=False)
     app_module._analysis_slot.release()
+
+
+def test_model_card_is_built_from_the_loaded_checkpoint(client):
+    card = client.get("/model-card").json()
+    info = client.get("/health").json()["model"]
+    assert card["model"]["trained_on"] == info["trained_on"]
+    assert card["model"]["input_channels"] == info["in_channels"]
+    assert card["generation"] in ("current", "earlier")
+    assert card["schema_version"] == inference.SCHEMA_VERSION
+    assert card["disclaimer"] and card["limits"]

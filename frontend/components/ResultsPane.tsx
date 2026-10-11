@@ -102,11 +102,13 @@ export default function ResultsPane() {
       <span className="eyebrow">Results</span>
       <h2 className="pane-title">What the experiments found</h2>
       <p className="pane-lede">
-        The headline is negative: <b>the novel component of this project did not work.</b> On
-        real falls the pre-impact objective cost recall and lead time rather than trading one
-        for the other, and the reproduced baseline beat it. That is stated first because a
-        results page that leads with its successes and files its central failure under
-        &ldquo;limitations&rdquo; is not reporting, it is marketing.
+        Two results, deliberately stated at different strengths. The pre-impact time-weighted
+        loss <b>did not help</b> on UR Fall, and that held in every one of three seeds. A later
+        combined benchmark of 129 falls shows a promising false-alarm reduction from richer
+        features and four-phase supervision, but from <b>one seed only</b>, so it is a hypothesis
+        being tested rather than a result. Negative findings are listed first on purpose: a page
+        that leads with its successes and files its failures under &ldquo;limitations&rdquo; is
+        not reporting, it is marketing.
       </p>
 
       <div className="stack" style={{ marginBottom: 30 }}>
@@ -176,6 +178,15 @@ export default function ResultsPane() {
               }}>
                 {benchmark.kind === "real" ? "real video" : "synthetic fixture"}
               </span>
+              {benchmark.seeds.length === 1 && (
+                // A single seed cannot separate a method effect from initialisation
+                // noise - on this project it already reversed a conclusion once -
+                // so the tag sits beside the title rather than in a footnote.
+                <span className="chip" style={{ borderColor: "var(--watch)", color: "var(--watch)" }}
+                      title="One training seed: the seed-to-seed spread is not measured here">
+                  single seed · preliminary
+                </span>
+              )}
               {benchmark.dataset && (
                 <span className="readout">
                   {benchmark.dataset.clips} clips · {benchmark.dataset.falls} falls ·{" "}

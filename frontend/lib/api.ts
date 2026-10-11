@@ -212,7 +212,34 @@ async function toApiError(response: Response): Promise<ApiError> {
   }
 }
 
+/** `GET /model-card`: absent on backends older than schema v2, so callers must tolerate a 404. */
+export interface ModelCard {
+  generation: "current" | "earlier";
+  generation_reasons: string[];
+  model: { trained_on: string | null; feature_set: string | null; input_channels: number | null; phase_head: boolean };
+  intended_use: string;
+  out_of_scope: string[];
+  limits: string[];
+  evaluation: string;
+}
+
+/**
+ * Whether a checkpoint is the project's current configuration. Mirrors the
+ * backend's rule so the label still appears when the deployed backend predates
+ * `/model-card`; a missing field counts as "earlier", never as "current".
+ */
+export function checkpointGeneration(model: ModelInfo): { current: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  if (model.feature_set !== "full") {
+    reasons.push(`reads ${model.in_channels} input channels (${model.feature_set ?? "(x, y, vx, vy)"} features), not the full set`);
+  }
+  if (!model.has_phase_head) reasons.push("has no four-phase head (binary imminence only)");
+  return { current: reasons.length === 0, reasons };
+}
+
 export const api = {
+  modelCard: () => request<ModelCard>("/model-card"),
+
   /**
    * Health check that tolerates a cold start.
    *

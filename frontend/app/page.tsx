@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, type Health } from "@/lib/api";
 import ApiPane from "@/components/ApiPane";
+import DataPane from "@/components/DataPane";
 import DemoPane from "@/components/DemoPane";
 import Hero from "@/components/Hero";
 import MethodPane from "@/components/MethodPane";
@@ -34,6 +35,7 @@ export default function Page() {
         <Hero />
         <DemoPane health={health} bootError={bootError} waking={!health && !bootError} />
         <ResultsPane />
+        <DataPane />
         <ResearchPane />
         <PipelinePane />
         <MethodPane />

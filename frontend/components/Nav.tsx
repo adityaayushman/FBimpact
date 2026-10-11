@@ -6,6 +6,7 @@ const SECTIONS = [
   { id: "overview", label: "Overview" },
   { id: "demo", label: "Live demo" },
   { id: "results", label: "Results" },
+  { id: "data", label: "Data" },
   { id: "research", label: "Research" },
   { id: "pipeline", label: "Pipeline" },
   { id: "method", label: "Method" },

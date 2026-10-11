@@ -1,0 +1,90 @@
+{
+  "generated_utc": "2026-10-11T17:44:10+00:00",
+  "datasets": [
+    {
+      "id": "urfd",
+      "name": "UR Fall Detection",
+      "citation": "Kwolek & Kepski, UR Fall Detection Dataset",
+      "clips": 70,
+      "falls": 30,
+      "adls": 40,
+      "minutes": 6.6,
+      "fps": [
+        30.0
+      ],
+      "negative_minutes": 5.8,
+      "pose_coverage": 0.7981,
+      "annotation": "First frame annotated 'lying' (dataset's own per-frame labels)",
+      "onset_note": "Onset is a fixed 30 frames before impact on all 30 falls, so the falling phase adds no information beyond the impact frame on this dataset.",
+      "pre_impact_frames": {
+        "min": 33,
+        "median": 56,
+        "max": 177
+      },
+      "onset_to_impact_frames": {
+        "min": 30,
+        "median": 30,
+        "max": 30
+      },
+      "phase_frames": {
+        "normal": 9664,
+        "imminent": 469,
+        "falling": 930,
+        "grounded": 873
+      },
+      "w_pre_frames": 17
+    },
+    {
+      "id": "le2i",
+      "name": "Le2i / ImViA",
+      "citation": "Charfi et al., Le2i fall detection dataset (Home and Coffee room scenes)",
+      "clips": 130,
+      "falls": 99,
+      "adls": 31,
+      "minutes": 28.6,
+      "fps": [
+        24.0,
+        25.0
+      ],
+      "negative_minutes": 20.6,
+      "pose_coverage": 0.8534,
+      "annotation": "Annotated fall END frame (dataset's own annotation)",
+      "onset_note": "Onset-to-impact varies from 1 to 45 frames and is genuine annotation.",
+      "pre_impact_frames": {
+        "min": 1,
+        "median": 161,
+        "max": 1115
+      },
+      "onset_to_impact_frames": {
+        "min": 1,
+        "median": 23,
+        "max": 45
+      },
+      "phase_frames": {
+        "normal": 28178,
+        "imminent": 1632,
+        "falling": 2289,
+        "grounded": 9967
+      },
+      "w_pre_frames": 17
+    }
+  ],
+  "combined": {
+    "clips": 200,
+    "falls": 129,
+    "adls": 71,
+    "minutes": 35.2,
+    "negative_minutes": 26.4,
+    "phase_frames": {
+      "normal": 37842,
+      "imminent": 2101,
+      "falling": 3219,
+      "grounded": 10840
+    }
+  },
+  "limits": [
+    "Falls are ACTED by volunteers - not recorded elderly falls.",
+    "Neither dataset publishes actor identity, so splits are clip-independent, not subject-independent, and may overstate performance on unseen people.",
+    "Pose coverage drops after impact: the estimator struggles with a person on the floor."
+  ]
+}

@@ -109,6 +109,43 @@ def test_bootstrap_reuses_one_clip_resample_for_every_seed():
     assert out["d_fa_hi"] >= -1e-9
 
 
+def mrow(arm, seed, level, fa):
+    return {"arm": arm, "seed": seed, "recall_level": level, "fa_per_hour": fa, "status": "ok"}
+
+
+def test_condition_3_met_when_treatment_is_lower_at_every_common_level():
+    rows = [mrow(a, s, lv, fa) for s in (1, 2) for lv in (0.6, 0.65)
+            for a, fa in (("T", 50 + 5 * s), ("R", 80 + 5 * s))]
+    assert aa.matched_recall_condition(rows, "T", "R", [1, 2]) == "met"
+
+
+def test_condition_3_not_met_if_the_treatment_loses_at_any_common_level():
+    rows = []
+    for s in (1, 2):
+        rows += [mrow("T", s, 0.6, 40), mrow("R", s, 0.6, 80),     # T better
+                 mrow("T", s, 0.65, 120), mrow("R", s, 0.65, 100)]  # T worse
+    assert aa.matched_recall_condition(rows, "T", "R", [1, 2]) == "not met"
+
+
+def test_condition_3_skips_a_level_one_arm_never_reaches_rather_than_passing_it():
+    """T reaches only 0.60; R reaches both. Only 0.60 is compared."""
+    rows = [mrow("T", 1, 0.6, 30), mrow("R", 1, 0.6, 60), mrow("R", 1, 0.65, 90),
+            {"arm": "T", "seed": 1, "recall_level": 0.65, "fa_per_hour": "", "status": "not_reached"}]
+    assert aa.matched_recall_condition(rows, "T", "R", [1]) == "met"
+
+
+def test_condition_3_is_not_computed_when_no_level_is_common_or_no_data():
+    assert aa.matched_recall_condition([], "T", "R", [1]) == "not computed"
+    rows = [mrow("T", 1, 0.6, 30)]
+    assert aa.matched_recall_condition(rows, "T", "R", [1]) == "not computed"
+
+
+def test_a_level_counts_only_if_every_confirmatory_seed_reached_it():
+    """Averaging over just the seeds that reached a level would bias the mean."""
+    rows = [mrow("T", 1, 0.6, 30), mrow("R", 1, 0.6, 60), mrow("R", 2, 0.6, 60)]  # T missing seed 2
+    assert aa.matched_recall_condition(rows, "T", "R", [1, 2]) == "not computed"
+
+
 def test_universe_is_only_clips_present_in_every_cell():
     runs = make_runs(10, lambda s, i: 0, lambda s, i: 0)
     del runs[("R", 3)]["c4"]

@@ -18,13 +18,7 @@
 
 import { useMemo } from "react";
 import type { Analysis } from "@/lib/api";
-
-const PHASES = [
-  { name: "normal", colour: "#56B4E9", blurb: "ordinary activity" },
-  { name: "imminent", colour: "#E69F00", blurb: "balance about to be lost" },
-  { name: "falling", colour: "#D55E00", blurb: "on the way to the floor" },
-  { name: "grounded", colour: "#CC79A7", blurb: "already down" },
-] as const;
+import { PHASES } from "@/lib/phases";
 
 const W = 900;
 const H = 150;

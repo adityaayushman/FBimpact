@@ -55,6 +55,38 @@ CONTRASTS = [
 ]
 
 
+# ----------------------------------------------------------- matched recall (3)
+def matched_recall_condition(rows: list[dict], treat: str, ref: str, seeds: list[int]) -> str:
+    """Decision-rule condition 3: fewer false alarms at the same recall.
+
+    Returns "met", "not met" or "not computed". The treatment must have a lower
+    mean FA/hour than the reference at EVERY recall level that both reach. Levels
+    a curve never reaches are skipped, not extrapolated; if no level is common to
+    both, the condition cannot be evaluated and is reported as such rather than
+    passed by default.
+    """
+    if not rows:
+        return "not computed"
+
+    def mean_at(arm: str, level: float):
+        vals = [float(r["fa_per_hour"]) for r in rows
+                if r["arm"] == arm and int(r["seed"]) in seeds
+                and abs(float(r["recall_level"]) - level) < 1e-9 and r["fa_per_hour"] != ""]
+        # A level counts for an arm only if EVERY confirmatory seed reached it;
+        # averaging over the seeds that happened to reach it would bias the mean.
+        return float(np.mean(vals)) if len(vals) == len(seeds) else None
+
+    levels = sorted({float(r["recall_level"]) for r in rows})
+    compared = []
+    for level in levels:
+        t, r = mean_at(treat, level), mean_at(ref, level)
+        if t is not None and r is not None:
+            compared.append(t < r)
+    if not compared:
+        return "not computed"
+    return "met" if all(compared) else "not met"
+
+
 # --------------------------------------------------------------------- loading
 def read_csv(path: Path) -> list[dict]:
     if not path.exists():
@@ -275,8 +307,11 @@ def main(argv: list[str] | None = None) -> int:
     write_csv(out / "arms_summary.csv", [{k: (round(v, 4) if isinstance(v, float) else v) for k, v in s.items()} for s in summary])
 
     # 3. contrasts -------------------------------------------------------------
+    matched_rows = read_csv(out / "matched_recall.csv")
     contrast_rows = []
     print("\ncontrasts (confirmatory seeds only; a negative d_FA means fewer false alarms)")
+    if not matched_rows:
+        print("  (no matched_recall.csv yet: condition 3 will read 'not computed')")
     for name, treat, ref, meaning in CONTRASTS:
         seeds = [s for s in args.confirmatory if (treat, s) in runs and (ref, s) in runs]
         if not seeds:
@@ -289,15 +324,23 @@ def main(argv: list[str] | None = None) -> int:
         cond1 = stats["d_fa_hi"] < 0
         cond2 = fewer >= (3 if len(seeds) == 4 else max(1, int(np.ceil(0.75 * len(seeds)))))
         rec_ok = stats["d_recall_lo"] > 0
+        cond3 = matched_recall_condition(matched_rows, treat, ref, seeds)
+        if not (cond1 and cond2):
+            verdict = "not shown"
+        elif cond3 == "met":
+            verdict = "reduces false alarms (all three conditions met)"
+        elif cond3 == "not met":
+            verdict = "fewer false alarms at the default threshold; not shown at matched recall"
+        else:
+            verdict = "conditions 1-2 met; condition 3 (matched recall) not computed"
         contrast_rows.append({
             "contrast": name, "means": meaning, "seeds": len(seeds), "clips": len(universe),
             **{k: round(v, 4) for k, v in stats.items()},
             "seeds_fewer_fa": f"{fewer}/{len(seeds)}",
             "cond1_ci_below_zero": cond1, "cond2_seed_majority": cond2,
-            "cond3_matched_recall": "not computed",
+            "cond3_matched_recall": cond3,
             "recall_ci_excludes_zero": rec_ok,
-            "fa_verdict": ("conditions 1-2 met; condition 3 (matched recall) pending" if cond1 and cond2
-                           else "not shown"),
+            "fa_verdict": verdict,
         })
         print(f"  {name:<4} dFA {stats['d_fa']:+6.1f} [{stats['d_fa_lo']:+6.1f}, {stats['d_fa_hi']:+6.1f}]  "
               f"dRecall {stats['d_recall']:+.3f} [{stats['d_recall_lo']:+.3f}, {stats['d_recall_hi']:+.3f}]  "

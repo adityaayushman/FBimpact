@@ -3,6 +3,7 @@
 import { useState } from "react";
 import results from "@/lib/results.json";
 import { FINDINGS } from "@/lib/content";
+import ConfirmationPane from "./ConfirmationPane";
 import OperatingCurve from "./OperatingCurve";
 
 /**
@@ -239,6 +240,10 @@ export default function ResultsPane() {
                 protocol.
               </p>
             </div>
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <ConfirmationPane />
           </div>
 
           <div style={{ marginTop: 16 }}>

@@ -1,0 +1,52 @@
+Pre-registration for the combined-benchmark confirmation grid
+==============================================================
+Written 2026-10-11, BEFORE any confirmatory result was read. Do not edit after
+the first confirmatory run completes; add a dated addendum below instead.
+
+Question
+  Does four-phase supervision (and, separately, the 14-channel features) reduce
+  false alarms on the combined UR Fall + Le2i benchmark without costing recall
+  or lead time? Seed 0 produced this hypothesis (135 -> 100 -> 67 false alarms)
+  and therefore cannot also confirm it.
+
+Arms (all: combined benchmark, 5 folds, batch 24, 30 epochs, lambda=0)
+  A  combined_xyv       (x, y, vx, vy)                         control
+  B  combined           + 14-channel features
+  C  combined_phases    B + four-phase head + consistency loss
+  D  combined_nocons    C with consistency_weight = 0          (phase head + loss only)
+  Contrasts: B-A features | C-B phase supervision | D-B head+loss | C-D consistency
+  Arm F (shuffled phase labels) is OPTIONAL and NOT run in this grid; it needs a
+  new labels option and is deferred.
+
+Seeds
+  Confirmatory: 1, 2, 3, 4 for every arm.  Seed 0 of A, B, C already exists and
+  is DESCRIPTIVE ONLY. D also runs at seed 0 so all arms have a seed-0 row; that
+  row is never used in a verdict.
+  Why four and not seven: measured fold time is ~5 min (A), ~11 min (B), ~9-13
+  min (C, D). The core grid is ~85 fold-runs, about 13 hours; seeds 5-7 would add
+  ~9 hours more than the machine can be assumed to stay up for. This choice
+  depends only on cost and is not revisited after results come in.
+
+Fixed measurement facts (from P1)
+  - Folds depend on data.split.seed (0), not run.seed, so every seed sees the same
+    folds and per-seed contrasts are paired on identical test clips.
+  - run directories already contain outcomes_test.csv (per-clip warned, lead time,
+    false alarms), so no re-scoring pass is required.
+  - outcomes_test.csv has NO per-clip negative duration; analyze_arms.py derives
+    it from the skeleton caches and the label config (frames labelled 0 / fps).
+  - Batch size stays 24: 15 completed runs at batch 24 hit no MemoryError and
+    commit headroom measured 4 GB at the start of P1. Arms are never compared
+    across batch sizes.
+
+Decision rules (applied identically to every contrast, confirmatory seeds only)
+  "X reduces false alarms" requires ALL of:
+    1. bootstrap CI of the seed-averaged paired FA-count difference lies
+       entirely below zero (clips resampled once, same indices for every seed);
+    2. the X arm has fewer false alarms in at least 3 of 4 seeds;
+    3. at matched recall (0.60 and 0.65, interpolated on the pooled out-of-fold
+       curve) the X arm has lower mean FA/hour at every level both curves reach.
+  If 1 and 2 hold but 3 fails: "fewer false alarms at the default threshold; not
+  shown at matched recall".
+  "X improves recall" uses the same test without condition 3. Failure means "not
+  shown", not "no effect".
+  Null and negative results are given the same prominence as positive ones.

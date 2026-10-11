@@ -1,0 +1,19 @@
+# Arm D: the phase head and phase loss WITHOUT the consistency coupling.
+#
+# Identical to combined_phases.yaml except consistency_weight is 0. Two contrasts
+# need it:
+#   D - B   effect of the phase head + phase loss on their own
+#   C - D   what the consistency term adds on top
+#
+# Consistency cannot be isolated any other way. losses/multitask.py returns before
+# the consistency term whenever phase_weight <= 0, so "consistency without phase
+# targets" is undefined and a tiny-phase_weight arm would only measure a weakly
+# supervised version of the same thing.
+
+_base_: combined_phases.yaml
+
+run:
+  name: combined_nocons
+
+loss:
+  consistency_weight: 0.0

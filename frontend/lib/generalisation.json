@@ -1,0 +1,179 @@
+{
+ "generated_utc": "2026-10-11T18:30:48+00:00",
+ "plan": "results/analysis/PLAN_XDOMAIN.txt",
+ "status": "pending",
+ "runs_done": 0,
+ "runs_expected": 24,
+ "limits": [
+  "Both datasets are acted falls by young volunteers.",
+  "Le2i has no actor labels: holding out a scene removes the room and camera, not necessarily the people.",
+  "Held-out test sets contain only 4-9 minutes of normal activity, so one false alarm is roughly 7-15 per hour. Recall is the better-powered quantity.",
+  "These runs describe generalisation; they cannot confirm the four-phase hypothesis, which PLAN.txt alone decides."
+ ],
+ "protocols": [
+  {
+   "id": "urfd_to_le2i",
+   "title": "UR Fall \u2192 Le2i",
+   "train": "Train on UR Fall only",
+   "test": "Every Le2i clip",
+   "sizes": {
+    "train": {
+     "clips": 52,
+     "falls": 22,
+     "normal_minutes": 3.7
+    },
+    "val": {
+     "clips": 18,
+     "falls": 8,
+     "normal_minutes": 1.2
+    },
+    "test": {
+     "clips": 130,
+     "falls": 99,
+     "normal_minutes": 8.6
+    }
+   },
+   "arms": {
+    "ctrl": {
+     "label": "Control \u00b7 (x, y, vx, vy)",
+     "runs": [],
+     "in_domain": {
+      "runs": 5,
+      "recall": 0.5659,
+      "seeds": [
+       1
+      ]
+     }
+    },
+    "phases": {
+     "label": "Arm C \u00b7 full features + four-phase head",
+     "runs": [],
+     "in_domain": null
+    }
+   }
+  },
+  {
+   "id": "le2i_to_urfd",
+   "title": "Le2i \u2192 UR Fall",
+   "train": "Train on Le2i only",
+   "test": "Every UR Fall clip",
+   "sizes": {
+    "train": {
+     "clips": 98,
+     "falls": 75,
+     "normal_minutes": 7.1
+    },
+    "val": {
+     "clips": 32,
+     "falls": 24,
+     "normal_minutes": 1.5
+    },
+    "test": {
+     "clips": 70,
+     "falls": 30,
+     "normal_minutes": 5.0
+    }
+   },
+   "arms": {
+    "ctrl": {
+     "label": "Control \u00b7 (x, y, vx, vy)",
+     "runs": [],
+     "in_domain": {
+      "runs": 5,
+      "recall": 0.5659,
+      "seeds": [
+       1
+      ]
+     }
+    },
+    "phases": {
+     "label": "Arm C \u00b7 full features + four-phase head",
+     "runs": [],
+     "in_domain": null
+    }
+   }
+  },
+  {
+   "id": "leave_coffee_room_out",
+   "title": "Leave Coffee room out",
+   "train": "UR Fall + Le2i Home",
+   "test": "Le2i Coffee room",
+   "sizes": {
+    "train": {
+     "clips": 98,
+     "falls": 52,
+     "normal_minutes": 6.5
+    },
+    "val": {
+     "clips": 32,
+     "falls": 15,
+     "normal_minutes": 2.4
+    },
+    "test": {
+     "clips": 70,
+     "falls": 62,
+     "normal_minutes": 4.7
+    }
+   },
+   "arms": {
+    "ctrl": {
+     "label": "Control \u00b7 (x, y, vx, vy)",
+     "runs": [],
+     "in_domain": {
+      "runs": 5,
+      "recall": 0.5659,
+      "seeds": [
+       1
+      ]
+     }
+    },
+    "phases": {
+     "label": "Arm C \u00b7 full features + four-phase head",
+     "runs": [],
+     "in_domain": null
+    }
+   }
+  },
+  {
+   "id": "leave_home_out",
+   "title": "Leave Home out",
+   "train": "UR Fall + Le2i Coffee room",
+   "test": "Le2i Home",
+   "sizes": {
+    "train": {
+     "clips": 105,
+     "falls": 68,
+     "normal_minutes": 6.0
+    },
+    "val": {
+     "clips": 35,
+     "falls": 24,
+     "normal_minutes": 3.6
+    },
+    "test": {
+     "clips": 60,
+     "falls": 37,
+     "normal_minutes": 4.0
+    }
+   },
+   "arms": {
+    "ctrl": {
+     "label": "Control \u00b7 (x, y, vx, vy)",
+     "runs": [],
+     "in_domain": {
+      "runs": 5,
+      "recall": 0.5659,
+      "seeds": [
+       1
+      ]
+     }
+    },
+    "phases": {
+     "label": "Arm C \u00b7 full features + four-phase head",
+     "runs": [],
+     "in_domain": null
+    }
+   }
+  }
+ ]
+}

@@ -6,6 +6,7 @@ import { useRoute } from "@/lib/route";
 import DataPane from "@/components/DataPane";
 import DemoPane from "@/components/DemoPane";
 import Experiments from "@/components/Experiments";
+import Generalisation from "@/components/Generalisation";
 import MethodPane from "@/components/MethodPane";
 import Overview from "@/components/Overview";
 import PipelinePane from "@/components/PipelinePane";
@@ -36,6 +37,7 @@ export default function Page() {
         {view === "analyzer" && <DemoPane health={health} bootError={bootError} waking={!health && !bootError} />}
         {view === "results" && <ResultsPane />}
         {view === "experiments" && <Experiments />}
+        {view === "generalisation" && <Generalisation />}
         {view === "data" && <DataPane />}
         {view === "method" && <><PipelinePane /><MethodPane /></>}
         {view === "research" && <ResearchPane />}

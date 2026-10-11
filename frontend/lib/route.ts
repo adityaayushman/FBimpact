@@ -7,10 +7,11 @@ export const VIEWS = [
   { id: "analyzer", label: "Live analyzer", key: "2", group: "Project", hint: "Run the model on a skeleton sequence or your own video" },
   { id: "results", label: "Results", key: "3", group: "Evidence", hint: "Aggregated benchmarks, operating curves, confirmation test" },
   { id: "experiments", label: "Experiments", key: "4", group: "Evidence", hint: "Every individual run, with seed-to-seed spread" },
-  { id: "data", label: "Data", key: "5", group: "Evidence", hint: "The datasets, their labelling and limits" },
-  { id: "method", label: "Method", key: "6", group: "Reference", hint: "Pipeline, model and evaluation protocol" },
-  { id: "research", label: "Research", key: "7", group: "Reference", hint: "Question, claims and what was not shown" },
-  { id: "status", label: "System status", key: "8", group: "Reference", hint: "API health, latency and deployed checkpoint" },
+  { id: "generalisation", label: "Generalisation", key: "5", group: "Evidence", hint: "Does the result hold in a place the model has never seen?" },
+  { id: "data", label: "Data", key: "6", group: "Evidence", hint: "The datasets, their labelling and limits" },
+  { id: "method", label: "Method", key: "7", group: "Reference", hint: "Pipeline, model and evaluation protocol" },
+  { id: "research", label: "Research", key: "8", group: "Reference", hint: "Question, claims and what was not shown" },
+  { id: "status", label: "System status", key: "9", group: "Reference", hint: "API health, latency and deployed checkpoint" },
 ] as const;
 
 export type ViewId = (typeof VIEWS)[number]["id"];
@@ -45,7 +46,7 @@ export function useRoute(): [ViewId, (id: ViewId) => void] {
     window.location.hash = `/${id}`;
   }, []);
 
-  // Keyboard: 1-8 jump between views, unless the user is typing somewhere.
+  // Keyboard: 1-9 jump between views, unless the user is typing somewhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;

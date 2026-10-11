@@ -26,19 +26,21 @@ export const ABSTRACT =
   "removing the main barrier to in-home cameras.";
 
 export const HERO_STATS = [
-  { value: "0.53 s", label: "mean lead time on real falls (UR Fall, 5-fold)" },
-  { value: "0.78", label: "recall across all 30 real falls tested" },
+  { value: "0.43 s", label: "mean lead time before impact, combined benchmark (1 seed)" },
+  { value: "129", label: "real falls tested, each exactly once (UR Fall + Le2i)" },
   { value: "0 px", label: "pixels leaving the device: skeletons only" },
-  { value: "393 k", label: "parameters — real-time on modest hardware" },
+  { value: "≈ 0.4 M", label: "parameters (393–396 k) — real-time on modest hardware" },
 ];
 
 /**
- * What the experiments actually found.
+ * What the experiments actually found, at the strength they were found.
  *
- * The headline is negative: the project's own novel component did not help.
- * That is stated first and plainly rather than buried under the ablations that
- * did work, because a results page that leads with its successes and files its
- * central failure under "limitations" is not reporting, it is marketing.
+ * Negative results come first and keep their prominence: a results page that
+ * leads with its successes and files its failures under "limitations" is not
+ * reporting, it is marketing. Equally, a single-seed observation is not allowed
+ * to read as a finding. The combined-benchmark entry says "one seed" in its
+ * title, because the earlier history of this project includes a single-seed
+ * conclusion that three seeds reversed.
  */
 export const FINDINGS = [
   {
@@ -52,6 +54,21 @@ export const FINDINGS = [
       "3 of 3 seeds. Lead time did not compensate: 0.491 s against 0.489 s. The answer to RQ3 is " +
       "that the objective costs recall and buys nothing, and that result is stable across seeds " +
       "rather than an artefact of one run.",
+  },
+  {
+    verdict: "caution" as const,
+    rq: "Preliminary",
+    title: "One seed: richer features, then phase supervision, each cut false alarms",
+    body:
+      "On the combined UR Fall + Le2i benchmark (129 falls, every fall tested exactly once), three " +
+      "arms that each differ from the previous by one change gave, in a single seed: control " +
+      "(x, y, vx, vy) 135 false alarms at recall 0.674; plus 14-channel features 100 at 0.682; plus " +
+      "four-phase supervision 67 at 0.705, with lead time held near 0.43 s. The features step " +
+      "accounts for 135 → 100 and the phase step for 100 → 67; the full 135 → 67 belongs to the " +
+      "package, not to phases alone. Recall moved by 1 to 4 falls of 129, which is inside the " +
+      "noise. Sixty-seven alarms over about 20 minutes of normal activity is still roughly 200 per " +
+      "hour. This seed generated the hypothesis, so it cannot also confirm it — replication on " +
+      "fresh seeds is in progress and nothing here should be read as 'improves' or 'more accurate'.",
   },
   {
     verdict: "caution" as const,
@@ -78,7 +95,7 @@ export const FINDINGS = [
   {
     verdict: "negative" as const,
     rq: "RQ3",
-    title: "The baseline dominates at every threshold, not just the chosen one",
+    title: "On UR Fall, the baseline dominates at every threshold, not just the chosen one",
     body:
       "Sweeping the full operating-point curve — all five folds pooled, each model scoring only " +
       "its own held-out clips — puts the baseline above both other variants across the entire " +
@@ -112,12 +129,15 @@ export const FINDINGS = [
   {
     verdict: "caution" as const,
     rq: "Power",
-    title: "Thirty falls is too few to be confident",
+    title: "Thirty falls was too few; 129 is better but splits are still not subject-independent",
     body:
-      "Per-fold recall ranges from 0.12 to 1.00 for the same variant, because each fold tests " +
-      "about six falls. The fold-to-fold spread is larger than every difference between " +
-      "variants, so these numbers rank methods weakly at best. UP-Fall, with 17 subjects, is " +
-      "the benchmark that would settle it.",
+      "On UR Fall alone, per-fold recall ranges from 0.12 to 1.00 for the same variant, because " +
+      "each fold tests about six falls, so those numbers rank methods weakly at best. The combined " +
+      "benchmark raises that to 129 falls, which narrows but does not remove the problem: the " +
+      "binomial standard error on recall at 129 falls is about 0.04, so a single arm cannot show a " +
+      "difference smaller than roughly 0.08. Neither dataset publishes actor identity, so splits " +
+      "are clip-independent and may overstate performance on people the model has never seen. " +
+      "UP-Fall, with 17 subjects, would address that and has no measured result here.",
   },
 ];
 

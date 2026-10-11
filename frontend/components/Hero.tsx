@@ -63,14 +63,17 @@ export default function Hero() {
 
           <p className="hero-lede">{ABSTRACT}</p>
 
-          {/* The result is negative and the landing view says so. A visitor
-              should not have to scroll to the tables to learn that the novel
-              component did not beat the baseline it was built to beat. */}
+          {/* The landing view states what was measured, at the strength it was
+              measured. The pre-impact loss finding is replicated (3 seeds); the
+              combined-benchmark result is a single seed and is labelled so. */}
           <p className="notice warn" style={{ marginBottom: 22, fontSize: 13.5 }}>
-            <b style={{ color: "var(--text)" }}>Result: the novel component did not work.</b>{" "}
-            On real falls, across three seeds, switching the pre-impact objective off raised
-            recall from 0.633 to 0.767 and cost no lead time — it won in 3 of 3 seeds. The
-            ablations show temporal modelling and velocity features are doing the anticipation.{" "}
+            <b style={{ color: "var(--text)" }}>Two results, at different strengths.</b>{" "}
+            On UR Fall, across three seeds, the pre-impact time-weighted loss{" "}
+            <b>did not help</b>: recall 0.633 against 0.767 with it switched off, equal lead time,
+            in 3 of 3 seeds. On the larger combined benchmark (129 falls), a{" "}
+            <b>single-seed</b> run saw false alarms fall from 135 to 100 with richer features and
+            to 67 with four-phase supervision on top. That is a hypothesis awaiting replication, not
+            a finding.{" "}
             <a href="#results" style={{ color: "var(--accent)" }}>See the measured tables →</a>
           </p>
 

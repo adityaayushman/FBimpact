@@ -43,3 +43,6 @@ next-env.d.ts
 # Pose-estimator weights: downloaded on demand, never committed.
 *.pt
 !backend/model/best.pt
+
+# Tournament run records (regenerable, large, not source)
+.colosseum/

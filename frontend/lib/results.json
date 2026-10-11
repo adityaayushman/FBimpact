@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-09-04T21:03:11+00:00",
+  "generated_utc": "2026-10-11T11:05:44+00:00",
   "benchmarks": [
     {
       "id": "combined",
@@ -71,6 +71,116 @@
           "num_warned": 87.0,
           "negative_hours": 0.4293,
           "recall_pooled": 0.6744
+        },
+        {
+          "variant": "combined",
+          "label": "+ richer features (14 channels)",
+          "role": "ours",
+          "runs": 5,
+          "recall": {
+            "mean": 0.67518,
+            "std": 0.08292
+          },
+          "mean_lead_time": {
+            "mean": 0.40099,
+            "std": 0.03934
+          },
+          "median_lead_time": {
+            "mean": 0.43316,
+            "std": 0.06666
+          },
+          "false_alarms_per_hour": {
+            "mean": 235.45784,
+            "std": 53.54975
+          },
+          "specificity": {
+            "mean": 0.70771,
+            "std": 0.09003
+          },
+          "frame_auc": {
+            "mean": 0.98021,
+            "std": 0.01251
+          },
+          "frame_f1": {
+            "mean": 0.71895,
+            "std": 0.0415
+          },
+          "faith_deletion_gap": {
+            "mean": 0.08274,
+            "std": 0.05515
+          },
+          "faith_insertion_gap": {
+            "mean": 0.11767,
+            "std": 0.04275
+          },
+          "faith_deletion_auc": {
+            "mean": 0.35982,
+            "std": 0.14847
+          },
+          "faith_insertion_auc": {
+            "mean": 0.57191,
+            "std": 0.13693
+          },
+          "num_false_alarms": 100.0,
+          "num_falls": 129.0,
+          "num_warned": 88.0,
+          "negative_hours": 0.4293,
+          "recall_pooled": 0.6822
+        },
+        {
+          "variant": "combined_phases",
+          "label": "+ four-phase supervision",
+          "role": "ours",
+          "runs": 5,
+          "recall": {
+            "mean": 0.70461,
+            "std": 0.03864
+          },
+          "mean_lead_time": {
+            "mean": 0.42922,
+            "std": 0.05146
+          },
+          "median_lead_time": {
+            "mean": 0.46066,
+            "std": 0.07194
+          },
+          "false_alarms_per_hour": {
+            "mean": 162.06298,
+            "std": 63.24237
+          },
+          "specificity": {
+            "mean": 0.7768,
+            "std": 0.11874
+          },
+          "frame_auc": {
+            "mean": 0.98553,
+            "std": 0.00815
+          },
+          "frame_f1": {
+            "mean": 0.76068,
+            "std": 0.03801
+          },
+          "faith_deletion_gap": {
+            "mean": 0.12564,
+            "std": 0.06855
+          },
+          "faith_insertion_gap": {
+            "mean": 0.15854,
+            "std": 0.06641
+          },
+          "faith_deletion_auc": {
+            "mean": 0.18165,
+            "std": 0.0157
+          },
+          "faith_insertion_auc": {
+            "mean": 0.46448,
+            "std": 0.11225
+          },
+          "num_false_alarms": 67.0,
+          "num_falls": 129.0,
+          "num_warned": 91.0,
+          "negative_hours": 0.4293,
+          "recall_pooled": 0.7054
         }
       ],
       "split": "Clip-independent, 5 folds pooled (every clip tested once)"

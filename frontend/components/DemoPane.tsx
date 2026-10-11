@@ -5,7 +5,9 @@ import {
   api, API_URL,
   type Analysis, type ClipSummary, type Faithfulness, type Health, type Keypoints, type Warning,
 } from "@/lib/api";
+import { KNOWN_SCHEMA_VERSIONS } from "@/lib/api";
 import FaithfulnessChart from "./FaithfulnessChart";
+import PhaseTimeline from "./PhaseTimeline";
 import Scene3D from "./Scene3D";
 import ScoreChart from "./ScoreChart";
 import VideoUpload from "./VideoUpload";
@@ -18,6 +20,16 @@ interface Source {
   title: string;
   isFall: boolean;
 }
+
+/**
+ * The phase timeline ships dark. NEXT_PUBLIC_PHASE_TIMELINE=on enables it, and
+ * NEXT_PUBLIC_PHASE_TIMELINE_PRELIMINARY=off removes the "single seed" badge. Both
+ * are set deliberately, after the confirmation grid decides what the evidence
+ * supports - a display that is built early should not show anything that is not
+ * yet established.
+ */
+const PHASE_TIMELINE_ON = process.env.NEXT_PUBLIC_PHASE_TIMELINE === "on";
+const PHASE_TIMELINE_PRELIMINARY = process.env.NEXT_PUBLIC_PHASE_TIMELINE_PRELIMINARY !== "off";
 
 export default function DemoPane({
   health,
@@ -319,6 +331,41 @@ export default function DemoPane({
                   {frame}/{source.keypoints.length - 1} · {(frame / source.fps).toFixed(2)}s · p={score.toFixed(3)}
                 </span>
               </div>
+
+              {/* States the backend can now report. Each is stated, not smoothed
+                  over: "nobody detected" must not read as "no fall", and bridged
+                  frames must not read as observed ones. */}
+              {analysis?.no_person && (
+                <div className="notice warn" style={{ marginTop: 14 }}>
+                  <b>No person detected in any frame.</b> This is missing data, not a low risk
+                  score — nothing was analysed.
+                </div>
+              )}
+              {analysis?.degraded && !analysis.no_person && (
+                <div className="notice warn" style={{ marginTop: 14 }}>
+                  <b>{analysis.interpolated_frames?.length ?? 0} frame
+                  {(analysis.interpolated_frames?.length ?? 0) === 1 ? "" : "s"} had no detection</b>{" "}
+                  and {(analysis.interpolated_frames?.length ?? 0) === 1 ? "was" : "were"} bridged by
+                  interpolation. Output over those frames is inferred, not observed.
+                </div>
+              )}
+              {analysis && analysis.schema_version !== undefined &&
+                !KNOWN_SCHEMA_VERSIONS.includes(analysis.schema_version) && (
+                <div className="notice" style={{ marginTop: 14 }}>
+                  The API is newer than this page (schema {analysis.schema_version}); showing the score
+                  only.
+                </div>
+              )}
+
+              {/* Off by default: shown only once the claim level behind it is
+                  established. See results/analysis/PLAN.txt. */}
+              {PHASE_TIMELINE_ON && analysis && !analysis.no_person &&
+                (analysis.schema_version === undefined || KNOWN_SCHEMA_VERSIONS.includes(analysis.schema_version)) && (
+                <div style={{ marginTop: 18 }}>
+                  <PhaseTimeline analysis={analysis} frame={frame} onScrub={setFrame}
+                                 preliminary={PHASE_TIMELINE_PRELIMINARY} />
+                </div>
+              )}
             </div>
           )}
 

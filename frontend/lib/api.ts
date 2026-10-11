@@ -43,6 +43,9 @@ export interface ModelInfo {
   trained_on: string;
   epoch: number | null;
   device: string;
+  /** Absent on schema v1 backends; treat missing as false. */
+  has_phase_head?: boolean;
+  feature_set?: string;
 }
 
 export interface Decision {
@@ -99,17 +102,35 @@ export interface Warning {
   evidence?: Evidence;
 }
 
+/** Per-frame phase probabilities straight from the model's phase head. */
+export interface Phases {
+  names: string[];
+  /** [T][P], each row summing to 1. */
+  probs: number[][];
+}
+
 export interface Analysis {
+  /** Absent on v1 backends. A version this client does not know => render the score only. */
+  schema_version?: number;
   clip_id: string;
   frames: number;
   fps: number;
   impact_frame: number | null;
   scores: number[];
+  /** Null when the checkpoint has no phase head, or on a v1 backend. Never synthesised. */
+  phases?: Phases | null;
   warnings: Warning[];
   decision: Decision;
   imminent_window: [number, number] | null;
   latency_ms: number;
+  /** Nobody was detected in any frame: "no data", not "no fall". */
+  no_person?: boolean;
+  /** Missing frames were bridged; `interpolated_frames` lists them. */
+  degraded?: boolean;
+  interpolated_frames?: number[];
 }
+
+export const KNOWN_SCHEMA_VERSIONS = [1, 2];
 
 export interface Faithfulness {
   frame: number;
@@ -144,16 +165,51 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     );
   }
   if (!response.ok) {
-    const detail = await response.text();
-    let message = detail;
-    try {
-      message = JSON.parse(detail).detail ?? detail;
-    } catch {
-      /* the body was not JSON; use it as-is */
-    }
-    throw new Error(`${response.status}: ${message}`);
+    throw await toApiError(response);
   }
   return (await response.json()) as T;
+}
+
+/**
+ * An error from the API with the fields the UI branches on.
+ *
+ * The backend sends `{error: {code, message, request_id, ...}}` from schema v2.
+ * A v1 backend sends FastAPI's `{detail}`; both are understood, so the frontend
+ * can ship before or after the backend does.
+ */
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public requestId?: string,
+    public retryAfter?: number,
+    public extra: Record<string, unknown> = {}
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+
+  /** The UI should offer a retry rather than a correction. */
+  get retryable(): boolean {
+    return this.code === "busy" || this.code === "out_of_memory" || this.status >= 500;
+  }
+}
+
+async function toApiError(response: Response): Promise<ApiError> {
+  const text = await response.text();
+  const retryAfter = Number(response.headers.get("Retry-After")) || undefined;
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed?.error?.code) {
+      const { code, message, request_id, ...extra } = parsed.error;
+      return new ApiError(response.status, code, message, request_id, retryAfter, extra);
+    }
+    const detail = typeof parsed?.detail === "string" ? parsed.detail : text;
+    return new ApiError(response.status, "legacy_error", detail, undefined, retryAfter);
+  } catch {
+    return new ApiError(response.status, "unparseable_error", text.slice(0, 300), undefined, retryAfter);
+  }
 }
 
 export const api = {

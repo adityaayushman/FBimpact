@@ -66,8 +66,8 @@ export const FINDINGS = [
       "four-phase supervision 67 at 0.705, with lead time held near 0.43 s. The features step " +
       "accounts for 135 → 100 and the phase step for 100 → 67; the full 135 → 67 belongs to the " +
       "package, not to phases alone. Recall moved by 1 to 4 falls of 129, which is inside the " +
-      "noise. Sixty-seven alarms over about 20 minutes of normal activity is still roughly 200 per " +
-      "hour. This seed generated the hypothesis, so it cannot also confirm it — replication on " +
+      "noise. Sixty-seven alarms over about 26 minutes of normal activity (both datasets together) is " +
+      "still roughly 150 per hour. This seed generated the hypothesis, so it cannot also confirm it — replication on " +
       "fresh seeds is in progress and nothing here should be read as 'improves' or 'more accurate'.",
   },
   {

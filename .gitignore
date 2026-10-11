@@ -1,6 +1,7 @@
 # Skeleton caches and run outputs are regenerable; the configs and code are not.
 data/cache/
-results/
+results/*
+!results/analysis/
 !results/.gitkeep
 
 # Annotations ARE a deliverable (Section 20) - keep them.

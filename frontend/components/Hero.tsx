@@ -74,12 +74,12 @@ export default function Hero() {
             <b>single-seed</b> run saw false alarms fall from 135 to 100 with richer features and
             to 67 with four-phase supervision on top. That is a hypothesis awaiting replication, not
             a finding.{" "}
-            <a href="#results" style={{ color: "var(--accent)" }}>See the measured tables →</a>
+            <a href="#/results" style={{ color: "var(--accent)" }}>See the measured tables →</a>
           </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 26 }}>
-            <a className="btn primary" href="#demo">Run the live demo</a>
-            <a className="btn" href="#research">Read the research</a>
+            <a className="btn primary" href="#/analyzer">Run the live demo</a>
+            <a className="btn" href="#/research">Read the research</a>
             <a className="btn ghost" href={PROJECT.repo} target="_blank" rel="noreferrer">Source ↗</a>
           </div>
 

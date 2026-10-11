@@ -15,7 +15,14 @@ from .augment import Augmenter
 from .clips import ClipRecord, load_cache, summarise
 from .datasets import ClipDataset, FeatureConfig, WindowDataset
 from .labels import LabelConfig
-from .splits import Split, assert_subject_disjoint, filter_clips, single_split, subject_folds
+from .splits import (
+    Split,
+    assert_subject_disjoint,
+    filter_clips,
+    holdout_split,
+    single_split,
+    subject_folds,
+)
 
 
 @dataclass
@@ -144,8 +151,20 @@ def build_split(cfg: dict, clips: list[ClipRecord]) -> Split:
         if not 0 <= index < len(folds):
             raise ValueError(f"fold {index} out of range for {len(folds)} folds")
         split = folds[index]
+    elif mode == "holdout":
+        domain = split_cfg.get("test")
+        if not domain:
+            raise ValueError("data.split.mode 'holdout' needs data.split.test: {source/scene}")
+        split = holdout_split(
+            clips,
+            test_domain=dict(domain),
+            val_fraction=float(split_cfg.get("val_fraction", 0.2)),
+            seed=seed,
+        )
     else:
-        raise ValueError(f"data.split.mode must be 'single' or 'folds', got {mode!r}")
+        raise ValueError(
+            f"data.split.mode must be 'single', 'folds' or 'holdout', got {mode!r}"
+        )
 
     assert_subject_disjoint(split)
     return split

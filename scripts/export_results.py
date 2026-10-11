@@ -175,16 +175,68 @@ def build_benchmark(
     seeds = sorted({int(float(r["seed"])) for r in read_table(results_dir / "runs.csv")
                     if (r.get("seed") or "").strip()})
 
+    # Which run directories each row was aggregated from, so `--check` can verify
+    # that every published number still has files behind it.
+    for row in rows:
+        row["run_dirs"] = [Path(r["run_dir"]).as_posix() for r in per_variant[row["variant"]]]
+
     return {
         "id": key, "name": name, "kind": kind, "caveat": caveat,
         "dataset": dataset, "seeds": seeds, "rows": rows,
+        # The UI picks its wording from this, not from the reader's assumptions:
+        # one seed cannot separate a method effect from initialisation noise (on
+        # this project it already reversed a conclusion once), so the strength of
+        # what may be said is a property of the data, recorded with it.
+        "n_seeds": len(seeds),
+        "evidence_level": "single_seed" if len(seeds) <= 1 else "multi_seed",
     }
+
+
+# Arms a benchmark must contain to be publishable. A missing arm must render as
+# "not run" - never as a table that quietly omits it.
+REQUIRED_ARMS = {
+    "combined": ["combined_xyv", "combined", "combined_phases"],
+}
+REQUIRED_METRICS = ("recall", "false_alarms_per_hour")
+
+
+def check_payload(payload: dict, root: Path) -> list[str]:
+    """Problems that make a results payload unfit to publish; empty means fit.
+
+    Checks three things a reader cannot see from the table: that no required arm
+    is missing, that no headline number is absent or NaN, and that every run
+    directory a row claims to be built from still exists with its evaluation
+    file. A number with no file behind it is a number nobody can reproduce.
+    """
+    problems: list[str] = []
+    for bench in payload.get("benchmarks", []):
+        present = {r["variant"] for r in bench["rows"]}
+        for arm in REQUIRED_ARMS.get(bench["id"], []):
+            if arm not in present:
+                problems.append(f"{bench['id']}: required arm '{arm}' has no runs")
+
+        for row in bench["rows"]:
+            tag = f"{bench['id']}/{row['variant']}"
+            for metric in REQUIRED_METRICS:
+                value = (row.get(metric) or {}).get("mean")
+                if value is None or value != value:
+                    problems.append(f"{tag}: '{metric}' is missing or NaN")
+            if not row.get("run_dirs"):
+                problems.append(f"{tag}: no source run directories recorded")
+            for rd in row.get("run_dirs", []):
+                path = root / rd
+                if not (path / "report_test.json").exists():
+                    problems.append(f"{tag}: source {rd} has no report_test.json")
+    return problems
 
 
 def main(argv: list[str] | None = None) -> int:
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--out", default="frontend/lib/results.json")
+    parser.add_argument("--check", action="store_true",
+                        help="after exporting, fail (exit 1) if an arm is missing, a headline "
+                             "number is NaN, or a row has no source run directory")
     args = parser.parse_args(argv)
 
     # Real benchmarks first: they are what the claims rest on, and a reader
@@ -281,8 +333,17 @@ def main(argv: list[str] | None = None) -> int:
     print(f"wrote {out}")
     for b in benchmarks:
         d = b.get("dataset")
-        print(f"  {b['name']}: {len(b['rows'])} variants, seeds {b['seeds']}"
+        print(f"  {b['name']}: {len(b['rows'])} variants, seeds {b['seeds']} [{b['evidence_level']}]"
               + (f", {d['clips']} clips / {d['falls']} falls / {d['subjects']} groups" if d else ""))
+
+    if args.check:
+        problems = check_payload(payload, root)
+        if problems:
+            print(f"\nCHECK FAILED: {len(problems)} problem(s)")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\ncheck passed: every required arm present, headline numbers finite, sources exist")
     return 0
 
 

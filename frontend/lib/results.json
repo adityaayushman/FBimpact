@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-11T11:05:44+00:00",
+  "generated_utc": "2026-10-11T17:36:15+00:00",
   "benchmarks": [
     {
       "id": "combined",
@@ -70,7 +70,14 @@
           "num_falls": 129.0,
           "num_warned": 87.0,
           "negative_hours": 0.4293,
-          "recall_pooled": 0.6744
+          "recall_pooled": 0.6744,
+          "run_dirs": [
+            "results/combined/combined_xyv_seed0_20260904-202800",
+            "results/combined/combined_xyv_seed0_20260904-203438",
+            "results/combined/combined_xyv_seed0_20260904-203922",
+            "results/combined/combined_xyv_seed0_20260904-204351",
+            "results/combined/combined_xyv_seed0_20260904-204922"
+          ]
         },
         {
           "variant": "combined",
@@ -125,7 +132,14 @@
           "num_falls": 129.0,
           "num_warned": 88.0,
           "negative_hours": 0.4293,
-          "recall_pooled": 0.6822
+          "recall_pooled": 0.6822,
+          "run_dirs": [
+            "results/combined/combined_seed0_20260904-205434",
+            "results/combined/combined_seed0_20260904-210413",
+            "results/combined/combined_seed0_20260904-212013",
+            "results/combined/combined_seed0_20260914-151917",
+            "results/combined/combined_seed0_20260914-153023"
+          ]
         },
         {
           "variant": "combined_phases",
@@ -180,9 +194,18 @@
           "num_falls": 129.0,
           "num_warned": 91.0,
           "negative_hours": 0.4293,
-          "recall_pooled": 0.7054
+          "recall_pooled": 0.7054,
+          "run_dirs": [
+            "results/combined/combined_phases_seed0_20260914-153831",
+            "results/combined/combined_phases_seed0_20260914-155014",
+            "results/combined/combined_phases_seed0_20260914-155955",
+            "results/combined/combined_phases_seed0_20260914-160858",
+            "results/combined/combined_phases_seed0_20261010-103938"
+          ]
         }
       ],
+      "n_seeds": 1,
+      "evidence_level": "single_seed",
       "split": "Clip-independent, 5 folds pooled (every clip tested once)"
     },
     {
@@ -254,7 +277,14 @@
           "num_falls": 99.0,
           "num_warned": 64.0,
           "negative_hours": 0.3439,
-          "recall_pooled": 0.6465
+          "recall_pooled": 0.6465,
+          "run_dirs": [
+            "results/le2i/ours_preimpact_seed0_20260902-115654",
+            "results/le2i/ours_preimpact_seed0_20260902-120347",
+            "results/le2i/ours_preimpact_seed0_20260902-200051",
+            "results/le2i/ours_preimpact_seed0_20260902-202318",
+            "results/le2i/ours_preimpact_seed0_20260902-203411"
+          ]
         },
         {
           "variant": "baseline_stgcn",
@@ -309,7 +339,14 @@
           "num_falls": 99.0,
           "num_warned": 67.0,
           "negative_hours": 0.3439,
-          "recall_pooled": 0.6768
+          "recall_pooled": 0.6768,
+          "run_dirs": [
+            "results/le2i/baseline_stgcn_seed0_20260902-111024",
+            "results/le2i/baseline_stgcn_seed0_20260902-111755",
+            "results/le2i/baseline_stgcn_seed0_20260902-113111",
+            "results/le2i/baseline_stgcn_seed0_20260902-114231",
+            "results/le2i/baseline_stgcn_seed0_20260902-114857"
+          ]
         },
         {
           "variant": "no_preimpact_loss",
@@ -364,7 +401,10 @@
           "num_falls": 20.0,
           "num_warned": 17.0,
           "negative_hours": 0.0757,
-          "recall_pooled": 0.85
+          "recall_pooled": 0.85,
+          "run_dirs": [
+            "results/le2i/ablation_no_preimpact_loss_seed0_20260904-200003"
+          ]
         },
         {
           "variant": "no_temporal",
@@ -419,9 +459,17 @@
           "num_falls": 78.0,
           "num_warned": 24.0,
           "negative_hours": 0.2883,
-          "recall_pooled": 0.3077
+          "recall_pooled": 0.3077,
+          "run_dirs": [
+            "results/le2i/ablation_no_temporal_seed0_20260902-204216",
+            "results/le2i/ablation_no_temporal_seed0_20260902-204622",
+            "results/le2i/ablation_no_temporal_seed0_20260902-205211",
+            "results/le2i/ablation_no_temporal_seed0_20260902-205726"
+          ]
         }
       ],
+      "n_seeds": 1,
+      "evidence_level": "single_seed",
       "split": "Clip-independent, 5 folds pooled (every clip tested once)"
     },
     {
@@ -495,7 +543,24 @@
           "num_falls": 90.0,
           "num_warned": 57.0,
           "negative_hours": 0.2898,
-          "recall_pooled": 0.6333
+          "recall_pooled": 0.6333,
+          "run_dirs": [
+            "results/urfd/ours_preimpact_seed0_20260901-140142",
+            "results/urfd/ours_preimpact_seed0_20260901-140442",
+            "results/urfd/ours_preimpact_seed0_20260901-140539",
+            "results/urfd/ours_preimpact_seed0_20260901-140718",
+            "results/urfd/ours_preimpact_seed0_20260901-141103",
+            "results/urfd/ours_preimpact_seed1_20260902-090652",
+            "results/urfd/ours_preimpact_seed1_20260902-090833",
+            "results/urfd/ours_preimpact_seed1_20260902-091132",
+            "results/urfd/ours_preimpact_seed1_20260902-091258",
+            "results/urfd/ours_preimpact_seed1_20260902-091526",
+            "results/urfd/ours_preimpact_seed2_20260902-091845",
+            "results/urfd/ours_preimpact_seed2_20260902-091950",
+            "results/urfd/ours_preimpact_seed2_20260902-092159",
+            "results/urfd/ours_preimpact_seed2_20260902-092354",
+            "results/urfd/ours_preimpact_seed2_20260902-092540"
+          ]
         },
         {
           "variant": "baseline_stgcn",
@@ -550,7 +615,24 @@
           "num_falls": 90.0,
           "num_warned": 64.0,
           "negative_hours": 0.2898,
-          "recall_pooled": 0.7111
+          "recall_pooled": 0.7111,
+          "run_dirs": [
+            "results/urfd/baseline_stgcn_seed0_20260901-134507",
+            "results/urfd/baseline_stgcn_seed0_20260901-134802",
+            "results/urfd/baseline_stgcn_seed0_20260901-135256",
+            "results/urfd/baseline_stgcn_seed0_20260901-135551",
+            "results/urfd/baseline_stgcn_seed0_20260901-135756",
+            "results/urfd/baseline_stgcn_seed1_20260902-084235",
+            "results/urfd/baseline_stgcn_seed1_20260902-084812",
+            "results/urfd/baseline_stgcn_seed1_20260902-085055",
+            "results/urfd/baseline_stgcn_seed1_20260902-085247",
+            "results/urfd/baseline_stgcn_seed1_20260902-085419",
+            "results/urfd/baseline_stgcn_seed2_20260902-085539",
+            "results/urfd/baseline_stgcn_seed2_20260902-085636",
+            "results/urfd/baseline_stgcn_seed2_20260902-085911",
+            "results/urfd/baseline_stgcn_seed2_20260902-090140",
+            "results/urfd/baseline_stgcn_seed2_20260902-090421"
+          ]
         },
         {
           "variant": "no_preimpact_loss",
@@ -605,7 +687,24 @@
           "num_falls": 90.0,
           "num_warned": 69.0,
           "negative_hours": 0.2898,
-          "recall_pooled": 0.7667
+          "recall_pooled": 0.7667,
+          "run_dirs": [
+            "results/urfd/ablation_no_preimpact_loss_seed0_20260901-143930",
+            "results/urfd/ablation_no_preimpact_loss_seed0_20260901-144124",
+            "results/urfd/ablation_no_preimpact_loss_seed0_20260901-191610",
+            "results/urfd/ablation_no_preimpact_loss_seed0_20260901-191908",
+            "results/urfd/ablation_no_preimpact_loss_seed0_20260901-192050",
+            "results/urfd/ablation_no_preimpact_loss_seed1_20260902-092832",
+            "results/urfd/ablation_no_preimpact_loss_seed2_20260902-093354",
+            "results/urfd/ablation_no_preimpact_loss_seed1_20260902-105230",
+            "results/urfd/ablation_no_preimpact_loss_seed1_20260902-105457",
+            "results/urfd/ablation_no_preimpact_loss_seed1_20260902-105700",
+            "results/urfd/ablation_no_preimpact_loss_seed1_20260902-105914",
+            "results/urfd/ablation_no_preimpact_loss_seed2_20260902-110103",
+            "results/urfd/ablation_no_preimpact_loss_seed2_20260902-110159",
+            "results/urfd/ablation_no_preimpact_loss_seed2_20260902-110519",
+            "results/urfd/ablation_no_preimpact_loss_seed2_20260902-110711"
+          ]
         },
         {
           "variant": "no_temporal",
@@ -660,7 +759,14 @@
           "num_falls": 30.0,
           "num_warned": 10.0,
           "negative_hours": 0.0966,
-          "recall_pooled": 0.3333
+          "recall_pooled": 0.3333,
+          "run_dirs": [
+            "results/urfd/ablation_no_temporal_seed0_20260901-141508",
+            "results/urfd/ablation_no_temporal_seed0_20260901-141656",
+            "results/urfd/ablation_no_temporal_seed0_20260901-141839",
+            "results/urfd/ablation_no_temporal_seed0_20260901-142140",
+            "results/urfd/ablation_no_temporal_seed0_20260901-142334"
+          ]
         },
         {
           "variant": "no_velocity",
@@ -715,7 +821,14 @@
           "num_falls": 30.0,
           "num_warned": 16.0,
           "negative_hours": 0.0966,
-          "recall_pooled": 0.5333
+          "recall_pooled": 0.5333,
+          "run_dirs": [
+            "results/urfd/ablation_no_velocity_seed0_20260901-142706",
+            "results/urfd/ablation_no_velocity_seed0_20260901-142854",
+            "results/urfd/ablation_no_velocity_seed0_20260901-143155",
+            "results/urfd/ablation_no_velocity_seed0_20260901-143430",
+            "results/urfd/ablation_no_velocity_seed0_20260901-143743"
+          ]
         },
         {
           "variant": "no_grounding",
@@ -770,9 +883,18 @@
           "num_falls": 30.0,
           "num_warned": 23.0,
           "negative_hours": 0.0966,
-          "recall_pooled": 0.7667
+          "recall_pooled": 0.7667,
+          "run_dirs": [
+            "results/urfd/ablation_no_grounding_seed0_20260901-192335",
+            "results/urfd/ablation_no_grounding_seed0_20260901-192730",
+            "results/urfd/ablation_no_grounding_seed0_20260901-192938",
+            "results/urfd/ablation_no_grounding_seed0_20260901-193117",
+            "results/urfd/ablation_no_grounding_seed0_20260901-193346"
+          ]
         }
       ],
+      "n_seeds": 3,
+      "evidence_level": "multi_seed",
       "split": "Sequence-independent, 5 folds pooled (every clip tested once)"
     },
     {
@@ -846,7 +968,12 @@
           "num_falls": 72.0,
           "num_warned": 68.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 0.9444
+          "recall_pooled": 0.9444,
+          "run_dirs": [
+            "results/bench/ours_preimpact_seed0_20260831-210246",
+            "results/bench/ours_preimpact_seed1_20260831-210449",
+            "results/bench/ours_preimpact_seed2_20260831-210725"
+          ]
         },
         {
           "variant": "baseline_stgcn",
@@ -901,7 +1028,12 @@
           "num_falls": 72.0,
           "num_warned": 71.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 0.9861
+          "recall_pooled": 0.9861,
+          "run_dirs": [
+            "results/bench/baseline_stgcn_seed0_20260831-205606",
+            "results/bench/baseline_stgcn_seed1_20260831-205846",
+            "results/bench/baseline_stgcn_seed2_20260831-210040"
+          ]
         },
         {
           "variant": "no_preimpact_loss",
@@ -956,7 +1088,12 @@
           "num_falls": 72.0,
           "num_warned": 68.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 0.9444
+          "recall_pooled": 0.9444,
+          "run_dirs": [
+            "results/bench/ablation_no_preimpact_loss_seed0_20260831-212746",
+            "results/bench/ablation_no_preimpact_loss_seed1_20260901-132554",
+            "results/bench/ablation_no_preimpact_loss_seed2_20260901-132928"
+          ]
         },
         {
           "variant": "no_temporal",
@@ -1011,7 +1148,12 @@
           "num_falls": 72.0,
           "num_warned": 72.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 1.0
+          "recall_pooled": 1.0,
+          "run_dirs": [
+            "results/bench/ablation_no_temporal_seed0_20260831-210950",
+            "results/bench/ablation_no_temporal_seed1_20260831-211210",
+            "results/bench/ablation_no_temporal_seed2_20260831-211426"
+          ]
         },
         {
           "variant": "no_velocity",
@@ -1066,7 +1208,12 @@
           "num_falls": 72.0,
           "num_warned": 71.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 0.9861
+          "recall_pooled": 0.9861,
+          "run_dirs": [
+            "results/bench/ablation_no_velocity_seed0_20260831-211809",
+            "results/bench/ablation_no_velocity_seed1_20260831-212049",
+            "results/bench/ablation_no_velocity_seed2_20260831-212432"
+          ]
         },
         {
           "variant": "no_grounding",
@@ -1121,9 +1268,16 @@
           "num_falls": 72.0,
           "num_warned": 69.0,
           "negative_hours": 0.1726,
-          "recall_pooled": 0.9583
+          "recall_pooled": 0.9583,
+          "run_dirs": [
+            "results/bench/ablation_no_grounding_seed0_20260901-133220",
+            "results/bench/ablation_no_grounding_seed1_20260901-133446",
+            "results/bench/ablation_no_grounding_seed2_20260901-133639"
+          ]
         }
       ],
+      "n_seeds": 3,
+      "evidence_level": "multi_seed",
       "split": "Leave-subjects-out, 5 folds (fold 0 reported)"
     }
   ]

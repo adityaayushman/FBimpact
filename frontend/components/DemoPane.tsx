@@ -5,7 +5,7 @@ import {
   api, API_URL,
   type Analysis, type ClipSummary, type Faithfulness, type Health, type Keypoints, type Warning,
 } from "@/lib/api";
-import { KNOWN_SCHEMA_VERSIONS } from "@/lib/api";
+import { KNOWN_SCHEMA_VERSIONS, checkpointGeneration } from "@/lib/api";
 import FaithfulnessChart from "./FaithfulnessChart";
 import PhaseTimeline from "./PhaseTimeline";
 import Scene3D from "./Scene3D";
@@ -240,6 +240,14 @@ export default function DemoPane({
               }
             />
           </div>
+
+          {health && !checkpointGeneration(health.model).current && (
+            <p className="notice warn" role="note" style={{ fontSize: 12.5 }}>
+              <b>Earlier-generation checkpoint.</b> This demo&apos;s model{" "}
+              {checkpointGeneration(health.model).reasons.join(" and ")}. It does not reflect the
+              project&apos;s current models; see Results and Generalisation.
+            </p>
+          )}
 
           {health && (
             <div className="glass pad-sm">

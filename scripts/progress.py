@@ -66,7 +66,9 @@ def training_processes() -> list[str]:
         ).stdout
     except (OSError, subprocess.SubprocessError):
         return []
-    return [line for line in out.splitlines() if line.strip()]
+    # The query's own PowerShell process contains the search words in its command
+    # line, so it must be excluded or it reports itself as a running job.
+    return [line for line in out.splitlines() if line.strip() and "Get-CimInstance" not in line]
 
 
 def fmt_duration(seconds: float) -> str:
@@ -108,7 +110,7 @@ def report() -> str:
     if procs and not working:
         lines.append("  (only waiting scripts are alive: " + ", ".join(names) + ")")
     if not working:
-        lines.append("  restart the grid with:  powershell -File d:\\tmp\\run_confirm.ps1")
+        lines.append("  restart the grid with:  powershell -File d:\\tmp\\run_all.ps1")
     return "\n".join(lines)
 
 

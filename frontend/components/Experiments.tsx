@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import data from "@/lib/runs.json";
+import { PageHeader } from "./ui";
 
 type Run = (typeof data.runs)[number];
 type Key = "arm_label" | "seed" | "fold" | "recall" | "lead" | "false_alarms" | "auc";
@@ -54,12 +55,9 @@ export default function Experiments() {
   };
 
   return (
-    <section className="pane">
-      <h2 className="pane-title">Experiments</h2>
-      <p className="pane-sub">
-        {data.runs.length} individual runs, one row per arm, seed and fold. Aggregates hide spread;
-        this view does not. Only seeds 1-4 of the confirmation grid count as confirmatory evidence.
-      </p>
+    <>
+      <PageHeader eyebrow="Evidence" title="Experiments" lede={<>{data.runs.length} individual runs, one row per arm, seed and fold. Aggregates hide spread; this view does not. Only seeds 1-4 of the confirmation grid count as confirmatory evidence.</>} />
+
 
       <div className="toolbar">
         <label>Benchmark{" "}
@@ -74,7 +72,7 @@ export default function Experiments() {
         <span className="dim mono" style={{ marginLeft: "auto" }}>{rows.length} rows</span>
       </div>
 
-      <div className="glass card" style={{ marginBottom: 16 }}>
+      <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-title">False alarms per fold, by arm</div>
         {spread.by.length === 0 && <p className="card-sub">No runs for this selection.</p>}
         {spread.by.map(([arm, vals]) => (
@@ -117,6 +115,6 @@ export default function Experiments() {
           </tbody>
         </table>
       </div>
-    </section>
+    </>
   );
 }

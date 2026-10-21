@@ -5,6 +5,8 @@ import results from "@/lib/results.json";
 import { FINDINGS } from "@/lib/content";
 import ConfirmationPane from "./ConfirmationPane";
 import OperatingCurve from "./OperatingCurve";
+import { SUBPAGES } from "@/lib/route";
+import { PageHeader, Section, TabPanel, Tabs } from "./ui";
 
 /**
  * Measured results.
@@ -94,169 +96,165 @@ function Table({ benchmark }: { benchmark: Benchmark }) {
   );
 }
 
-export default function ResultsPane() {
+export default function ResultsPane({ sub }: { sub: string }) {
   const [active, setActive] = useState(0);
   const benchmark = BENCHMARKS[active];
 
   return (
-    <section id="results" className="pane">
-      <span className="eyebrow">Results</span>
-      <h2 className="pane-title">What the experiments found</h2>
-      <p className="pane-lede">
-        Two results, deliberately stated at different strengths. The pre-impact time-weighted
-        loss <b>did not help</b> on UR Fall, and that held in every one of three seeds. A later
-        combined benchmark of 129 falls shows a promising false-alarm reduction from richer
-        features and four-phase supervision, but from <b>one seed only</b>, so it is a hypothesis
-        being tested rather than a result. Negative findings are listed first on purpose: a page
-        that leads with its successes and files its failures under &ldquo;limitations&rdquo; is
-        not reporting, it is marketing.
-      </p>
+    <>
+      <PageHeader
+        eyebrow="Evidence"
+        title="What the experiments found"
+        lede={<>
+          Negative findings come first on purpose. The pre-impact loss <b>did not help</b> in any
+          of three seeds, and a promising false-alarm reduction on the larger benchmark comes
+          from <b>one seed only</b>, so it is a hypothesis under test and not yet a result.
+        </>}
+      />
+      <Tabs view="results" tabs={SUBPAGES.results} value={sub} label="Results sections" />
 
-      <div className="stack" style={{ marginBottom: 30 }}>
-        {FINDINGS.map((f) => {
-          const colour =
-            f.verdict === "negative" ? "var(--impact)"
-              : f.verdict === "positive" ? "var(--calm)" : "var(--watch)";
-          return (
-            <div key={f.title} className="glass pad" style={{ borderLeft: `3px solid ${colour}` }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "baseline",
-                            flexWrap: "wrap", marginBottom: 6 }}>
-                <span className="chip mono" style={{ color: colour, borderColor: colour }}>
-                  {f.verdict === "negative" ? "does not work"
-                    : f.verdict === "positive" ? "works" : "inconclusive"}
-                </span>
-                <h3 className="card-title" style={{ margin: 0 }}>{f.title}</h3>
-                <span className="readout" style={{ marginLeft: "auto" }}>{f.rq}</span>
+      <TabPanel view="results" id="findings" value={sub}>
+        <Section
+          title="Findings, at the strength they were measured"
+          sub="A page that leads with its successes and files its failures under limitations is marketing, not reporting."
+        >
+          <div className="stack">
+            {FINDINGS.map((f) => {
+              const colour =
+                f.verdict === "negative" ? "var(--impact)"
+                  : f.verdict === "positive" ? "var(--calm)" : "var(--watch)";
+              return (
+                <div key={f.title} className="card" style={{ borderLeft: `4px solid ${colour}` }}>
+                  <div style={{ display: "flex", gap: 10, alignItems: "baseline", flexWrap: "wrap", marginBottom: 8 }}>
+                    <span className="chip" style={{ color: colour, borderColor: colour }}>
+                      {f.verdict === "negative" ? "does not work"
+                        : f.verdict === "positive" ? "works" : "inconclusive"}
+                    </span>
+                    <h3 className="card-title" style={{ margin: 0 }}>{f.title}</h3>
+                    <span className="readout" style={{ marginLeft: "auto" }}>{f.rq}</span>
+                  </div>
+                  <p className="card-sub">{f.body}</p>
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      </TabPanel>
+
+      <TabPanel view="results" id="tables" value={sub}>
+        <Section
+          title="Benchmark tables"
+          sub={<>Every cell is a mean ± standard deviation, never a single run. The operating point (τ, k) was chosen on a validation split under a false-alarm budget and frozen before the test set was touched.</>}
+        >
+          {BENCHMARKS.length === 0 ? (
+            <div className="card">
+              <div className="empty">
+                No benchmark has been run yet.
+                <div className="mono" style={{ marginTop: 10, fontSize: 12 }}>
+                  python scripts/run_ablations.py --seeds 0 1 2
+                  <br />
+                  python scripts/export_results.py
+                </div>
               </div>
-              <p className="card-sub" style={{ margin: 0 }}>{f.body}</p>
             </div>
-          );
-        })}
-      </div>
+          ) : (
+            <>
+              {BENCHMARKS.length > 1 && (
+                <div className="toolbar" role="group" aria-label="Choose a benchmark">
+                  {BENCHMARKS.map((b, i) => (
+                    <button key={b.id} className={`btn sm${i === active ? " primary" : ""}`}
+                            aria-pressed={i === active} onClick={() => setActive(i)}>
+                      {b.name}
+                      <span style={{ opacity: 0.75, fontSize: 11 }}>
+                        {b.kind === "real" ? "real video" : "synthetic"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
-      <h2 className="pane-title">The tables</h2>
-      <p className="pane-lede">
-        Every cell is a mean ± standard deviation, never a single run. The operating point
-        (τ, k) was chosen on a validation split under a false-alarm budget and frozen before
-        the test set was touched. On UR Fall the grid sweeps all five folds, so every one of
-        the 30 real falls is tested exactly once.
-      </p>
-
-      {BENCHMARKS.length === 0 ? (
-        <div className="glass pad">
-          <div className="empty">
-            No benchmark has been run yet.
-            <div className="mono" style={{ marginTop: 10, fontSize: 12 }}>
-              python scripts/run_ablations.py --seeds 0 1 2
-              <br />
-              python scripts/export_results.py
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {BENCHMARKS.length > 1 && (
-            <div style={{ display: "flex", gap: 7, marginBottom: 14, flexWrap: "wrap" }}>
-              {BENCHMARKS.map((b, i) => (
-                <button key={b.id} className={`btn${i === active ? " primary" : ""}`}
-                        onClick={() => setActive(i)}>
-                  {b.name}
-                  <span style={{ opacity: 0.7, fontSize: 11, marginLeft: 4 }}>
-                    {b.kind === "real" ? "real video" : "synthetic"}
+              <div className="card">
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 14 }}>
+                  <h3 className="card-title" style={{ margin: 0 }}>{benchmark.name}</h3>
+                  <span className="chip" style={{ color: benchmark.kind === "real" ? "var(--calm)" : "var(--text-3)" }}>
+                    {benchmark.kind === "real" ? "real video" : "synthetic fixture"}
                   </span>
-                </button>
-              ))}
-            </div>
+                  {benchmark.seeds.length === 1 && (
+                    // One seed cannot separate a method effect from initialisation noise
+                    // (on this project it already reversed a conclusion once), so the tag
+                    // sits beside the title and not in a footnote.
+                    <span className="chip" style={{ borderColor: "var(--watch)", color: "var(--watch)" }}
+                          title="One training seed: the seed-to-seed spread is not measured here">
+                      single seed · preliminary
+                    </span>
+                  )}
+                  {benchmark.dataset && (
+                    <span className="readout">
+                      {benchmark.dataset.clips} clips · {benchmark.dataset.falls} falls ·{" "}
+                      {benchmark.dataset.adls} ADL · {benchmark.dataset.subjects} groups ·{" "}
+                      {benchmark.dataset.minutes} min
+                    </span>
+                  )}
+                </div>
+
+                <div className="table-wrap"><Table benchmark={benchmark} /></div>
+
+                <p className="card-sub" style={{ marginTop: 14 }}>
+                  {benchmark.split && <><b style={{ color: "var(--text-2)" }}>Split:</b> {benchmark.split}. </>}
+                  <b style={{ color: "var(--text-2)" }}>Seeds:</b>{" "}
+                  {benchmark.seeds.length ? benchmark.seeds.join(", ") : "—"}.
+                </p>
+              </div>
+
+              <div className="notice warn" style={{ marginTop: 16 }}>
+                <b>How to read this {benchmark.kind === "real" ? "benchmark" : "fixture"}:</b> {benchmark.caveat}
+              </div>
+
+              <div className="cols-3" style={{ marginTop: 18 }}>
+                <div className="card quiet">
+                  <h3 className="card-title">Reading the lead-time column</h3>
+                  <p className="card-sub">
+                    Averaged over correctly warned falls only, so read it together with recall. A
+                    variant that warns on one easy fall out of thirty can post an excellent lead
+                    time; both are reported at a fixed false-alarm budget for that reason.
+                  </p>
+                </div>
+                <div className="card quiet">
+                  <h3 className="card-title">Reading the faithfulness gaps</h3>
+                  <p className="card-sub">
+                    Positive means the joint ranking beats a random ordering of the same joints on
+                    the same model. Zero or negative is a real finding: the explanation looked
+                    plausible and did no work.
+                  </p>
+                </div>
+                <div className="card quiet">
+                  <h3 className="card-title">Why a baseline row</h3>
+                  <p className="card-sub">
+                    The same architecture trained with a plain loss and evaluated through the same
+                    windowing and decision logic. A published figure would confound the objective
+                    with a different evaluation protocol.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 28 }}>
+                <OperatingCurve />
+              </div>
+
+              <p className="card-sub" style={{ marginTop: 18 }}>
+                Generated from the run directories by <code>scripts/export_results.py</code> and{" "}
+                <code>scripts/export_curve.py</code> · <span className="mono">{results.generated_utc}</span>
+              </p>
+            </>
           )}
+        </Section>
+      </TabPanel>
 
-          <div className="glass pad">
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap",
-                          alignItems: "baseline", marginBottom: 12 }}>
-              <h3 className="card-title" style={{ margin: 0 }}>{benchmark.name}</h3>
-              <span className={`chip`} style={{
-                borderColor: benchmark.kind === "real" ? "var(--glass-edge-bright)" : "var(--glass-edge)",
-                color: benchmark.kind === "real" ? "var(--calm)" : "var(--text-3)",
-              }}>
-                {benchmark.kind === "real" ? "real video" : "synthetic fixture"}
-              </span>
-              {benchmark.seeds.length === 1 && (
-                // A single seed cannot separate a method effect from initialisation
-                // noise - on this project it already reversed a conclusion once -
-                // so the tag sits beside the title rather than in a footnote.
-                <span className="chip" style={{ borderColor: "var(--watch)", color: "var(--watch)" }}
-                      title="One training seed: the seed-to-seed spread is not measured here">
-                  single seed · preliminary
-                </span>
-              )}
-              {benchmark.dataset && (
-                <span className="readout">
-                  {benchmark.dataset.clips} clips · {benchmark.dataset.falls} falls ·{" "}
-                  {benchmark.dataset.adls} ADL · {benchmark.dataset.subjects} groups ·{" "}
-                  {benchmark.dataset.minutes} min
-                </span>
-              )}
-            </div>
-
-            <Table benchmark={benchmark} />
-
-            <p className="card-sub" style={{ marginTop: 14, marginBottom: 0 }}>
-              {benchmark.split && <><b style={{ color: "var(--text-2)" }}>Split:</b> {benchmark.split}. </>}
-              <b style={{ color: "var(--text-2)" }}>Seeds:</b>{" "}
-              {benchmark.seeds.length ? benchmark.seeds.join(", ") : "—"}.
-            </p>
-          </div>
-
-          <div className="notice warn" style={{ marginTop: 14 }}>
-            <b style={{ color: "var(--text)" }}>
-              How to read this {benchmark.kind === "real" ? "benchmark" : "fixture"}:
-            </b>{" "}
-            {benchmark.caveat}
-          </div>
-
-          <div className="cols-3" style={{ marginTop: 16 }}>
-            <div className="glass pad">
-              <h3 className="card-title">Reading the lead-time column</h3>
-              <p className="card-sub" style={{ marginBottom: 0 }}>
-                Averaged over correctly warned falls only, so it must be read together with
-                recall. A variant that warns on one easy fall out of thirty can post an excellent
-                lead time; that is why recall sits in the column beside it and why both are
-                reported at a fixed false-alarm budget.
-              </p>
-            </div>
-            <div className="glass pad">
-              <h3 className="card-title">Reading the faithfulness gaps</h3>
-              <p className="card-sub" style={{ marginBottom: 0 }}>
-                Signed so positive means the joint ranking beats a random ordering of the same
-                joints on the same model. Zero or negative is a real finding — the explanation
-                looked plausible and did no work — not a failed run.
-              </p>
-            </div>
-            <div className="glass pad">
-              <h3 className="card-title">Why a baseline row</h3>
-              <p className="card-sub" style={{ marginBottom: 0 }}>
-                The baseline is the same architecture trained with a plain classification loss and
-                evaluated through the same windowing and decision logic. Comparing against a
-                published figure instead would confound the objective with a different evaluation
-                protocol.
-              </p>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <ConfirmationPane />
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <OperatingCurve />
-          </div>
-
-          <p className="card-sub" style={{ marginTop: 14 }}>
-            Generated from the run directories by <code>scripts/export_results.py</code> and{" "}
-            <code>scripts/export_curve.py</code> ·{" "}
-            <span className="mono">{results.generated_utc}</span>
-          </p>
-        </>
-      )}
-    </section>
+      <TabPanel view="results" id="confirmation" value={sub}>
+        <Section>
+          <ConfirmationPane />
+        </Section>
+      </TabPanel>
+    </>
   );
 }

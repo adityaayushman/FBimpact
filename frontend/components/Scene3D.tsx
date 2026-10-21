@@ -36,10 +36,10 @@ interface Props {
   interactive?: boolean;
 }
 
-const CALM = new THREE.Color("#DDE3E8");
-const WATCH = new THREE.Color("#EAAA00");
-const IMMINENT = new THREE.Color("#F5703C");
-const EVIDENCE = new THREE.Color("#FF84A0");
+const CALM = new THREE.Color("#FFF8E7");
+const WATCH = new THREE.Color("#F2B544");
+const IMMINENT = new THREE.Color("#FF7A45");
+const EVIDENCE = new THREE.Color("#FF6B86");
 const MIN_CONF = 0.2;
 
 export default function Scene3D({
@@ -70,7 +70,7 @@ export default function Scene3D({
 
     const width = mount.clientWidth || 400;
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x2c0a27, 9, 22);
+    scene.fog = new THREE.Fog(0x3f0a19, 9, 22);
 
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
     const camState = { theta: -0.32, phi: 1.28, radius: 8.4, target: new THREE.Vector3(0, 1.5, 0) };
@@ -90,9 +90,9 @@ export default function Scene3D({
     mount.appendChild(renderer.domElement);
 
     // -- lighting ------------------------------------------------------------
-    scene.add(new THREE.AmbientLight(0x9d87a3, 0.9));
+    scene.add(new THREE.AmbientLight(0xc9a99b, 0.9));
 
-    const key = new THREE.DirectionalLight(0xdde3e8, 2.1);
+    const key = new THREE.DirectionalLight(0xfff8e7, 2.1);
     key.position.set(4.5, 8, 5.5);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -105,11 +105,11 @@ export default function Scene3D({
     key.shadow.bias = -0.0012;
     scene.add(key);
 
-    const rim = new THREE.DirectionalLight(0xeaaa00, 1.5);
+    const rim = new THREE.DirectionalLight(0xc4a48c, 1.5);
     rim.position.set(-5, 3.5, -4.5);
     scene.add(rim);
 
-    const fill = new THREE.PointLight(0xc58bda, 22, 20, 2);
+    const fill = new THREE.PointLight(0xe8a07a, 22, 20, 2);
     fill.position.set(0, 4.5, 5);
     scene.add(fill);
 
@@ -117,7 +117,7 @@ export default function Scene3D({
     const ground = new THREE.Mesh(
       new THREE.CircleGeometry(9, 64),
       new THREE.MeshStandardMaterial({
-        color: 0x230720, roughness: 0.86, metalness: 0.12,
+        color: 0x2c0712, roughness: 0.86, metalness: 0.12,
         transparent: true, opacity: 0.92,
       })
     );
@@ -125,7 +125,7 @@ export default function Scene3D({
     ground.receiveShadow = true;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(18, 36, 0xeaaa00, 0x5a2553);
+    const grid = new THREE.GridHelper(18, 36, 0xc4a48c, 0x6b2a3d);
     (grid.material as THREE.Material).transparent = true;
     (grid.material as THREE.Material).opacity = 0.15;
     grid.position.y = 0.004;

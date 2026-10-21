@@ -11,6 +11,8 @@
 
 import datasets from "@/lib/datasets.json";
 import { PHASES } from "@/lib/phases";
+import { SUBPAGES } from "@/lib/route";
+import { PageHeader, Section, TabPanel, Tabs } from "./ui";
 
 interface FrameRange { min: number; median: number; max: number }
 interface Dataset {
@@ -55,29 +57,29 @@ function PhaseBar({ frames, label }: { frames: Record<string, number>; label: st
 
 const range = (r: FrameRange | null) => (r ? `${r.min} / ${r.median} / ${r.max}` : "—");
 
-export default function DataPane() {
+export default function DataPane({ sub }: { sub: string }) {
   if (!SETS.length) return null;
-
   return (
-    <section id="data" className="pane">
-      <span className="eyebrow">Data</span>
-      <h2 className="pane-title">What the models were trained and tested on</h2>
-      <p className="pane-lede">
-        Two public datasets of real video, pooled. Every figure below is computed from the cached
-        skeleton files that training read, not described from memory. Both datasets contain falls
-        that were <b>acted</b> by volunteers — none are recorded elderly falls — and that limit
-        applies to everything on this page.
-      </p>
+    <>
+      <PageHeader
+        eyebrow="Evidence"
+        title="What the models were trained and tested on"
+        lede={<>
+          Two public datasets of real video, pooled. Every figure is computed from the cached
+          skeleton files that training read. Both contain falls <b>acted</b> by volunteers; none
+          are recorded elderly falls, and that limit applies to everything here.
+        </>}
+      />
 
       {COMBINED && (
-        <div className="stat-row" style={{ marginBottom: 16 }}>
+        <div className="stat-row" style={{ marginTop: 6 }}>
           {[
             [COMBINED.clips, "clips pooled"],
             [COMBINED.falls, "falls, each tested exactly once"],
             [COMBINED.adls, "normal-activity clips"],
             [`${COMBINED.negative_minutes} min`, "of normal footage that false alarms are counted over"],
           ].map(([v, l]) => (
-            <div key={String(l)} className="glass stat">
+            <div key={String(l)} className="card stat">
               <div className="stat-value">{v}</div>
               <div className="stat-label">{l}</div>
             </div>
@@ -85,54 +87,69 @@ export default function DataPane() {
         </div>
       )}
 
-      <div className="cols-2">
-        {SETS.map((d) => (
-          <div key={d.id} className="glass pad">
-            <h3 className="card-title">{d.name}</h3>
-            <p className="card-sub">{d.citation}</p>
-            <table className="data">
-              <tbody>
-                <tr><td>Clips</td><td className="num">{d.clips} ({d.falls} falls · {d.adls} normal)</td></tr>
-                <tr><td>Footage</td><td className="num">{d.minutes} min at {d.fps.join(" / ")} fps</td></tr>
-                <tr><td>Normal time</td><td className="num">{d.negative_minutes} min</td></tr>
-                <tr><td>Pose detected</td>
-                    <td className="num">{(d.pose_coverage * 100).toFixed(1)}% of joints</td></tr>
-                <tr><td title="min / median / max frames before ground contact">Frames before impact</td>
-                    <td className="num">{range(d.pre_impact_frames)}</td></tr>
-                <tr><td title="min / median / max frames from fall onset to impact">Onset → impact (frames)</td>
-                    <td className="num">{range(d.onset_to_impact_frames)}</td></tr>
-              </tbody>
-            </table>
-            <p className="card-sub" style={{ margin: "12px 0 6px" }}>
-              <b style={{ color: "var(--text-2)" }}>Impact frame:</b> {d.annotation}.
-            </p>
-            <p className="card-sub" style={{ margin: "0 0 14px" }}>{d.onset_note}</p>
-            <PhaseBar frames={d.phase_frames} label={`phase frames · imminent window ${d.w_pre_frames} frames`} />
-          </div>
-        ))}
-      </div>
+      <div style={{ height: 28 }} />
+      <Tabs view="data" tabs={SUBPAGES.data} value={sub} label="Data sections" />
 
-      {COMBINED && (
-        <div className="glass pad" style={{ marginTop: 16 }}>
-          <h3 className="card-title">Class balance when pooled</h3>
-          <p className="card-sub">
-            Falls are rare in any recording, so the phases that matter — imminent and falling — are
-            a small share of frames. That imbalance is why the loss is class-weighted, why recall and
-            false-alarm counts are reported rather than accuracy, and why a model that always says
-            &ldquo;normal&rdquo; would look about 70% accurate while being useless.
-          </p>
-          <PhaseBar frames={COMBINED.phase_frames} label="all frames, both datasets" />
-        </div>
-      )}
-
-      <div className="glass pad" style={{ marginTop: 16 }}>
-        <h3 className="card-title">Limits of this data</h3>
-        <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 9 }}>
-          {LIMITS.map((l) => (
-            <li key={l} style={{ color: "var(--text-2)", fontSize: 14, lineHeight: 1.6 }}>{l}</li>
+      <TabPanel view="data" id="datasets" value={sub}>
+        <div className="cols-2">
+          {SETS.map((d) => (
+            <div key={d.id} className="card">
+              <h3 className="card-title">{d.name}</h3>
+              <p className="card-sub">{d.citation}</p>
+              <div className="table-wrap">
+                <table className="data">
+                  <tbody>
+                    <tr><td>Clips</td><td className="num">{d.clips} ({d.falls} falls · {d.adls} normal)</td></tr>
+                    <tr><td>Footage</td><td className="num">{d.minutes} min at {d.fps.join(" / ")} fps</td></tr>
+                    <tr><td>Normal time</td><td className="num">{d.negative_minutes} min</td></tr>
+                    <tr><td>Pose detected</td>
+                        <td className="num">{(d.pose_coverage * 100).toFixed(1)}% of joints</td></tr>
+                    <tr><td title="min / median / max frames before ground contact">Frames before impact</td>
+                        <td className="num">{range(d.pre_impact_frames)}</td></tr>
+                    <tr><td title="min / median / max frames from fall onset to impact">Onset → impact (frames)</td>
+                        <td className="num">{range(d.onset_to_impact_frames)}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="card-sub" style={{ margin: "14px 0 6px" }}>
+                <b style={{ color: "var(--text-2)" }}>Impact frame:</b> {d.annotation}.
+              </p>
+              <p className="card-sub">{d.onset_note}</p>
+              <PhaseBar frames={d.phase_frames} label={`phase frames · imminent window ${d.w_pre_frames} frames`} />
+            </div>
           ))}
-        </ul>
-      </div>
-    </section>
+        </div>
+      </TabPanel>
+
+      <TabPanel view="data" id="balance" value={sub}>
+        {COMBINED && (
+          <Section
+            title="Class balance when pooled"
+            sub="Falls are rare in any recording, so the phases that matter are a small share of frames."
+          >
+            <div className="card">
+              <p className="card-sub">
+                That imbalance is why the loss is class-weighted, why recall and false-alarm counts
+                are reported instead of accuracy, and why a model that always says
+                &ldquo;normal&rdquo; would look about 70% accurate while being useless.
+              </p>
+              <PhaseBar frames={COMBINED.phase_frames} label="all frames, both datasets" />
+            </div>
+          </Section>
+        )}
+      </TabPanel>
+
+      <TabPanel view="data" id="limits" value={sub}>
+        <Section title="Limits of this data" sub="What these datasets cannot tell you, however the numbers come out.">
+          <div className="card">
+            <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 10 }}>
+              {LIMITS.map((l) => (
+                <li key={l} style={{ color: "var(--text-2)", fontSize: 14.5, lineHeight: 1.6 }}>{l}</li>
+              ))}
+            </ul>
+          </div>
+        </Section>
+      </TabPanel>
+    </>
   );
 }

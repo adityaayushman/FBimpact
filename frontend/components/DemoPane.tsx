@@ -11,6 +11,7 @@ import PhaseTimeline from "./PhaseTimeline";
 import Scene3D from "./Scene3D";
 import ScoreChart from "./ScoreChart";
 import VideoUpload from "./VideoUpload";
+import { PageHeader } from "./ui";
 
 interface Source {
   id: string;
@@ -145,15 +146,9 @@ export default function DemoPane({
   const adls = clips.filter((c) => c.label === "adl");
 
   return (
-    <section id="demo" className="pane">
-      <span className="eyebrow">Live demo</span>
-      <h2 className="pane-title">Run the model on real skeleton data</h2>
-      <p className="pane-lede">
-        Every result below is computed live by the deployed model, through the same windowing,
-        frame alignment and trigger rule as the offline evaluation. The normal activities are
-        deliberately <em>hard negatives</em> — sitting, bending and lying down are all controlled
-        descents, and a model that fires on any downward motion fails here.
-      </p>
+    <>
+      <PageHeader eyebrow="Project" title="Run the model on real skeleton data" lede={<>Every result below is computed live by the deployed model, through the same windowing, frame alignment and trigger rule as the offline evaluation. The normal activities are deliberately <em>hard negatives</em> — sitting, bending and lying down are all controlled descents, and a model that fires on any downward motion fails here.</>} />
+
 
       <div className="disclaimer" style={{ marginBottom: 18 }}>
         <svg width="17" height="17" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
@@ -197,7 +192,7 @@ export default function DemoPane({
       <div className="demo-grid">
         {/* -- source picker ---------------------------------------------- */}
         <div className="stack">
-          <div className="glass pad-sm">
+          <div className="card">
             <h3 className="card-title">Demo clips</h3>
             <p className="card-sub">Bundled with the API — no upload needed.</p>
 
@@ -226,7 +221,7 @@ export default function DemoPane({
             ))}
           </div>
 
-          <div className="glass pad-sm">
+          <div className="card">
             <h3 className="card-title">Your own video</h3>
             <p className="card-sub">
               Posed in your browser; only joint coordinates are sent.
@@ -250,7 +245,7 @@ export default function DemoPane({
           )}
 
           {health && (
-            <div className="glass pad-sm">
+            <div className="card">
               <h3 className="card-title">Operating point</h3>
               <p className="card-sub" style={{ marginBottom: 10 }}>
                 Chosen on a validation split under a false-alarm budget, then frozen into the
@@ -272,13 +267,13 @@ export default function DemoPane({
         {/* -- viewer ------------------------------------------------------ */}
         <div className="stack">
           {!source && !error && (
-            <div className="glass"><div className="empty">
+            <div className="card"><div className="empty">
               Select a clip to run the model, or load your own video.
             </div></div>
           )}
 
           {source && (
-            <div className="glass pad">
+            <div className="card">
               <div style={{ display: "flex", alignItems: "baseline", gap: 12,
                             flexWrap: "wrap", marginBottom: 14 }}>
                 <h3 className="card-title" style={{ margin: 0, textTransform: "capitalize" }}>
@@ -379,7 +374,7 @@ export default function DemoPane({
 
           {/* -- warnings ------------------------------------------------- */}
           {analysis && (
-            <div className="glass pad">
+            <div className="card">
               <h3 className="card-title">Warnings &amp; grounded evidence</h3>
               <p className="card-sub">
                 Each warning names the joints that drove it. Whether that evidence is{" "}
@@ -466,6 +461,6 @@ export default function DemoPane({
           )}
         </div>
       </div>
-    </section>
+    </>
   );
 }

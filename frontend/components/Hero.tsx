@@ -51,31 +51,17 @@ export default function Hero() {
       : 0.2;
 
   return (
-    <section id="overview" className="pane hero">
+    <section className="hero" aria-labelledby="hero-title">
       <div className="hero-grid">
         <div>
           <span className="eyebrow">Vision · privacy-preserving · explanation-verified</span>
 
-          <h1 className="hero-title">
+          <h1 className="hero-title" id="hero-title">
             Predict the fall <span className="grad">before impact</span> — and test whether the
             evidence is real.
           </h1>
 
           <p className="hero-lede">{ABSTRACT}</p>
-
-          {/* The landing view states what was measured, at the strength it was
-              measured. The pre-impact loss finding is replicated (3 seeds); the
-              combined-benchmark result is a single seed and is labelled so. */}
-          <p className="notice warn" style={{ marginBottom: 22, fontSize: 13.5 }}>
-            <b style={{ color: "var(--text)" }}>Two results, at different strengths.</b>{" "}
-            On UR Fall, across three seeds, the pre-impact time-weighted loss{" "}
-            <b>did not help</b>: recall 0.633 against 0.767 with it switched off, equal lead time,
-            in 3 of 3 seeds. On the larger combined benchmark (129 falls), a{" "}
-            <b>single-seed</b> run saw false alarms fall from 135 to 100 with richer features and
-            to 67 with four-phase supervision on top. That is a hypothesis awaiting replication, not
-            a finding.{" "}
-            <a href="#/results" style={{ color: "var(--accent)" }}>See the measured tables →</a>
-          </p>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 26 }}>
             <a className="btn primary" href="#/analyzer">Run the live demo</a>
@@ -85,7 +71,7 @@ export default function Hero() {
 
           <div className="stat-row">
             {HERO_STATS.map((s) => (
-              <div key={s.label} className="glass stat">
+              <div key={s.label} className="card stat">
                 <div className="stat-value">{s.value}</div>
                 <div className="stat-label">{s.label}</div>
               </div>
@@ -93,7 +79,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="glass" style={{ padding: 12 }}>
+        <div className="card" style={{ padding: 12 }}>
           <Scene3D
             keypoints={sequence}
             frame={frame}

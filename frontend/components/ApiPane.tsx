@@ -2,6 +2,7 @@
 
 import { API_URL, type Health } from "@/lib/api";
 import { DEMO_CHECKPOINT, DEPLOYMENT_FACTS, PROJECT } from "@/lib/content";
+import { Section } from "./ui";
 
 const ENDPOINTS = [
   { method: "GET", path: "/health", body: "Liveness, the loaded model's identity, and the frozen operating point." },
@@ -20,18 +21,10 @@ const ENDPOINTS = [
  */
 export default function ApiPane({ health }: { health: Health | null }) {
   return (
-    <section id="api" className="pane">
-      <span className="eyebrow">Deployment</span>
-      <h2 className="pane-title">A public inference API</h2>
-      <p className="pane-lede">
-        The service accepts <b>skeletons and nothing else</b>. There is no endpoint that takes an
-        image, so the privacy property is structural rather than a promise about how uploads are
-        handled. It routes through the same code as the offline evaluation — if the demo and the
-        reported metrics disagreed, one would be wrong with no way to tell which.
-      </p>
+    <Section title="A public inference API" sub={<>The service accepts <b>skeletons and nothing else</b>. There is no endpoint that takes an image, so the privacy property is structural rather than a promise about how uploads are handled. It routes through the same code as the offline evaluation — if the demo and the reported metrics disagreed, one would be wrong with no way to tell which.</>}>
 
       <div className="cols-2">
-        <div className="glass pad">
+        <div className="card">
           <h3 className="card-title">Endpoints</h3>
           <p className="card-sub">
             Base <code>{API_URL}</code> · OpenAPI at{" "}
@@ -57,7 +50,7 @@ export default function ApiPane({ health }: { health: Health | null }) {
         </div>
 
         <div className="stack">
-          <div className="glass pad">
+          <div className="card">
             <h3 className="card-title">Live status</h3>
             {health ? (
               <>
@@ -84,7 +77,7 @@ export default function ApiPane({ health }: { health: Health | null }) {
             )}
           </div>
 
-          <div className="glass pad">
+          <div className="card">
             <h3 className="card-title">Measured, not claimed</h3>
             <p className="card-sub">
               On the reference machine (RTX 4050 laptop) and the deployed free-tier container.
@@ -103,7 +96,7 @@ export default function ApiPane({ health }: { health: Health | null }) {
         </div>
       </div>
 
-      <div className="glass pad" style={{ marginTop: 16 }}>
+      <div className="card" style={{ marginTop: 16 }}>
         <h3 className="card-title">Which checkpoint is deployed, and why</h3>
         <p className="card-sub" style={{ marginBottom: 10 }}>
           The live model is <b style={{ color: "var(--text)" }}>{DEMO_CHECKPOINT.variant}</b> —{" "}
@@ -122,7 +115,7 @@ export default function ApiPane({ health }: { health: Health | null }) {
         </p>
       </div>
 
-      <div className="glass pad" style={{ marginTop: 16 }}>
+      <div className="card" style={{ marginTop: 16 }}>
         <h3 className="card-title">Two things worth knowing before you use it</h3>
         <div className="cols-2" style={{ marginTop: 12 }}>
           <div>
@@ -147,6 +140,6 @@ export default function ApiPane({ health }: { health: Health | null }) {
              style={{ color: "var(--accent)" }}>DEPLOY.md</a>.
         </p>
       </div>
-    </section>
+    </Section>
   );
 }

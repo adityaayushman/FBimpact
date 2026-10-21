@@ -36,8 +36,8 @@ ARMS = {
     "phases": {"label": "Arm C · full features + four-phase head", "in_domain": "combined_phases"},
 }
 PROTOCOLS = [
-    ("urfd_to_le2i", "UR Fall → Le2i", "Train on UR Fall only", "Every Le2i clip", {"source": "le2i"}),
-    ("le2i_to_urfd", "Le2i → UR Fall", "Train on Le2i only", "Every UR Fall clip", {"source": "urfd"}),
+    ("urfd_to_le2i", "UR Fall → Le2i", "UR Fall only", "Every Le2i clip", {"source": "le2i"}),
+    ("le2i_to_urfd", "Le2i → UR Fall", "Le2i only", "Every UR Fall clip", {"source": "urfd"}),
     ("leave_coffee_room_out", "Leave Coffee room out", "UR Fall + Le2i Home", "Le2i Coffee room",
      {"source": "le2i", "scene": "coffee_room"}),
     ("leave_home_out", "Leave Home out", "UR Fall + Le2i Coffee room", "Le2i Home",

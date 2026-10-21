@@ -1,6 +1,7 @@
 "use client";
 
 import { PIPELINE } from "@/lib/content";
+import { Section } from "./ui";
 
 /**
  * The A–H pipeline, with the privacy boundary drawn where it actually falls.
@@ -11,17 +12,10 @@ import { PIPELINE } from "@/lib/content";
  */
 export default function PipelinePane() {
   return (
-    <section id="pipeline" className="pane">
-      <span className="eyebrow">Architecture</span>
-      <h2 className="pane-title">Eight stages, three of them novel</h2>
-      <p className="pane-lede">
-        Perception is frozen and reused. The research effort concentrates on a small temporal
-        model, a joint-level explanation, and a test that proves the explanation is faithful —
-        so the whole thing is completable by one person and runs in real time on modest hardware.
-      </p>
+    <Section title="Eight stages, three of them novel" sub={<>Perception is frozen and reused. The research effort concentrates on a small temporal model, a joint-level explanation, and a test that proves the explanation is faithful — so the whole thing is completable by one person and runs in real time on modest hardware.</>}>
 
       {/* privacy boundary marker */}
-      <div className="glass pad-sm" style={{
+      <div className="card" style={{
         display: "flex", alignItems: "center", gap: 12, marginBottom: 16,
         borderColor: "var(--accent-line)", background: "var(--accent-dim)",
       }}>
@@ -56,6 +50,6 @@ export default function PipelinePane() {
         <span><i className="swatch" style={{ background: "var(--accent)" }} /> research contribution</span>
         <span><i className="swatch" style={{ background: "var(--text-4)" }} /> reusable plumbing</span>
       </div>
-    </section>
+    </Section>
   );
 }

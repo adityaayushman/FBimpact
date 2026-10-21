@@ -1,6 +1,7 @@
 "use client";
 
 import data from "@/lib/generalisation.json";
+import { PageHeader } from "./ui";
 
 type Protocol = (typeof data.protocols)[number];
 type Run = { seed: number; recall: number | null; false_alarms: number | null; normal_hours: number | null };
@@ -24,7 +25,7 @@ function RecallStrip({ runs, reference }: { runs: Run[]; reference: number | nul
 
 function ProtocolCard({ p }: { p: Protocol }) {
   return (
-    <div className="glass card">
+    <div className="card">
       <div className="card-title">{p.title}</div>
       <p className="card-sub">Train: {p.train}. Test: {p.test}.</p>
 
@@ -36,7 +37,7 @@ function ProtocolCard({ p }: { p: Protocol }) {
               <td>{s}</td>
               <td className="num mono">{p.sizes[s].clips}</td>
               <td className="num mono">{p.sizes[s].falls}</td>
-              <td className="num mono">{p.sizes[s].normal_minutes}</td>
+              <td className="num mono">{p.sizes[s].normal_minutes.toFixed(1)}</td>
             </tr>
           ))}
         </tbody>
@@ -73,14 +74,9 @@ export default function Generalisation() {
   const label = data.status === "complete" ? "complete"
     : data.status === "partial" ? "partial" : "not yet run";
   return (
-    <section className="pane">
-      <h2 className="pane-title">Generalisation</h2>
-      <p className="pane-sub">
-        Random splits inside one dataset let a model see the same rooms and cameras on both sides.
-        These protocols hold a whole dataset or scene out, which is what a deployment faces: a place
-        the model has never seen. Protocol and the claims it can support were fixed before any run
-        (<span className="mono">{data.plan}</span>).
-      </p>
+    <>
+      <PageHeader eyebrow="Evidence" title="Generalisation" lede={<>Random splits inside one dataset let a model see the same rooms and cameras on both sides. These protocols hold a whole dataset or scene out, which is what a deployment faces: a place the model has never seen. Protocol and the claims it can support were fixed before any run (<span className="mono">{data.plan}</span>).</>} />
+
 
       <p className={`notice ${data.status === "complete" ? "" : "warn"}`}>
         <b>Status: {label}.</b> {data.runs_done} of {data.runs_expected} runs finished (4 protocols
@@ -92,12 +88,12 @@ export default function Generalisation() {
         {data.protocols.map((p) => <ProtocolCard key={p.id} p={p} />)}
       </div>
 
-      <div className="glass card" style={{ marginTop: 16 }}>
+      <div className="card" style={{ marginTop: 16 }}>
         <div className="card-title">What these numbers can and cannot say</div>
         <ul className="card-sub" style={{ paddingLeft: 18, margin: "8px 0 0" }}>
           {data.limits.map((l) => <li key={l}>{l}</li>)}
         </ul>
       </div>
-    </section>
+    </>
   );
 }

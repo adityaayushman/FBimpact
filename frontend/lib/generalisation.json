@@ -14,7 +14,7 @@
   {
    "id": "urfd_to_le2i",
    "title": "UR Fall \u2192 Le2i",
-   "train": "Train on UR Fall only",
+   "train": "UR Fall only",
    "test": "Every Le2i clip",
    "sizes": {
     "train": {
@@ -55,7 +55,7 @@
   {
    "id": "le2i_to_urfd",
    "title": "Le2i \u2192 UR Fall",
-   "train": "Train on Le2i only",
+   "train": "Le2i only",
    "test": "Every UR Fall clip",
    "sizes": {
     "train": {

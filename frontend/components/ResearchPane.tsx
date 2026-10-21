@@ -7,6 +7,8 @@ import {
   POSITIONING,
   RESEARCH_QUESTIONS,
 } from "@/lib/content";
+import { SUBPAGES } from "@/lib/route";
+import { PageHeader, Section, TabPanel, Tabs } from "./ui";
 
 function Cell({ value }: { value: boolean | string }) {
   if (value === true) return <span className="yes">Yes</span>;
@@ -22,22 +24,18 @@ function Cell({ value }: { value: boolean | string }) {
  * first, because "pre-impact + privacy + verified explanation" is the only
  * reason the rest is interesting.
  */
-export default function ResearchPane() {
+export default function ResearchPane({ sub }: { sub: string }) {
   return (
-    <section id="research" className="pane">
-      <span className="eyebrow">Research</span>
-      <h2 className="pane-title">The gap this fills</h2>
-      <p className="pane-lede">
-        The fall-monitoring field is crowded, but concentrated in three places this project
-        deliberately avoids. Most published systems recognise a fall <em>after</em> it happens.
-        A second cluster achieves genuine pre-impact warning but requires a wearable inertial
-        sensor, which older adults frequently forget, refuse or remove. A third uses raw RGB
-        video, which is unacceptable in the bedrooms and bathrooms where most serious falls
-        occur. The intersection — vision-based, pre-impact, privacy-preserving, and with an
-        explanation that is <em>scored</em> for faithfulness — is empty.
-      </p>
-
-      <div className="glass pad">
+    <>
+      <PageHeader
+        eyebrow="Reference"
+        title="The research case"
+        lede="What the project claims, why the claim is unusual, and what would falsify it. Ordered as a reviewer reads it: the gap first, because that is the only reason the rest is interesting."
+      />
+      <Tabs view="research" tabs={SUBPAGES.research} value={sub} label="Research sections" />
+      <TabPanel view="research" id="gap" value={sub}>
+        <Section title="The gap this fills" sub={<>The fall-monitoring field is crowded, but concentrated in three places this project deliberately avoids. Most published systems recognise a fall <em>after</em> it happens. A second cluster achieves genuine pre-impact warning but requires a wearable inertial sensor, which older adults frequently forget, refuse or remove. A third uses raw RGB video, which is unacceptable in the bedrooms and bathrooms where most serious falls occur. The intersection — vision-based, pre-impact, privacy-preserving, and with an explanation that is <em>scored</em> for faithfulness — is empty.</>}>
+      <div className="card">
         <div className="table-scroll">
           <table className="data">
             <thead>
@@ -72,16 +70,15 @@ export default function ResearchPane() {
         </p>
       </div>
 
-      {/* -- research questions ------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>Research questions</h2>
-      <p className="pane-lede">
-        Three questions, each answerable against ground truth. Anything that could not be
-        checked was left out of scope on purpose.
-      </p>
-
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="research" id="questions" value={sub}>
+        <Section title="Research questions" sub={<>Three questions, each answerable against ground truth. Anything that could not be checked was left out of scope on purpose.</>}>
       <div className="stack">
         {RESEARCH_QUESTIONS.map((rq) => (
-          <div key={rq.id} className="glass pad">
+          <div key={rq.id} className="card">
             <div className="rq">
               <span className="rq-tag">{rq.id}</span>
               <div>
@@ -93,17 +90,15 @@ export default function ResearchPane() {
         ))}
       </div>
 
-      {/* -- contributions ------------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>Contribution</h2>
-      <p className="pane-lede">
-        Deliberately narrow, so each part can be executed and defended. The novelty budget is
-        spent entirely on the anticipation objective and the verified explanation; perception
-        is treated as solved plumbing and reused frozen.
-      </p>
-
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="research" id="contribution" value={sub}>
+        <Section title="Contribution" sub={<>Deliberately narrow, so each part can be executed and defended. The novelty budget is spent entirely on the anticipation objective and the verified explanation; perception is treated as solved plumbing and reused frozen.</>}>
       <div className="cols-2">
         {CONTRIBUTIONS.map((c) => (
-          <div key={c.kind} className="glass pad">
+          <div key={c.kind} className="card">
             <span className="eyebrow" style={{ marginBottom: 12 }}>{c.kind}</span>
             <h3 className="card-title" style={{ marginTop: 12 }}>{c.title}</h3>
             <p className="card-sub" style={{ marginBottom: 0 }}>{c.body}</p>
@@ -111,17 +106,15 @@ export default function ResearchPane() {
         ))}
       </div>
 
-      {/* -- validity guards ----------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>What protects the result</h2>
-      <p className="pane-lede">
-        Three properties that, if silently broken, would make every reported number meaningless
-        while producing no error at all. Each is enforced in code and asserted in the test suite,
-        because each fails silently — and two of them fail in the flattering direction.
-      </p>
-
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="research" id="safeguards" value={sub}>
+        <Section title="What protects the result" sub={<>Three properties that, if silently broken, would make every reported number meaningless while producing no error at all. Each is enforced in code and asserted in the test suite, because each fails silently — and two of them fail in the flattering direction.</>}>
       <div className="cols-3">
         {GUARDS.map((g) => (
-          <div key={g.title} className="glass pad">
+          <div key={g.title} className="card">
             <h3 className="card-title">{g.title}</h3>
             <p className="card-sub">{g.body}</p>
             <p style={{
@@ -134,20 +127,20 @@ export default function ResearchPane() {
         ))}
       </div>
 
-      {/* -- limitations --------------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>Honest boundary of the claim</h2>
-      <p className="pane-lede">
-        The edge here is pre-impact timing, privacy, efficiency and verifiable explanation — not
-        raw benchmark accuracy. These limits are stated in the paper rather than in a footnote.
-      </p>
-
-      <div className="glass pad">
+      
+      
+        </Section>
+        <Section title="Honest boundary of the claim" sub={<>The edge here is pre-impact timing, privacy, efficiency and verifiable explanation — not raw benchmark accuracy. These limits are stated in the paper rather than in a footnote.</>}>
+      <div className="card">
         <ul style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 11 }}>
           {LIMITATIONS.map((l) => (
             <li key={l} style={{ color: "var(--text-2)", fontSize: 14, lineHeight: 1.6 }}>{l}</li>
           ))}
         </ul>
       </div>
-    </section>
+    
+        </Section>
+      </TabPanel>
+    </>
   );
 }

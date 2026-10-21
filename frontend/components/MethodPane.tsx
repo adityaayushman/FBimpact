@@ -1,59 +1,63 @@
 "use client";
 
 import { ABLATIONS, DECISIONS, METRICS } from "@/lib/content";
+import { SUBPAGES } from "@/lib/route";
+import { PageHeader, Section, TabPanel, Tabs } from "./ui";
+import PipelinePane from "./PipelinePane";
 
-/** A drawn definition of lead time — the project's headline quantity. */
+/** A drawn definition of lead time, the project's headline quantity. */
 function LeadTimeDiagram() {
-  const W = 760, H = 132;
-  const pad = { l: 16, r: 16, t: 26, b: 30 };
+  const W = 760, H = 150;
+  const pad = { l: 16, r: 16, t: 34 };
   const x = (f: number) => pad.l + (f / 100) * (W - pad.l - pad.r);
   const impact = 78;
   const wPre = 20;
   const warn = impact - 14;
-  const y = pad.t + 30;
+  const y = pad.t + 36;            // the timeline
+  const boxH = 72;                 // height of the shaded windows
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }}
          role="img" aria-label="Lead time is the interval between the warning frame and the impact frame">
-      {/* imminent window */}
-      <rect x={x(impact - wPre)} y={pad.t} width={x(impact) - x(impact - wPre)} height={46}
-            fill="var(--accent)" opacity={0.16} rx={3} />
-      <text x={(x(impact - wPre) + x(impact)) / 2} y={pad.t - 8} textAnchor="middle"
-            fontSize={10.5} fill="var(--accent)" fontFamily="var(--mono)">
+      {/* imminent window, labelled above its box */}
+      <rect x={x(impact - wPre)} y={pad.t} width={x(impact) - x(impact - wPre)} height={boxH}
+            fill="var(--mocha)" opacity={0.28} rx={4} />
+      <text x={(x(impact - wPre) + x(impact)) / 2} y={pad.t - 10} textAnchor="middle"
+            fontSize={11} fill="var(--text-2)" fontFamily="var(--mono)">
         imminent window [t*−W, t*]
       </text>
 
+      {/* after impact: masked out of scoring */}
+      <rect x={x(impact)} y={pad.t} width={(W - pad.r) - x(impact)} height={boxH}
+            fill="var(--text-3)" opacity={0.1} rx={4} />
+      <text x={(x(impact) + W - pad.r) / 2} y={pad.t - 10} textAnchor="middle"
+            fontSize={11} fill="var(--text-3)" fontFamily="var(--mono)">masked</text>
+
       {/* timeline */}
-      <line x1={pad.l} y1={y} x2={W - pad.r} y2={y} stroke="var(--text-4)" strokeWidth={1.2} />
-      <text x={pad.l} y={y + 22} fontSize={10.5} fill="var(--text-4)" fontFamily="var(--mono)">
+      <line x1={pad.l} y1={y} x2={W - pad.r} y2={y} stroke="var(--text-3)" strokeWidth={1.4} />
+      <text x={pad.l} y={y + 24} fontSize={11} fill="var(--text-3)" fontFamily="var(--mono)">
         normal activity
       </text>
 
-      {/* warning */}
-      <line x1={x(warn)} y1={pad.t - 2} x2={x(warn)} y2={y + 12} stroke="var(--imminent)" strokeWidth={1.6} />
-      <circle cx={x(warn)} cy={y} r={4.5} fill="var(--imminent)" />
-      <text x={x(warn)} y={y + 26} textAnchor="middle" fontSize={10.5}
+      {/* warning and impact markers, labelled above the line */}
+      <line x1={x(warn)} y1={pad.t + 4} x2={x(warn)} y2={y + 10} stroke="var(--imminent)" strokeWidth={1.8} />
+      <circle cx={x(warn)} cy={y} r={5} fill="var(--imminent)" />
+      <text x={x(warn) - 8} y={y - 12} textAnchor="end" fontSize={11.5} fontWeight={600}
             fill="var(--imminent)" fontFamily="var(--mono)">t_warn</text>
 
-      {/* impact */}
-      <line x1={x(impact)} y1={pad.t - 2} x2={x(impact)} y2={y + 12} stroke="var(--impact)" strokeWidth={2} />
-      <circle cx={x(impact)} cy={y} r={4.5} fill="var(--impact)" />
-      <text x={x(impact)} y={y + 26} textAnchor="middle" fontSize={10.5}
+      <line x1={x(impact)} y1={pad.t + 4} x2={x(impact)} y2={y + 10} stroke="var(--impact)" strokeWidth={2.2} />
+      <circle cx={x(impact)} cy={y} r={5} fill="var(--impact)" />
+      <text x={x(impact) + 8} y={y - 12} textAnchor="start" fontSize={11.5} fontWeight={600}
             fill="var(--impact)" fontFamily="var(--mono)">t* impact</text>
 
-      {/* the measured span */}
-      <line x1={x(warn)} y1={y - 17} x2={x(impact)} y2={y - 17}
-            stroke="var(--imminent)" strokeWidth={2.5} opacity={0.75} />
-      <text x={(x(warn) + x(impact)) / 2} y={y - 23} textAnchor="middle"
-            fontSize={11.5} fill="var(--imminent)" fontWeight={640} fontFamily="var(--mono)">
+      {/* the measured span, drawn beneath the timeline with its own label */}
+      <line x1={x(warn)} y1={y + 34} x2={x(impact)} y2={y + 34} stroke="var(--imminent)" strokeWidth={2.5} />
+      <line x1={x(warn)} y1={y + 28} x2={x(warn)} y2={y + 40} stroke="var(--imminent)" strokeWidth={2} />
+      <line x1={x(impact)} y1={y + 28} x2={x(impact)} y2={y + 40} stroke="var(--imminent)" strokeWidth={2} />
+      <text x={(x(warn) + x(impact)) / 2} y={y + 60} textAnchor="middle"
+            fontSize={12.5} fill="var(--imminent)" fontWeight={650} fontFamily="var(--mono)">
         lead time = (t* − t_warn) / fps
       </text>
-
-      {/* post impact */}
-      <rect x={x(impact)} y={pad.t} width={(W - pad.r) - x(impact)} height={46}
-            fill="var(--text-4)" opacity={0.1} rx={3} />
-      <text x={(x(impact) + W - pad.r) / 2} y={pad.t + 28} textAnchor="middle"
-            fontSize={10.5} fill="var(--text-4)" fontFamily="var(--mono)">masked</text>
     </svg>
   );
 }
@@ -67,35 +71,33 @@ function LeadTimeDiagram() {
  * usually leaves implicit — which is precisely why two systems reporting
  * "0.5 s lead time" can be measuring different quantities.
  */
-export default function MethodPane() {
+export default function MethodPane({ sub }: { sub: string }) {
   return (
-    <section id="method" className="pane">
-      <span className="eyebrow">Method</span>
-      <h2 className="pane-title">Lead time, defined precisely</h2>
-      <p className="pane-lede">
-        For each fall clip, the impact frame <code>t*</code> — first ground contact — is
-        annotated by hand. Frames in <code>[t* − W, t*]</code> are positive, everything before is
-        negative, and every frame of a normal-activity clip is negative. A warning fires when the
-        score holds at or above τ for k consecutive frames. Lead time is reported only over falls
-        that were correctly warned; a fall with no warning before <code>t*</code> is a miss.
-      </p>
-
-      <div className="glass pad">
+    <>
+      <PageHeader
+        eyebrow="Reference"
+        title="How it works, and how it is measured"
+        lede="The pipeline from video to a verified warning, the precise definition of the headline number, and every judgement call that definition leaves open."
+      />
+      <Tabs view="method" tabs={SUBPAGES.method} value={sub} label="Method sections" />
+      <TabPanel view="method" id="pipeline" value={sub}>
+        <PipelinePane />
+      </TabPanel>
+      <TabPanel view="method" id="lead-time" value={sub}>
+        <Section title="Lead time, defined precisely" sub={<>For each fall clip, the impact frame <code>t*</code> — first ground contact — is annotated by hand. Frames in <code>[t* − W, t*]</code> are positive, everything before is negative, and every frame of a normal-activity clip is negative. A warning fires when the score holds at or above τ for k consecutive frames. Lead time is reported only over falls that were correctly warned; a fall with no warning before <code>t*</code> is a miss.</>}>
+      <div className="card">
         <LeadTimeDiagram />
       </div>
 
-      {/* -- decisions ----------------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>Judgement calls, made explicit</h2>
-      <p className="pane-lede">
-        The definition above still leaves five things open, and each one changes the reported
-        number. They are named options in the code with documented defaults, not silent
-        conventions — which is why two systems can both report &ldquo;0.5&nbsp;s lead time&rdquo;
-        and not be measuring the same quantity.
-      </p>
-
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="method" id="decisions" value={sub}>
+        <Section title="Judgement calls, made explicit" sub={<>The definition above still leaves five things open, and each one changes the reported number. They are named options in the code with documented defaults, not silent conventions — which is why two systems can both report &ldquo;0.5&nbsp;s lead time&rdquo; and not be measuring the same quantity.</>}>
       <div className="stack">
         {DECISIONS.map((d) => (
-          <div key={d.question} className="glass pad">
+          <div key={d.question} className="card">
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "baseline", marginBottom: 8 }}>
               <h3 className="card-title" style={{ margin: 0, flex: "1 1 300px" }}>{d.question}</h3>
               <span className="chip" style={{
@@ -110,16 +112,15 @@ export default function MethodPane() {
         ))}
       </div>
 
-      {/* -- metrics ------------------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>What is measured</h2>
-      <p className="pane-lede">
-        Recall leads, because a missed fall is the costly error. A single balanced-accuracy figure
-        would flatter the method and tell a care setting nothing it needs.
-      </p>
-
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="method" id="metrics" value={sub}>
+        <Section title="What is measured" sub={<>Recall leads, because a missed fall is the costly error. A single balanced-accuracy figure would flatter the method and tell a care setting nothing it needs.</>}>
       <div className="cols-3">
         {METRICS.map((m) => (
-          <div key={m.name} className="glass pad-sm" style={
+          <div key={m.name} className="card" style={
             m.primary ? { borderColor: "var(--accent-line)" } : undefined
           }>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
@@ -137,15 +138,13 @@ export default function MethodPane() {
         ))}
       </div>
 
-      {/* -- ablations ----------------------------------------------------- */}
-      <h2 className="pane-title" style={{ marginTop: 52 }}>Ablation plan</h2>
-      <p className="pane-lede">
-        Each variant removes exactly one component and re-measures both anticipation and
-        faithfulness. Every cell of the results table is a mean ± standard deviation over seeds
-        &#123;0,&nbsp;1,&nbsp;2&#125; — a single run cannot distinguish a real effect from seed noise.
-      </p>
-
-      <div className="glass pad">
+      
+      
+        </Section>
+      </TabPanel>
+      <TabPanel view="method" id="ablations" value={sub}>
+        <Section title="Ablation plan" sub={<>Each variant removes exactly one component and re-measures both anticipation and faithfulness. Every cell of the results table is a mean ± standard deviation over seeds &#123;0,&nbsp;1,&nbsp;2&#125; — a single run cannot distinguish a real effect from seed noise.</>}>
+      <div className="card">
         <div className="table-scroll">
           <table className="data">
             <thead>
@@ -173,6 +172,9 @@ export default function MethodPane() {
           is attributable to the time weighting alone.
         </p>
       </div>
-    </section>
+    
+        </Section>
+      </TabPanel>
+    </>
   );
 }

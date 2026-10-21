@@ -15,9 +15,9 @@ function Mark() {
   return (
     <span className="brand-mark" aria-hidden>
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="3" r="1.9" fill="#04231f" />
+        <circle cx="8" cy="3" r="1.9" fill="#3A0F34" />
         <path d="M8 5.2v4.4M8 9.6l-2.6 3.6M8 9.6l2.6 3.6M4.4 6.7L11.6 6.7"
-              stroke="#04231f" strokeWidth="1.5" strokeLinecap="round" />
+              stroke="#3A0F34" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     </span>
   );

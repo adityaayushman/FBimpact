@@ -153,7 +153,7 @@ export default function PhaseTimeline({ analysis, frame, onScrub, preliminary }:
         )}
         {warnings.map((w) => (
           <line key={w.frame} x1={x(w.frame)} y1={PAD.top} x2={x(w.frame)} y2={PAD.top + plotH}
-                stroke="#fff" strokeWidth={1.4} strokeDasharray="3 3" />
+                stroke="var(--text)" strokeWidth={1.4} strokeDasharray="3 3" />
         ))}
 
         <line x1={x(frame)} y1={PAD.top} x2={x(frame)} y2={PAD.top + plotH}
@@ -172,7 +172,7 @@ export default function PhaseTimeline({ analysis, frame, onScrub, preliminary }:
             {p.name}
           </span>
         ))}
-        <span><i className="swatch" style={{ background: "#fff", width: 2, height: 11 }} /> warning</span>
+        <span><i className="swatch" style={{ background: "var(--text)", width: 2, height: 11 }} /> warning</span>
         {interpolated_frames && interpolated_frames.length > 0 && (
           <span>shaded = frames bridged over missing detections</span>
         )}

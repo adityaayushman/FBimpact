@@ -174,7 +174,7 @@ export default function ResultsPane() {
                           alignItems: "baseline", marginBottom: 12 }}>
               <h3 className="card-title" style={{ margin: 0 }}>{benchmark.name}</h3>
               <span className={`chip`} style={{
-                borderColor: benchmark.kind === "real" ? "rgba(78,201,165,.4)" : "var(--glass-edge)",
+                borderColor: benchmark.kind === "real" ? "var(--glass-edge-bright)" : "var(--glass-edge)",
                 color: benchmark.kind === "real" ? "var(--calm)" : "var(--text-3)",
               }}>
                 {benchmark.kind === "real" ? "real video" : "synthetic fixture"}

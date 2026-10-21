@@ -6,10 +6,10 @@
  * colour alone is never the only carrier of which phase is which.
  */
 export const PHASES = [
-  { name: "normal", colour: "#56B4E9", blurb: "ordinary activity" },
-  { name: "imminent", colour: "#E69F00", blurb: "balance about to be lost" },
-  { name: "falling", colour: "#D55E00", blurb: "on the way to the floor" },
-  { name: "grounded", colour: "#CC79A7", blurb: "already down" },
+  { name: "normal", colour: "#DDE3E8", blurb: "ordinary activity" },
+  { name: "imminent", colour: "#EAAA00", blurb: "balance about to be lost" },
+  { name: "falling", colour: "#F5703C", blurb: "on the way to the floor" },
+  { name: "grounded", colour: "#C58BDA", blurb: "already down" },
 ] as const;
 
 export type PhaseName = (typeof PHASES)[number]["name"];

@@ -26,7 +26,7 @@ export const ABSTRACT =
   "removing the main barrier to in-home cameras.";
 
 export const HERO_STATS = [
-  { value: "0.43 s", label: "mean lead time before impact, combined benchmark (1 seed)" },
+  { value: "≈ 0.42 s", label: "mean lead time before impact, combined benchmark (4 seeds; every arm 0.41–0.43 s)" },
   { value: "129", label: "real falls tested, each exactly once (UR Fall + Le2i)" },
   { value: "0 px", label: "pixels leaving the device: skeletons only" },
   { value: "≈ 0.4 M", label: "parameters (393–396 k) — real-time on modest hardware" },
@@ -57,18 +57,22 @@ export const FINDINGS = [
   },
   {
     verdict: "caution" as const,
-    rq: "Preliminary",
-    title: "One seed: richer features, then phase supervision, each cut false alarms",
+    rq: "Confirmed: not shown",
+    title: "Four fresh seeds: phase supervision was not shown to reduce false alarms",
     body:
-      "On the combined UR Fall + Le2i benchmark (129 falls, every fall tested exactly once), three " +
-      "arms that each differ from the previous by one change gave, in a single seed: control " +
-      "(x, y, vx, vy) 135 false alarms at recall 0.674; plus 14-channel features 100 at 0.682; plus " +
-      "four-phase supervision 67 at 0.705, with lead time held near 0.43 s. The features step " +
-      "accounts for 135 → 100 and the phase step for 100 → 67; the full 135 → 67 belongs to the " +
-      "package, not to phases alone. Recall moved by 1 to 4 falls of 129, which is inside the " +
-      "noise. Sixty-seven alarms over about 26 minutes of normal activity (both datasets together) is " +
-      "still roughly 150 per hour. This seed generated the hypothesis, so it cannot also confirm it — replication on " +
-      "fresh seeds is in progress and nothing here should be read as 'improves' or 'more accurate'.",
+      "One seed had suggested that richer features, then four-phase supervision, cut false alarms " +
+      "on the combined benchmark (135, then 100, then 67). It was tested on four fresh seeds against " +
+      "decision rules committed before any of those runs. Averages over the four seeds: control 108 " +
+      "false alarms (recall 0.632); 14-channel features 101 (0.653); plus four-phase head and " +
+      "consistency loss 84 (0.643); four-phase head without the consistency loss 77 (0.680). The " +
+      "phase arms are lower on average, but never reliably: they had fewer false alarms than the " +
+      "feature-only arm in just 2 of 4 seeds, and the rule requires 3 of 4, so every contrast is " +
+      "\"not shown\". The earlier drop fits inside seed-to-seed noise: the feature-only arm alone " +
+      "ranged from 77 to 133 false alarms across seeds. The consistency loss looks harmful (about 6 " +
+      "more false alarms and 0.037 less recall than leaving it out). Whatever the arm, the system " +
+      "still raises roughly 180 to 250 false alarms per hour of normal activity, far above anything " +
+      "a care setting could use. \"Not shown\" means the experiment could not separate an effect " +
+      "from noise, not that there is no effect.",
   },
   {
     verdict: "caution" as const,

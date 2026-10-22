@@ -1,0 +1,5 @@
+arm,n_seeds,recall_mean,recall_sd,fa_mean,fa_sd,lead_mean
+combined_xyv,4,0.6318,0.0568,108.25,18.2277,0.4255
+combined,4,0.6531,0.0531,100.75,25.1976,0.4332
+combined_phases,4,0.6434,0.019,83.5,4.6547,0.4349
+combined_nocons,4,0.6802,0.0331,77.25,11.5578,0.41

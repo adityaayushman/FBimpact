@@ -25,6 +25,14 @@ interface Contrast {
 }
 
 const CONTRASTS = (analysis.contrasts ?? []) as unknown as Contrast[];
+const ARMS = (analysis.arms ?? []) as unknown as
+  { arm: string; recall_mean: number; recall_sd: number; fa_mean: number; fa_sd: number; lead_mean: number }[];
+const ARM_LABEL: Record<string, string> = {
+  combined_xyv: "A · control, (x, y, vx, vy) features",
+  combined: "B · plus 14-channel features",
+  combined_phases: "C · plus four-phase head and consistency loss",
+  combined_nocons: "D · four-phase head, no consistency loss",
+};
 const PENDING = analysis.status !== "complete" || CONTRASTS.length === 0;
 
 const LEVEL_COLOUR: Record<string, string> = {
@@ -42,10 +50,10 @@ export default function ConfirmationPane() {
     <div className="glass pad">
       <h3 className="card-title">Does it replicate? A pre-registered confirmation</h3>
       <p className="card-sub">
-        The single-seed combined result is a hypothesis. It is being tested on fresh seeds (1–4),
+        The single-seed combined result was a hypothesis. It was tested on fresh seeds (1–4),
         with the question, the contrasts and the decision rules committed to the repository
-        before any of those runs existed. Seed 0, which produced the hypothesis, is shown above
-        and never counted as evidence for it.
+        before any of those runs existed. Seed 0, which produced the hypothesis, is shown with
+        the benchmark tables and was never counted as evidence for it.
       </p>
 
       {PENDING ? (
@@ -57,6 +65,31 @@ export default function ConfirmationPane() {
         </div>
       ) : (
         <>
+          <h4 className="card-title" style={{ fontSize: 14, margin: "6px 0 8px" }}>Each arm, mean ± standard deviation over seeds 1–4</h4>
+          <div className="table-scroll" style={{ marginBottom: 20 }}>
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Arm</th>
+                  <th className="num">Recall</th>
+                  <th className="num">False alarms</th>
+                  <th className="num">Lead time (s)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ARMS.map((a) => (
+                  <tr key={a.arm}>
+                    <td>{ARM_LABEL[a.arm] ?? a.arm}</td>
+                    <td className="num">{a.recall_mean.toFixed(3)} ± {a.recall_sd.toFixed(3)}</td>
+                    <td className="num">{a.fa_mean.toFixed(1)} ± {a.fa_sd.toFixed(1)}</td>
+                    <td className="num">{a.lead_mean.toFixed(3)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h4 className="card-title" style={{ fontSize: 14, margin: "6px 0 8px" }}>The pre-registered comparisons</h4>
           <div className="table-scroll">
             <table className="data">
               <thead>

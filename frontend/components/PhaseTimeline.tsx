@@ -29,7 +29,7 @@ interface Props {
   analysis: Analysis;
   frame: number;
   onScrub?: (frame: number) => void;
-  /** Shown beside the title until the result behind it is replicated. */
+  /** Shown beside the title: the phase head's benefit was not confirmed on fresh seeds. */
   preliminary?: boolean;
 }
 
@@ -112,7 +112,7 @@ export default function PhaseTimeline({ analysis, frame, onScrub, preliminary }:
         <span className="readout">model output, not ground truth</span>
         {preliminary && (
           <span className="chip" style={{ borderColor: "var(--watch)", color: "var(--watch)" }}>
-            single seed · preliminary
+            preliminary · gain not confirmed
           </span>
         )}
       </div>

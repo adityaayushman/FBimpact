@@ -107,8 +107,8 @@ export default function ResultsPane({ sub }: { sub: string }) {
         title="What the experiments found"
         lede={<>
           Negative findings come first on purpose. The pre-impact loss <b>did not help</b> in any
-          of three seeds, and a promising false-alarm reduction on the larger benchmark comes
-          from <b>one seed only</b>, so it is a hypothesis under test and not yet a result.
+          of three seeds, and the false-alarm reduction that one seed suggested on the larger
+          benchmark was <b>not shown</b> when tested on four fresh seeds under pre-registered rules.
         </>}
       />
       <Tabs view="results" tabs={SUBPAGES.results} value={sub} label="Results sections" />

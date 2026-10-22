@@ -155,10 +155,11 @@ and wasteful on a real machine.
 
 | Endpoint | Purpose |
 |---|---|
-| `GET /health` | Liveness plus the loaded model's identity and frozen operating point |
+| `GET /health` | Liveness plus the loaded model's identity (`has_phase_head`, `feature_set`) and frozen operating point |
+| `GET /ready` | Whether the model is loaded, *without* triggering a load: 200 or 503. Separates "container up" from "container warm", which on a sleeping free tier are minutes apart |
 | `GET /skeleton` | Joint names and bones, so the client draws the graph the model uses |
 | `GET /clips`, `GET /clips/{id}` | Bundled demo clips |
-| `POST /analyze` | Score a `[T,17,3]` sequence → per-frame `p_t`, warnings, joint evidence |
+| `POST /analyze` | Score a `[T,17,3]` sequence → per-frame `p_t`, optional `phases`, warnings, joint evidence |
 | `POST /faithfulness` | Deletion/insertion test on one warning (RQ2) |
 
 `/analyze` accepts `impact_frame`. **Lead time is only defined when it is given** — without
@@ -167,7 +168,71 @@ trigger that fires before the imminent window comes back with
 `within_imminent_window: false`, and the UI labels it a false alarm rather than an
 anticipation, matching `evaluation/metrics.py`.
 
+### Response contract (schema version 2)
+
+Every addition over version 1 is optional or nullable, so a version-1 client keeps working
+and a client that sees a version it does not know should render the score and ignore the rest.
+
+| Field | Meaning |
+|---|---|
+| `schema_version` | `2`. Absent on the older API |
+| `phases` | `{names: [normal, imminent, falling, grounded], probs: [T×4]}` from the model's **own** phase head, each row summing to 1 — or `null` for a checkpoint without one. Never zeros, and never derived from the imminence score, which would be a fabricated output presented as the model's |
+| `no_person` | `true` when no frame had a detection. This is **missing data, not a low score**: `scores` is empty and nothing was analysed |
+| `degraded`, `interpolated_frames` | Frames with no detection that were bridged, listed by index. Output over those frames is inferred, not observed |
+| `confidence_clipped` | Confidences outside [0, 1] were clipped |
+
+Phases are displayed only. The warning still fires from the binary imminence score, so lead
+time keeps measuring exactly what every reported number measured.
+
+### Errors
+
+Every error has one shape, with a stable code and a request id that is also in the server log
+and the `X-Request-ID` header. Tracebacks never reach the client.
+
+```json
+{"error": {"code": "too_much_missing", "message": "...", "request_id": "a1b2c3d4e5f6"}}
+```
+
+| Status | Code | When |
+|---|---|---|
+| 413 | `too_large` | Body over 2 MB, refused from the header before it is parsed |
+| 413 | `too_long` | More frames than `MAX_FRAMES` (600) |
+| 422 | `bad_shape`, `non_numeric`, `empty_clip` | Not `[T,17,3]` / non-numeric element / no frames |
+| 422 | `too_short` | Fewer frames than the model's window. States the minimum; **never padded** |
+| 422 | `bad_fps` | Outside 5–120 |
+| 422 | `too_much_missing` | More than 20% of frames missing, or a gap over 10 frames. States the fraction and longest gap |
+| 422 | `out_of_range` | Coordinates that cannot be pixels (|v| > 50 000) |
+| 422 | `bad_request` | Schema errors from FastAPI, reshaped into this format |
+| 503 | `busy` | Another analysis is running. `Retry-After: 3` |
+| 503 | `model_unavailable`, `out_of_memory` | Missing checkpoint; allocation failure |
+| 500 | `internal_error` | Anything unforeseen. Generic message, request id |
+
+**Dropout policy.** A pose estimator drops a person for a few frames when they are occluded or
+leave the shot, and a fall is exactly when that happens. Rejecting any clip containing a `null`
+would make the service unusable on the one event it exists for; silently bridging a long gap
+would invent motion the person never made. So short, sparse gaps (≤ 20% of frames, none longer
+than 10) are bridged by the same per-joint interpolation used in training and flagged
+`degraded`, and anything beyond that is refused with the numbers that caused it. A clip with
+**no** detections at all is a 200 with `no_person: true`, not a low score.
+
+`null`, `NaN` and `Infinity` all count as missing. A frame is missing when no joint has finite
+coordinates and positive confidence, so an all-zero frame — the pose-estimator convention for
+"nobody detected" — needs no special case.
+
+**One analysis at a time.** The 512 MB container holds the torch runtime (403 MB) plus one
+request's activations; two concurrent requests would exceed it and the platform would kill the
+process, taking the in-flight request with it. A fast, honest `503 busy` is better than that.
+
+### Memory gate before deploying a new checkpoint
+
+A Windows working set does not predict usage in a Linux container, so the number that decides
+is measured in one: send a 600-frame clip with `INFERENCE_CHUNK_SIZE=8` to the candidate under
+a 512 MB limit (`docker run --memory=512m --memory-swap=512m`, or a separate Render free
+service — never the live one) and read the cgroup's `memory.peak`. **Pass: ≤ 470 MB and no OOM
+kill.** The 14-channel phase-head checkpoint has not yet been measured this way.
+
 ---
 
-**Not a medical device.** The deployed checkpoint is trained on a synthetic fixture, not on
-real fall data. The UI says so above the fold, and the API repeats it in `/health`.
+**Not a medical device.** The deployed checkpoint is trained on UR Fall — real video of falls
+*acted* by young volunteers, not recorded elderly falls. The UI says so above the fold, and the
+API repeats it in `/health`.

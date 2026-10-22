@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
 from data.clips import ClipRecord, load_cache  # noqa: E402
 from data.datasets import ClipDataset, FeatureConfig  # noqa: E402
 from data.labels import LabelConfig  # noqa: E402
+from data.phases import PHASE_NAMES  # noqa: E402
 from data.skeleton import BONES, FLIP_PAIRS, JOINT_NAMES, NUM_JOINTS  # noqa: E402
 from evaluation.decision import DecisionConfig, all_triggers  # noqa: E402
 from evaluation.runner import score_clip  # noqa: E402
@@ -62,6 +63,12 @@ CHUNK_SIZE = max(1, int(os.environ.get("INFERENCE_CHUNK_SIZE", "8")))
 # platform's timeout - or exhausts what little memory remains.
 MAX_FRAMES = max(60, int(os.environ.get("MAX_FRAMES", "600")))
 
+# Bumped when the response shape changes. Version 2 added `phases` and the
+# validation flags; every addition is optional or null-able, so a client written
+# against version 1 keeps working, and a client that sees a version it does not
+# know should render the score and ignore the rest.
+SCHEMA_VERSION = 2
+
 
 @dataclass
 class LoadedModel:
@@ -86,6 +93,8 @@ class LoadedModel:
             "w_pre_frames": self.labels.w_pre,
             "with_velocity": self.features.with_velocity,
             "attention": bool(self.config["model"].get("attention", True)),
+            "has_phase_head": bool(self.config["model"].get("phase_head", False)),
+            "feature_set": self.features.resolved_feature_set,
             "causal": bool(self.config["model"].get("causal", True)),
             "explain_method": self.config.get("explain", {}).get("method", "attention"),
             "trained_on": self.config.get("data", {}).get("source", "unknown"),
@@ -237,7 +246,10 @@ def analyze(
     clip = _as_clip(keypoints, fps, impact_frame, clip_id)
     dataset = ClipDataset([clip], loaded.features, loaded.labels)
     item = dataset[0]
-    scored = score_clip(loaded.model, item, loaded.device, chunk_size=CHUNK_SIZE)
+    # torch.inference_mode is stricter than no_grad: it also skips version-counter
+    # tracking, which is memory the 512 MB container cannot spare.
+    with torch.inference_mode():
+        scored = score_clip(loaded.model, item, loaded.device, chunk_size=CHUNK_SIZE)
 
     decision = DecisionConfig(
         threshold=float(threshold if threshold is not None else loaded.decision.threshold),
@@ -273,16 +285,26 @@ def analyze(
     # owns 80% of the memory, waiting for the collector's own schedule is what
     # turns a working request into a killed container on the next one.
     scores = [round(float(s), 5) for s in scored.scores]
+    # Phases come from the model's own phase head or not at all. A checkpoint
+    # without one returns null - never zeros and never a distribution
+    # reconstructed from the imminence score, which would be a fabricated output
+    # presented as a model one.
+    phases = (
+        {"names": list(PHASE_NAMES), "probs": np.round(scored.phases, 4).tolist()}
+        if scored.phases is not None else None
+    )
     num_frames = int(clip.num_frames)
     del item, dataset, scored, clip
     gc.collect()
 
     return {
+        "schema_version": SCHEMA_VERSION,
         "clip_id": clip_id,
         "frames": num_frames,
         "fps": float(fps),
         "impact_frame": impact_frame,
         "scores": scores,
+        "phases": phases,
         "warnings": warnings,
         "decision": {
             "threshold": decision.threshold,

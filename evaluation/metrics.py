@@ -43,6 +43,11 @@ class ClipScores:
     tti: np.ndarray
     """`[T]` seconds until impact."""
 
+    phases: np.ndarray | None = None
+    """`[T, P]` per-frame phase probabilities, or None for a model with no phase
+    head. Never derived from `scores`: a phase distribution reconstructed from the
+    imminence score would be a fabricated output presented as a model one."""
+
     def __post_init__(self) -> None:
         n = self.clip.num_frames
         for name in ("scores", "labels", "tti"):

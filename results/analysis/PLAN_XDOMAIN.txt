@@ -1,0 +1,73 @@
+PRE-REGISTRATION ADDENDUM: HELD-OUT-DOMAIN EVALUATION
+Written 2026-10-12, before any run of the protocols below. Do not edit after the
+first run; add dated addenda instead. This is a separate document from PLAN.txt
+and does not change any rule in it.
+
+QUESTION
+Do the results on the combined benchmark survive a change of place and camera?
+The in-domain folds mix clips from the same rooms and cameras (and, where actors
+are unlabelled, probably the same people) across train and test. A held-out
+domain removes that.
+
+PROTOCOLS (one split each; configs/xd_<protocol>_<arm>.yaml)
+  urfd_to_le2i            train: UR Fall                       test: all Le2i
+  le2i_to_urfd            train: Le2i                          test: all UR Fall
+  leave_coffee_room_out   train: UR Fall + Le2i Home           test: Le2i Coffee room
+  leave_home_out          train: UR Fall + Le2i Coffee room    test: Le2i Home
+Validation subjects are drawn from the training side only and fix the decision
+threshold, so the test domain never influences any choice.
+
+ARMS
+  ctrl    combined_xyv      (x, y, vx, vy) features, binary head
+  phases  combined_phases   full features + four-phase head + consistency
+Seeds 1, 2, 3 for every cell (24 runs). Seed 0 is not used.
+
+REPORTED, FOR EVERY CELL
+  recall (pooled: warned / falls), absolute false-alarm count on the held-out
+  domain's normal clips, negative minutes (so the rate is interpretable),
+  mean lead time, frame AUC.
+Per protocol: the phases-minus-ctrl difference in false alarms and in recall,
+seed-averaged, with a paired clip-level bootstrap interval (same procedure as
+scripts/analyze_arms.py).
+Per arm: the DOMAIN GAP, that is held-out recall and false alarms against the
+in-domain fold results of the same arm.
+
+WHAT THIS DOCUMENT CAN CLAIM
+Nothing about the four-phase hypothesis. That is decided by PLAN.txt alone. These
+runs can only support statements of the form "the in-domain result did / did not
+carry over to a held-out domain" and measure the size of the domain gap. If the
+PLAN.txt confirmation fails, these runs are reported as a description of
+generalisation, not as evidence for the phases arm.
+
+LIMITS TO STATE WITH ANY RESULT
+Both datasets are acted falls by young volunteers. Le2i's four scenes are three
+rooms and one camera each; two of them are the held-out scenes here. Le2i has no
+actor labels, so a held-out scene removes the room and camera but not necessarily
+the people. The held-out domains are small (see the clip counts printed by the
+runner), and one false alarm is a large fraction of any count, so a difference of
+a few alarms is not distinguishable from noise.
+
+ADDENDUM 2026-10-12 (before any run): measured split sizes, seed 0 split
+  protocol                 train                   val                    test
+  urfd_to_le2i             52 clips/22 falls       18/8                   130 clips/99 falls/8.6 min normal
+  le2i_to_urfd             98 clips/75 falls       32/24                  70 clips/30 falls/5.0 min normal
+  leave_coffee_room_out    98 clips/52 falls       32/15                  70 clips/62 falls/4.7 min normal
+  leave_home_out           105 clips/68 falls      35/24                  60 clips/37 falls/4.0 min normal
+Consequences, stated now so they cannot be discovered afterwards:
+  - One false alarm is roughly 7-15 per hour on these test sets. False-alarm
+    differences of a few counts will not be called a result.
+  - urfd_to_le2i trains on only 22 falls; a poor outcome there says as much about
+    training-set size as about domain shift.
+  - Recall (over 30-99 falls) is the better-powered quantity in this document.
+
+ADDENDUM 2026-10-22: first execution invalid, rerun required
+  The first 24 runs did not test on the held-out domains. train.py overrode
+  data.split.mode with "folds" whenever --fold was given, and the runner passed
+  --folds 0, so every run tested on ordinary fold 0 (40 clips). The saved config of
+  each run records mode "folds". The error was found because recall was identical
+  across protocols whose test sets differ in size. None of those numbers were
+  published; they are kept in results/xdomain_invalid_fold0 and are not used.
+  Fix: train.py now refuses --fold together with mode holdout; the runner omits
+  --folds for these configs. scripts/verify_xdomain.py must report every run as
+  tested on its held-out domain before any result is exported. Nothing else in this
+  document (protocols, arms, seeds, reported quantities, claims) changes.

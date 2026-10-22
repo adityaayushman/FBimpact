@@ -134,6 +134,14 @@ def main(argv: list[str] | None = None) -> Path:
     if args.seed is not None:
         cfg["run"]["seed"] = args.seed
     if args.fold is not None:
+        if cfg["data"]["split"].get("mode") == "holdout":
+            # A held-out-domain protocol has exactly one split. Overriding it with a
+            # fold would silently test on a random in-domain fold, which is the
+            # opposite of what the protocol measures.
+            raise SystemExit(
+                "--fold cannot be combined with data.split.mode: holdout "
+                "(a held-out-domain run has a single split; omit --fold / --folds)"
+            )
         cfg["data"]["split"]["fold"] = args.fold
         cfg["data"]["split"]["mode"] = "folds"
     if args.run_name:

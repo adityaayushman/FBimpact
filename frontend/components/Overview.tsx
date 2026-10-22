@@ -6,12 +6,12 @@ import { Icon, Section } from "./ui";
 import { hrefFor, type ViewId } from "@/lib/route";
 import runs from "@/lib/runs.json";
 
-const EXPECTED_CONFIRM = 85; // 4 arms x seeds 1-4 x 5 folds, plus arm D seed 0 x 5 folds
+const EXPECTED_CONFIRM = 80; // confirmatory runs: 4 arms x seeds 1-4 x 5 folds (seed 0 is descriptive)
 
 const LADDER = [
   { level: "Replicated", tone: "var(--calm)", text: "The pre-impact time-weighted loss did not help on UR Fall: recall 0.633 against 0.767 with it switched off, in 3 of 3 seeds." },
-  { level: "Single seed", tone: "var(--watch)", text: "Richer features and four-phase supervision cut false alarms on the combined benchmark from 135 to 100 to 67. One seed: a hypothesis." },
-  { level: "Pre-registered", tone: "var(--imminent)", text: "Seeds 1 to 4 test that hypothesis against decision rules that were committed before any of those runs existed." },
+  { level: "Not shown", tone: "var(--watch)", text: "Four-phase supervision lowered false alarms on average (84 against 101) but not reliably: fewer in only 2 of 4 seeds, where the rule needs 3 of 4. The earlier 135 to 67 drop was mostly noise." },
+  { level: "Pre-registered", tone: "var(--imminent)", text: "The decision rules were committed before the confirmation runs existed, so the null result stands as reported: all four comparisons came out not shown." },
 ];
 
 const EXPLORE: { view: ViewId; sub?: string; icon: string; title: string; body: string }[] = [
@@ -45,7 +45,7 @@ export default function Overview() {
                  aria-label="Confirmation runs completed">
               <span style={{ width: `${pct}%` }} />
             </div>
-            <p className="card-sub">Pre-registered runs finished on seeds 1 to 4. The verdict stays pending until all are in.</p>
+            <p className="card-sub">{confirm >= EXPECTED_CONFIRM ? "Complete. All four pre-registered comparisons came out not shown." : "Pre-registered runs on seeds 1 to 4; the verdict stays pending until all are in."}</p>
           </div>
           <div className="card">
             <div className="card-title">Benchmark size</div>

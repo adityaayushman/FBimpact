@@ -1,8 +1,315 @@
 {
-  "generated_utc": "2026-10-11T17:38:34+00:00",
-  "status": "pending",
+  "generated_utc": "2026-10-22T02:01:45+00:00",
+  "status": "complete",
   "plan": "results/analysis/PLAN.txt",
-  "contrasts": [],
-  "arms": [],
-  "by_seed": []
+  "contrasts": [
+    {
+      "contrast": "B-A",
+      "means": "14-channel features",
+      "seeds": 4,
+      "clips": 200,
+      "d_fa": -7.5,
+      "d_fa_lo": -18.5,
+      "d_fa_hi": 4.2562,
+      "d_recall": 0.0213,
+      "d_recall_lo": -0.0194,
+      "d_recall_hi": 0.064,
+      "seeds_fewer_fa": "2/4",
+      "matched_recall": "met",
+      "verdict": "not shown",
+      "level": "not_shown",
+      "wording": "Not reproducibly different from seed-to-seed variation in the confirmation seeds."
+    },
+    {
+      "contrast": "C-B",
+      "means": "phase supervision (head + loss + consistency)",
+      "seeds": 4,
+      "clips": 200,
+      "d_fa": -17.25,
+      "d_fa_lo": -28.7563,
+      "d_fa_hi": -6.75,
+      "d_recall": -0.0097,
+      "d_recall_lo": -0.0562,
+      "d_recall_hi": 0.0368,
+      "seeds_fewer_fa": "2/4",
+      "matched_recall": "met",
+      "verdict": "not shown",
+      "level": "not_shown",
+      "wording": "Not reproducibly different from seed-to-seed variation in the confirmation seeds."
+    },
+    {
+      "contrast": "D-B",
+      "means": "phase head + loss alone",
+      "seeds": 4,
+      "clips": 200,
+      "d_fa": -23.5,
+      "d_fa_lo": -34.5,
+      "d_fa_hi": -13.5,
+      "d_recall": 0.0271,
+      "d_recall_lo": -0.0233,
+      "d_recall_hi": 0.0756,
+      "seeds_fewer_fa": "2/4",
+      "matched_recall": "met",
+      "verdict": "not shown",
+      "level": "not_shown",
+      "wording": "Not reproducibly different from seed-to-seed variation in the confirmation seeds."
+    },
+    {
+      "contrast": "C-D",
+      "means": "consistency coupling",
+      "seeds": 4,
+      "clips": 200,
+      "d_fa": 6.25,
+      "d_fa_lo": 2.0,
+      "d_fa_hi": 10.5,
+      "d_recall": -0.0368,
+      "d_recall_lo": -0.0659,
+      "d_recall_hi": -0.0078,
+      "seeds_fewer_fa": "1/4",
+      "matched_recall": "met",
+      "verdict": "not shown",
+      "level": "not_shown",
+      "wording": "Not reproducibly different from seed-to-seed variation in the confirmation seeds."
+    }
+  ],
+  "arms": [
+    {
+      "arm": "combined_xyv",
+      "n_seeds": 4,
+      "recall_mean": 0.6318,
+      "recall_sd": 0.0568,
+      "fa_mean": 108.25,
+      "fa_sd": 18.2277,
+      "lead_mean": 0.4255
+    },
+    {
+      "arm": "combined",
+      "n_seeds": 4,
+      "recall_mean": 0.6531,
+      "recall_sd": 0.0531,
+      "fa_mean": 100.75,
+      "fa_sd": 25.1976,
+      "lead_mean": 0.4332
+    },
+    {
+      "arm": "combined_phases",
+      "n_seeds": 4,
+      "recall_mean": 0.6434,
+      "recall_sd": 0.019,
+      "fa_mean": 83.5,
+      "fa_sd": 4.6547,
+      "lead_mean": 0.4349
+    },
+    {
+      "arm": "combined_nocons",
+      "n_seeds": 4,
+      "recall_mean": 0.6802,
+      "recall_sd": 0.0331,
+      "fa_mean": 77.25,
+      "fa_sd": 11.5578,
+      "lead_mean": 0.41
+    }
+  ],
+  "by_seed": [
+    {
+      "arm": "combined",
+      "seed": 0,
+      "role": "descriptive",
+      "recall": 0.68217,
+      "warned": 88,
+      "falls": 129,
+      "fa": 100,
+      "lead": 0.40267
+    },
+    {
+      "arm": "combined",
+      "seed": 1,
+      "role": "confirmatory",
+      "recall": 0.72868,
+      "warned": 94,
+      "falls": 129,
+      "fa": 77,
+      "lead": 0.44881
+    },
+    {
+      "arm": "combined",
+      "seed": 2,
+      "role": "confirmatory",
+      "recall": 0.60465,
+      "warned": 78,
+      "falls": 129,
+      "fa": 133,
+      "lead": 0.42968
+    },
+    {
+      "arm": "combined",
+      "seed": 3,
+      "role": "confirmatory",
+      "recall": 0.63566,
+      "warned": 82,
+      "falls": 129,
+      "fa": 85,
+      "lead": 0.42632
+    },
+    {
+      "arm": "combined",
+      "seed": 4,
+      "role": "confirmatory",
+      "recall": 0.64341,
+      "warned": 83,
+      "falls": 129,
+      "fa": 108,
+      "lead": 0.42793
+    },
+    {
+      "arm": "combined_nocons",
+      "seed": 0,
+      "role": "descriptive",
+      "recall": 0.67442,
+      "warned": 87,
+      "falls": 129,
+      "fa": 59,
+      "lead": 0.395
+    },
+    {
+      "arm": "combined_nocons",
+      "seed": 1,
+      "role": "confirmatory",
+      "recall": 0.64341,
+      "warned": 83,
+      "falls": 129,
+      "fa": 86,
+      "lead": 0.39522
+    },
+    {
+      "arm": "combined_nocons",
+      "seed": 2,
+      "role": "confirmatory",
+      "recall": 0.66667,
+      "warned": 86,
+      "falls": 129,
+      "fa": 61,
+      "lead": 0.39145
+    },
+    {
+      "arm": "combined_nocons",
+      "seed": 3,
+      "role": "confirmatory",
+      "recall": 0.72093,
+      "warned": 93,
+      "falls": 129,
+      "fa": 85,
+      "lead": 0.42727
+    },
+    {
+      "arm": "combined_nocons",
+      "seed": 4,
+      "role": "confirmatory",
+      "recall": 0.68992,
+      "warned": 89,
+      "falls": 129,
+      "fa": 77,
+      "lead": 0.42608
+    },
+    {
+      "arm": "combined_phases",
+      "seed": 0,
+      "role": "descriptive",
+      "recall": 0.70543,
+      "warned": 91,
+      "falls": 129,
+      "fa": 67,
+      "lead": 0.42474
+    },
+    {
+      "arm": "combined_phases",
+      "seed": 1,
+      "role": "confirmatory",
+      "recall": 0.62016,
+      "warned": 80,
+      "falls": 129,
+      "fa": 82,
+      "lead": 0.40773
+    },
+    {
+      "arm": "combined_phases",
+      "seed": 2,
+      "role": "confirmatory",
+      "recall": 0.64341,
+      "warned": 83,
+      "falls": 129,
+      "fa": 83,
+      "lead": 0.45974
+    },
+    {
+      "arm": "combined_phases",
+      "seed": 3,
+      "role": "confirmatory",
+      "recall": 0.66667,
+      "warned": 86,
+      "falls": 129,
+      "fa": 90,
+      "lead": 0.43571
+    },
+    {
+      "arm": "combined_phases",
+      "seed": 4,
+      "role": "confirmatory",
+      "recall": 0.64341,
+      "warned": 83,
+      "falls": 129,
+      "fa": 79,
+      "lead": 0.43626
+    },
+    {
+      "arm": "combined_xyv",
+      "seed": 0,
+      "role": "descriptive",
+      "recall": 0.67442,
+      "warned": 87,
+      "falls": 129,
+      "fa": 135,
+      "lead": 0.4327
+    },
+    {
+      "arm": "combined_xyv",
+      "seed": 1,
+      "role": "confirmatory",
+      "recall": 0.56589,
+      "warned": 73,
+      "falls": 129,
+      "fa": 110,
+      "lead": 0.44406
+    },
+    {
+      "arm": "combined_xyv",
+      "seed": 2,
+      "role": "confirmatory",
+      "recall": 0.66667,
+      "warned": 86,
+      "falls": 129,
+      "fa": 122,
+      "lead": 0.43186
+    },
+    {
+      "arm": "combined_xyv",
+      "seed": 3,
+      "role": "confirmatory",
+      "recall": 0.68992,
+      "warned": 89,
+      "falls": 129,
+      "fa": 119,
+      "lead": 0.40341
+    },
+    {
+      "arm": "combined_xyv",
+      "seed": 4,
+      "role": "confirmatory",
+      "recall": 0.60465,
+      "warned": 78,
+      "falls": 129,
+      "fa": 82,
+      "lead": 0.42256
+    }
+  ]
 }

@@ -59,3 +59,15 @@ Consequences, stated now so they cannot be discovered afterwards:
   - urfd_to_le2i trains on only 22 falls; a poor outcome there says as much about
     training-set size as about domain shift.
   - Recall (over 30-99 falls) is the better-powered quantity in this document.
+
+ADDENDUM 2026-10-22: first execution invalid, rerun required
+  The first 24 runs did not test on the held-out domains. train.py overrode
+  data.split.mode with "folds" whenever --fold was given, and the runner passed
+  --folds 0, so every run tested on ordinary fold 0 (40 clips). The saved config of
+  each run records mode "folds". The error was found because recall was identical
+  across protocols whose test sets differ in size. None of those numbers were
+  published; they are kept in results/xdomain_invalid_fold0 and are not used.
+  Fix: train.py now refuses --fold together with mode holdout; the runner omits
+  --folds for these configs. scripts/verify_xdomain.py must report every run as
+  tested on its held-out domain before any result is exported. Nothing else in this
+  document (protocols, arms, seeds, reported quantities, claims) changes.

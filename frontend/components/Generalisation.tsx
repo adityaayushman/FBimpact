@@ -1,7 +1,7 @@
 "use client";
 
 import data from "@/lib/generalisation.json";
-import { PageHeader } from "./ui";
+import { PageHeader, Section } from "./ui";
 
 type Protocol = (typeof data.protocols)[number];
 type Run = { seed: number; recall: number | null; false_alarms: number | null; normal_hours: number | null };
@@ -47,6 +47,9 @@ function ProtocolCard({ p }: { p: Protocol }) {
         const runs = arm.runs as Run[];
         const recalls = runs.map((r) => r.recall).filter((v): v is number => v != null);
         const alarms = runs.map((r) => r.false_alarms).filter((v): v is number => v != null);
+        const perHour = runs
+          .map((r) => (r.false_alarms != null && r.normal_hours ? r.false_alarms / r.normal_hours : null))
+          .filter((v): v is number => v != null);
         const ref = arm.in_domain?.recall ?? null;
         return (
           <div key={id} style={{ marginTop: 10 }}>
@@ -59,6 +62,7 @@ function ProtocolCard({ p }: { p: Protocol }) {
               <p className="card-sub mono" style={{ margin: "2px 0 0 0" }}>
                 recall {pct(mean(recalls))} over {runs.length} seed{runs.length > 1 ? "s" : ""}
                 {" · "}false alarms {alarms.join(", ")}
+                {perHour.length > 0 && <> (≈ {Math.round(mean(perHour) ?? 0)} per hour)</>}
                 {ref != null && <> {" · "}in-domain {pct(ref)} (gap {pct((mean(recalls) ?? 0) - ref)})</>}
               </p>
             )}
@@ -84,7 +88,46 @@ export default function Generalisation() {
         for the same arm. Nothing here is estimated for cells that have not run.
       </p>
 
-      <div className="cols-2">
+      {data.status === "complete" && (
+        <Section title="What the held-out runs show">
+          <div className="stack">
+            <div className="card">
+              <div className="card-title">Recall depends heavily on the domain, in both directions</div>
+              <p className="card-sub">
+                Between a quarter and 0.4 when training on UR Fall alone or leaving out the Coffee
+                room, but about 0.9 for Le2i to UR Fall and when leaving out the Home scene. It did
+                not fall uniformly below the in-domain figure.
+              </p>
+            </div>
+            <div className="card">
+              <div className="card-title">High recall did not mean a good detector</div>
+              <p className="card-sub">
+                False alarms stay in the hundreds per hour in every protocol (shown on each card).
+                The high recalls were bought with a permissive threshold, chosen on the training
+                domain&apos;s validation clips, that does not transfer to a new place.
+              </p>
+            </div>
+            <div className="card">
+              <div className="card-title">The four-phase arm shows no consistent benefit</div>
+              <p className="card-sub">
+                Slightly higher recall in two protocols and lower in two. Trained on UR Fall alone it
+                collapsed in one seed (recall 0.03). With three seeds and test sets this small none of
+                the differences is distinguishable from noise, which matches the confirmation result.
+              </p>
+            </div>
+            <div className="card">
+              <div className="card-title">Why the domains differ so much is not established</div>
+              <p className="card-sub">
+                The training sets differ in size (UR Fall alone has only 22 training falls) and the test
+                sets differ in difficulty (every UR Fall fall has the same fixed 30-frame onset). These
+                runs measure the size of the shift, not its cause.
+              </p>
+            </div>
+          </div>
+        </Section>
+      )}
+
+      <div className="cols-2" style={{ marginTop: 28 }}>
         {data.protocols.map((p) => <ProtocolCard key={p.id} p={p} />)}
       </div>
 

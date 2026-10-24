@@ -1,8 +1,8 @@
 {
- "generated_utc": "2026-10-11T18:30:48+00:00",
+ "generated_utc": "2026-10-24T11:30:24+00:00",
  "plan": "results/analysis/PLAN_XDOMAIN.txt",
- "status": "pending",
- "runs_done": 0,
+ "status": "complete",
+ "runs_done": 24,
  "runs_expected": 24,
  "limits": [
   "Both datasets are acted falls by young volunteers.",
@@ -36,19 +36,79 @@
    "arms": {
     "ctrl": {
      "label": "Control \u00b7 (x, y, vx, vy)",
-     "runs": [],
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.404,
+       "false_alarms": 82.0,
+       "normal_hours": 0.3437,
+       "lead": 0.4687,
+       "auc": 0.8327
+      },
+      {
+       "seed": 2,
+       "recall": 0.3737,
+       "false_alarms": 19.0,
+       "normal_hours": 0.3437,
+       "lead": 0.4296,
+       "auc": 0.9063
+      },
+      {
+       "seed": 3,
+       "recall": 0.4545,
+       "false_alarms": 52.0,
+       "normal_hours": 0.3437,
+       "lead": 0.3992,
+       "auc": 0.8889
+      }
+     ],
      "in_domain": {
-      "runs": 5,
-      "recall": 0.5659,
+      "runs": 15,
+      "recall": 0.6408,
       "seeds": [
-       1
+       1,
+       2,
+       3
       ]
      }
     },
     "phases": {
      "label": "Arm C \u00b7 full features + four-phase head",
-     "runs": [],
-     "in_domain": null
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.3636,
+       "false_alarms": 23.0,
+       "normal_hours": 0.3437,
+       "lead": 0.3643,
+       "auc": 0.8077
+      },
+      {
+       "seed": 2,
+       "recall": 0.0303,
+       "false_alarms": 10.0,
+       "normal_hours": 0.3437,
+       "lead": 0.2978,
+       "auc": 0.647
+      },
+      {
+       "seed": 3,
+       "recall": 0.3636,
+       "false_alarms": 40.0,
+       "normal_hours": 0.3437,
+       "lead": 0.4207,
+       "auc": 0.799
+      }
+     ],
+     "in_domain": {
+      "runs": 15,
+      "recall": 0.6434,
+      "seeds": [
+       1,
+       2,
+       3
+      ]
+     }
     }
    }
   },
@@ -77,19 +137,79 @@
    "arms": {
     "ctrl": {
      "label": "Control \u00b7 (x, y, vx, vy)",
-     "runs": [],
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.9667,
+       "false_alarms": 54.0,
+       "normal_hours": 0.0974,
+       "lead": 0.2805,
+       "auc": 0.8917
+      },
+      {
+       "seed": 2,
+       "recall": 0.9667,
+       "false_alarms": 55.0,
+       "normal_hours": 0.0974,
+       "lead": 0.3586,
+       "auc": 0.9214
+      },
+      {
+       "seed": 3,
+       "recall": 0.8667,
+       "false_alarms": 81.0,
+       "normal_hours": 0.0974,
+       "lead": 0.4192,
+       "auc": 0.9114
+      }
+     ],
      "in_domain": {
-      "runs": 5,
-      "recall": 0.5659,
+      "runs": 15,
+      "recall": 0.6408,
       "seeds": [
-       1
+       1,
+       2,
+       3
       ]
      }
     },
     "phases": {
      "label": "Arm C \u00b7 full features + four-phase head",
-     "runs": [],
-     "in_domain": null
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.8667,
+       "false_alarms": 48.0,
+       "normal_hours": 0.0974,
+       "lead": 0.3526,
+       "auc": 0.9463
+      },
+      {
+       "seed": 2,
+       "recall": 0.9,
+       "false_alarms": 90.0,
+       "normal_hours": 0.0974,
+       "lead": 0.4074,
+       "auc": 0.8907
+      },
+      {
+       "seed": 3,
+       "recall": 0.9667,
+       "false_alarms": 56.0,
+       "normal_hours": 0.0974,
+       "lead": 0.4011,
+       "auc": 0.9471
+      }
+     ],
+     "in_domain": {
+      "runs": 15,
+      "recall": 0.6434,
+      "seeds": [
+       1,
+       2,
+       3
+      ]
+     }
     }
    }
   },
@@ -118,19 +238,79 @@
    "arms": {
     "ctrl": {
      "label": "Control \u00b7 (x, y, vx, vy)",
-     "runs": [],
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.3387,
+       "false_alarms": 20.0,
+       "normal_hours": 0.216,
+       "lead": 0.459,
+       "auc": 0.8807
+      },
+      {
+       "seed": 2,
+       "recall": 0.3548,
+       "false_alarms": 22.0,
+       "normal_hours": 0.216,
+       "lead": 0.4491,
+       "auc": 0.8611
+      },
+      {
+       "seed": 3,
+       "recall": 0.3548,
+       "false_alarms": 21.0,
+       "normal_hours": 0.216,
+       "lead": 0.4691,
+       "auc": 0.84
+      }
+     ],
      "in_domain": {
-      "runs": 5,
-      "recall": 0.5659,
+      "runs": 15,
+      "recall": 0.6408,
       "seeds": [
-       1
+       1,
+       2,
+       3
       ]
      }
     },
     "phases": {
      "label": "Arm C \u00b7 full features + four-phase head",
-     "runs": [],
-     "in_domain": null
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.4032,
+       "false_alarms": 23.0,
+       "normal_hours": 0.216,
+       "lead": 0.4704,
+       "auc": 0.8866
+      },
+      {
+       "seed": 2,
+       "recall": 0.2903,
+       "false_alarms": 46.0,
+       "normal_hours": 0.216,
+       "lead": 0.4689,
+       "auc": 0.958
+      },
+      {
+       "seed": 3,
+       "recall": 0.5,
+       "false_alarms": 58.0,
+       "normal_hours": 0.216,
+       "lead": 0.4116,
+       "auc": 0.9177
+      }
+     ],
+     "in_domain": {
+      "runs": 15,
+      "recall": 0.6434,
+      "seeds": [
+       1,
+       2,
+       3
+      ]
+     }
     }
    }
   },
@@ -159,19 +339,79 @@
    "arms": {
     "ctrl": {
      "label": "Control \u00b7 (x, y, vx, vy)",
-     "runs": [],
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.8919,
+       "false_alarms": 11.0,
+       "normal_hours": 0.1265,
+       "lead": 0.4444,
+       "auc": 0.9845
+      },
+      {
+       "seed": 2,
+       "recall": 0.8649,
+       "false_alarms": 20.0,
+       "normal_hours": 0.1265,
+       "lead": 0.4271,
+       "auc": 0.9826
+      },
+      {
+       "seed": 3,
+       "recall": 0.8378,
+       "false_alarms": 23.0,
+       "normal_hours": 0.1265,
+       "lead": 0.4825,
+       "auc": 0.9867
+      }
+     ],
      "in_domain": {
-      "runs": 5,
-      "recall": 0.5659,
+      "runs": 15,
+      "recall": 0.6408,
       "seeds": [
-       1
+       1,
+       2,
+       3
       ]
      }
     },
     "phases": {
      "label": "Arm C \u00b7 full features + four-phase head",
-     "runs": [],
-     "in_domain": null
+     "runs": [
+      {
+       "seed": 1,
+       "recall": 0.8919,
+       "false_alarms": 12.0,
+       "normal_hours": 0.1265,
+       "lead": 0.3737,
+       "auc": 0.9842
+      },
+      {
+       "seed": 2,
+       "recall": 0.9189,
+       "false_alarms": 7.0,
+       "normal_hours": 0.1265,
+       "lead": 0.2855,
+       "auc": 0.9584
+      },
+      {
+       "seed": 3,
+       "recall": 0.8649,
+       "false_alarms": 19.0,
+       "normal_hours": 0.1265,
+       "lead": 0.4245,
+       "auc": 0.9789
+      }
+     ],
+     "in_domain": {
+      "runs": 15,
+      "recall": 0.6434,
+      "seeds": [
+       1,
+       2,
+       3
+      ]
+     }
     }
    }
   }

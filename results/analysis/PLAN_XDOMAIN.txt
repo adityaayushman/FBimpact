@@ -71,3 +71,17 @@ ADDENDUM 2026-10-22: first execution invalid, rerun required
   --folds for these configs. scripts/verify_xdomain.py must report every run as
   tested on its held-out domain before any result is exported. Nothing else in this
   document (protocols, arms, seeds, reported quantities, claims) changes.
+
+ADDENDUM 2026-10-24: results of the corrected execution
+  All 24 runs (4 protocols x 2 arms x seeds 1-3) completed, and scripts/verify_xdomain.py
+  reports 24 of 24 tested on their held-out domain. Per-run values are in
+  results/analysis/xdomain_by_run.csv. Descriptive only, as pre-registered:
+  - Recall depends strongly on the domain, in both directions (about 0.25-0.40 for
+    UR Fall -> Le2i and leave-Coffee-room-out; about 0.86-0.93 for Le2i -> UR Fall and
+    leave-Home-out), against 0.64 in-domain. It does not fall uniformly.
+  - False alarms stay in the hundreds per hour in every protocol, so the high recalls
+    were bought with a permissive threshold chosen on training-domain validation clips.
+  - The four-phase arm shows no consistent difference from the control (higher recall
+    in two protocols, lower in two; one seed collapsed to recall 0.03 on UR Fall -> Le2i).
+    No claim about the four-phase hypothesis is made here, per this document's scope.
+  - Causes of the domain differences are not identified by these runs.

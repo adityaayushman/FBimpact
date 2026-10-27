@@ -55,6 +55,31 @@ CONTRASTS = [
 ]
 
 
+# PLAN_COMPLETION.txt. `--mode rq3` compares the pre-impact loss on the combined benchmark;
+# `--mode ablation-urfd|ablation-le2i` compares each ablated variant with the full model.
+# The default mode is unchanged and still applies PLAN.txt.
+RQ3_ARMS = {"combined": "B  lambda 0 (plain loss)", "combined_preimpact": "G  lambda 1.5 (pre-impact weighted)"}
+RQ3_CONTRASTS = [("G-B", "combined_preimpact", "combined", "pre-impact time-weighted loss (lambda 1.5 vs 0)")]
+ABLATION_VARIANTS = ["ours_preimpact", "baseline_stgcn", "no_preimpact_loss", "no_temporal", "no_velocity", "no_grounding"]
+ABLATION_ARMS = {v: v for v in ABLATION_VARIANTS}
+ABLATION_CONTRASTS = [(f"{v}-full", v, "ours_preimpact", f"removing/changing: {v}") for v in ABLATION_VARIANTS[1:]]
+
+
+def seed_majority(n: int) -> int:
+    """Seeds that must agree: 3 of 4, 2 of 3 (the ratios fixed in the plans)."""
+    return {4: 3, 3: 2}.get(n, max(1, int(np.ceil(0.75 * n))))
+
+
+def two_sided(lo: float, hi: float, per_seed: list[float]) -> str:
+    """"lower" / "higher" when the interval excludes zero and enough seeds agree, else "not shown"."""
+    need = seed_majority(len(per_seed))
+    if hi < 0 and sum(d < 0 for d in per_seed) >= need:
+        return "lower"
+    if lo > 0 and sum(d > 0 for d in per_seed) >= need:
+        return "higher"
+    return "not shown"
+
+
 # ----------------------------------------------------------- matched recall (3)
 def matched_recall_condition(rows: list[dict], treat: str, ref: str, seeds: list[int]) -> str:
     """Decision-rule condition 3: fewer false alarms at the same recall.
@@ -259,13 +284,30 @@ def fmt(x, d=3):
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--results", nargs="*", default=["results/combined", "results/combined_confirm"])
-    parser.add_argument("--caches", nargs="*", default=["data/cache/urfd", "data/cache/le2i"])
-    parser.add_argument("--confirmatory", nargs="*", type=int, default=[1, 2, 3, 4])
-    parser.add_argument("--descriptive", nargs="*", type=int, default=[0])
-    parser.add_argument("--out", default="results/analysis")
+    parser.add_argument("--mode", default="arms", choices=["arms", "rq3", "ablation-urfd", "ablation-le2i"],
+                        help="arms: PLAN.txt (default); rq3 / ablation-*: PLAN_COMPLETION.txt")
+    parser.add_argument("--results", nargs="*", default=None)
+    parser.add_argument("--caches", nargs="*", default=None)
+    parser.add_argument("--confirmatory", nargs="*", type=int, default=None)
+    parser.add_argument("--descriptive", nargs="*", type=int, default=None)
+    parser.add_argument("--out", default=None)
     parser.add_argument("--boot", type=int, default=2000)
     args = parser.parse_args(argv)
+
+    defaults = {
+        "arms": dict(results=["results/combined", "results/combined_confirm"], caches=["data/cache/urfd", "data/cache/le2i"],
+                     confirmatory=[1, 2, 3, 4], descriptive=[0], out="results/analysis", arms=ARMS, contrasts=CONTRASTS),
+        "rq3": dict(results=["results/combined_confirm", "results/combined_rq3"], caches=["data/cache/urfd", "data/cache/le2i"],
+                    confirmatory=[1, 2, 3, 4], descriptive=[], out="results/analysis/rq3", arms=RQ3_ARMS, contrasts=RQ3_CONTRASTS),
+        "ablation-urfd": dict(results=["results/urfd"], caches=["data/cache/urfd"], confirmatory=[0, 1, 2], descriptive=[],
+                              out="results/analysis/ablation_urfd", arms=ABLATION_ARMS, contrasts=ABLATION_CONTRASTS),
+        "ablation-le2i": dict(results=["results/le2i"], caches=["data/cache/le2i"], confirmatory=[0, 1, 2], descriptive=[],
+                              out="results/analysis/ablation_le2i", arms=ABLATION_ARMS, contrasts=ABLATION_CONTRASTS),
+    }[args.mode]
+    for key in ("results", "caches", "confirmatory", "descriptive", "out"):
+        if getattr(args, key) is None:
+            setattr(args, key, defaults[key])
+    arms_map, contrasts = defaults["arms"], defaults["contrasts"]
 
     out = ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
@@ -279,6 +321,8 @@ def main(argv: list[str] | None = None) -> int:
     # 1. per arm and seed ------------------------------------------------------
     rows = []
     for (arm, seed), recs in sorted(runs.items()):
+        if args.mode != "arms" and arm not in arms_map:
+            continue
         s = summarise(recs)
         rows.append({"arm": arm, "seed": seed,
                      "role": "confirmatory" if seed in args.confirmatory else "descriptive",
@@ -293,7 +337,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # 2. across confirmatory seeds --------------------------------------------
     summary = []
-    for arm in ARMS:
+    for arm in arms_map:
         cells = [r for r in rows if r["arm"] == arm and r["seed"] in args.confirmatory]
         if not cells:
             continue
@@ -312,7 +356,7 @@ def main(argv: list[str] | None = None) -> int:
     print("\ncontrasts (confirmatory seeds only; a negative d_FA means fewer false alarms)")
     if not matched_rows:
         print("  (no matched_recall.csv yet: condition 3 will read 'not computed')")
-    for name, treat, ref, meaning in CONTRASTS:
+    for name, treat, ref, meaning in contrasts:
         seeds = [s for s in args.confirmatory if (treat, s) in runs and (ref, s) in runs]
         if not seeds:
             print(f"  {name}: no complete confirmatory seeds yet")
@@ -333,7 +377,7 @@ def main(argv: list[str] | None = None) -> int:
             verdict = "fewer false alarms at the default threshold; not shown at matched recall"
         else:
             verdict = "conditions 1-2 met; condition 3 (matched recall) not computed"
-        contrast_rows.append({
+        row = {
             "contrast": name, "means": meaning, "seeds": len(seeds), "clips": len(universe),
             **{k: round(v, 4) for k, v in stats.items()},
             "seeds_fewer_fa": f"{fewer}/{len(seeds)}",
@@ -341,10 +385,25 @@ def main(argv: list[str] | None = None) -> int:
             "cond3_matched_recall": cond3,
             "recall_ci_excludes_zero": rec_ok,
             "fa_verdict": verdict,
-        })
+        }
+        if args.mode != "arms":
+            rec_per_seed = [summarise(runs[(treat, s)])["recall"] - summarise(runs[(ref, s)])["recall"] for s in seeds]
+            lead_t = [summarise(runs[(treat, s)])["lead"] for s in seeds]
+            lead_r = [summarise(runs[(ref, s)])["lead"] for s in seeds]
+            row.update({
+                "recall_verdict": two_sided(stats["d_recall_lo"], stats["d_recall_hi"], rec_per_seed),
+                "fa_two_sided": two_sided(stats["d_fa_lo"], stats["d_fa_hi"], per_seed),
+                "seeds_lower_recall": f"{sum(d < 0 for d in rec_per_seed)}/{len(seeds)}",
+                "seeds_longer_lead": f"{sum(a > b for a, b in zip(lead_t, lead_r))}/{len(seeds)}",
+                "lead_mean_treat": round(float(np.nanmean(lead_t)), 4), "lead_mean_ref": round(float(np.nanmean(lead_r)), 4),
+            })
+        contrast_rows.append(row)
         print(f"  {name:<4} dFA {stats['d_fa']:+6.1f} [{stats['d_fa_lo']:+6.1f}, {stats['d_fa_hi']:+6.1f}]  "
               f"dRecall {stats['d_recall']:+.3f} [{stats['d_recall_lo']:+.3f}, {stats['d_recall_hi']:+.3f}]  "
-              f"fewer FA in {fewer}/{len(seeds)} seeds  -> {contrast_rows[-1]['fa_verdict']}")
+              f"fewer FA in {fewer}/{len(seeds)} seeds  -> {contrast_rows[-1]['fa_verdict']}"
+              + (f"  | recall: {contrast_rows[-1]['recall_verdict']}, FA two-sided: {contrast_rows[-1]['fa_two_sided']}, "
+                 f"lead {contrast_rows[-1]['lead_mean_treat']:.3f} vs {contrast_rows[-1]['lead_mean_ref']:.3f}"
+                 if args.mode != "arms" else ""))
     write_csv(out / "contrasts.csv", contrast_rows)
 
     # 4. per dataset -----------------------------------------------------------

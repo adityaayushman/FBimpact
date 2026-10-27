@@ -1,0 +1,13 @@
+# ARM G (PLAN_COMPLETION.txt, E3): arm B with the pre-impact time-weighted loss switched ON.
+#
+# Identical to combined.yaml (arm B) in every respect except loss.lam, which is the
+# project's default pre-impact weight (1.5) instead of 0. Arm B's confirmation-grid runs are
+# the paired reference, so any difference is attributable to the objective alone.
+
+_base_: combined.yaml
+
+run:
+  name: combined_preimpact
+
+loss:
+  lam: 1.5

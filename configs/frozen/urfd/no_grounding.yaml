@@ -1,0 +1,95 @@
+# Frozen for PLAN_COMPLETION.txt E2: saved config of an existing run.
+run:
+  name: ablation_no_grounding
+  seed: 0
+  seeds:
+  - 0
+  - 1
+  - 2
+  device: auto
+  deterministic: false
+  results_dir: results\urfd
+data:
+  cache_dir: data/cache/urfd
+  source: synthetic
+  onsets: null
+  split:
+    mode: folds
+    num_folds: 5
+    fold: 0
+    val_fraction: 0.25
+    test_fraction: 0.2
+    seed: 0
+features:
+  window: 30
+  stride: 3
+  conf_threshold: 0.35
+  with_velocity: true
+  temporal_jitter: 2
+labels:
+  w_pre: 20
+  post_impact: ignore
+augment:
+  enabled: true
+  flip_prob: 0.5
+  scale_range:
+  - 0.9
+  - 1.1
+  noise_std: 0.015
+  rotate_deg: 0.0
+model:
+  name: stgcn
+  base_channels: 64
+  blocks:
+  - - 64
+    - 1
+  - - 64
+    - 1
+  - - 128
+    - 1
+  - - 128
+    - 1
+  kernel_size: 7
+  dropout: 0.1
+  graph_strategy: spatial
+  max_hop: 1
+  causal: true
+  edge_importance: true
+  attention: false
+  attention_hidden: 32
+  temporal_pool: false
+loss:
+  lam: 1.5
+  w_pre_seconds: 0.67
+  pos_weight: null
+  max_pos_weight: 20.0
+  focal_gamma: 0.0
+  label_smoothing: 0.0
+train:
+  epochs: 45
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.0001
+  scheduler: cosine
+  warmup_epochs: 2
+  grad_clip: 5.0
+  amp: true
+  num_workers: 0
+  eval_every: 1
+  patience: 12
+decision:
+  threshold: 0.7
+  persistence: 3
+  refractory_frames: 30
+  early_trigger: false_alarm
+  tolerance_frames: 0
+  select_on_val: true
+  max_false_alarms_per_hour: 2.0
+  objective: mean_lead_time
+explain:
+  enabled: true
+  method: gradient_input
+  baseline: zero
+  num_random: 5
+  max_warnings: 40
+  top_k: 3

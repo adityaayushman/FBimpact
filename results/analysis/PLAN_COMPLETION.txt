@@ -1,0 +1,81 @@
+Pre-registration: completing the research programme (three items)
+=================================================================
+Written 2026-10-27, BEFORE any run of the experiments below. Do not edit after the first
+run starts; add a dated addendum instead. PLAN.txt (confirmation grid) and PLAN_XDOMAIN.txt
+(held-out domains) are unchanged and remain the authority for what they cover.
+
+Why these three
+  An audit of the site's own promises against what was run found three gaps:
+  (a) RQ2 asks whether joint explanations are faithful. Only the "attention" method was
+      evaluated at scale (100 runs); "gradient_input" ran on 8; "gradient" and "occlusion"
+      never ran, and no statistical answer pooled the results.
+  (b) The Method page says every ablation cell is a mean +/- sd over seeds {0, 1, 2}. On
+      UR Fall three variants have seed 0 only; on Le2i two variants have no runs and the
+      others are single-seed or missing folds.
+  (c) RQ3 (does an explicit pre-impact objective trade recall or false alarms for lead
+      time?) was answered only on UR Fall (30 falls). It was never tested on the combined
+      benchmark (129 falls).
+  Not run, deliberately: arm F (shuffled phase labels). Phase supervision was not shown to
+  help (PLAN.txt), so a control for a null result would not be informative.
+
+----------------------------------------------------------------------------------------
+E1  Explanation methods compared on the same models (RQ2)
+----------------------------------------------------------------------------------------
+Models     The 40 confirmation-grid checkpoints of arm B (combined) and arm C
+           (combined_phases): seeds 1-4, folds 0-4. No retraining; the saved best.pt is
+           re-scored on the same test clips with the same decision rule.
+Methods    attention, gradient, gradient_input, occlusion (explain.method). Baseline "zero".
+Quantity   Per run: deletion gap (random-order AUC minus relevance-order AUC after deleting
+           joints) and insertion gap (relevance-order minus random-order AUC), weighted by
+           the number of explanations the run scored. Pooled per method with a bootstrap
+           95% interval that resamples runs (the run, not the explanation, is the unit).
+Rules      "Method X is more faithful than attention" requires the paired difference
+           (same checkpoint) in BOTH gaps to have a 95% interval entirely above zero.
+           "A method's explanations are faithful" requires both of its pooled gaps to have
+           95% intervals entirely above zero. Otherwise "not shown". Arm B and arm C are
+           reported separately and pooled.
+Claims     Only about the model's reliance on the named joints (deletion/insertion), never
+           about causal importance in the world and never about clinical meaning.
+
+----------------------------------------------------------------------------------------
+E2  Complete the ablation grid to seeds {0, 1, 2} x 5 folds (RQ3 support)
+----------------------------------------------------------------------------------------
+Runs       UR Fall: no_temporal, no_velocity, no_grounding at seeds 1 and 2 (30 runs).
+           Le2i: all six variants (ours_preimpact, baseline_stgcn, no_preimpact_loss,
+           no_temporal, no_velocity, no_grounding) up to seeds 0, 1, 2 x 5 folds, skipping
+           what already exists (about 75 runs).
+Settings   Each new run uses the SAVED config of the existing run of that variant, so only
+           the seed (and, for the two Le2i variants that never ran, the ablation switch)
+           differs. Explanations stay on, as in the existing runs.
+Analysis   Each ablated variant against the full model (ours_preimpact) on the same
+           benchmark, seeds 0-2, clips resampled once and shared across seeds (PLAN.txt
+           machinery). Metrics: pooled recall (warned/falls) and false-alarm count.
+Rules      "Removing component X changes recall (or false alarms)" requires the 95%
+           interval of the seed-averaged paired difference to exclude zero AND the same
+           sign in at least 2 of 3 seeds. Otherwise "not shown". Lead time is reported,
+           not tested. There are 5 variants x 2 benchmarks x 2 metrics = 20 comparisons and
+           no multiplicity correction is applied, so an isolated finding is read cautiously.
+
+----------------------------------------------------------------------------------------
+E3  The pre-impact objective on the combined benchmark (RQ3)
+----------------------------------------------------------------------------------------
+Arm G      combined_preimpact = arm B (combined) with loss.lam = 1.5 (the project's
+           default pre-impact weight). Everything else identical to arm B.
+Runs       Seeds 1-4 x 5 folds = 20 runs, with the confirmation-grid settings (30 epochs,
+           patience 6, eval_every 2, batch 24, no explanations). Arm B's existing runs are
+           the reference, paired on identical folds.
+Contrast   G minus B, analysed with the PLAN.txt machinery and decision rules verbatim:
+           "G reduces false alarms" needs conditions 1-3 as written there; "G improves
+           recall" uses the same test without condition 3. The reverse questions use the
+           mirror rules: "G lowers recall" needs the recall interval entirely below zero
+           and G lower in at least 3 of 4 seeds.
+Lead time  Reported (mean per arm and per seed), descriptive only. "G buys lead time" is
+           claimed only if G's mean lead is longer in at least 3 of 4 seeds.
+
+----------------------------------------------------------------------------------------
+Order and limits
+----------------------------------------------------------------------------------------
+Order of execution (cost only, not revisited after results): E1, E3, E2 (UR Fall, then Le2i).
+All datasets are acted falls by young volunteers; Le2i has no actor labels, so splits are
+clip-independent. Null results get the same prominence as positive ones. Nothing here can
+support a clinical claim.

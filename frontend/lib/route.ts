@@ -8,6 +8,7 @@ export const SUBPAGES = {
     { id: "findings", label: "Findings" },
     { id: "tables", label: "Benchmark tables" },
     { id: "confirmation", label: "Confirmation test" },
+    { id: "explanations", label: "Explanations" },
   ],
   data: [
     { id: "datasets", label: "Datasets" },

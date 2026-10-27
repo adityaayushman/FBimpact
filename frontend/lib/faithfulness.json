@@ -1,0 +1,442 @@
+{
+ "generated_utc": "2026-10-27T15:04:06+00:00",
+ "overall": {
+  "runs": 108,
+  "explanations": 1096,
+  "deletion": {
+   "mean": 0.040761525931447606,
+   "lo": 0.010735412144581442,
+   "hi": 0.06951141046628208,
+   "runs": 108,
+   "share_positive": 0.6944444444444444
+  },
+  "insertion": {
+   "mean": 0.0694427226265428,
+   "lo": 0.040099172638460356,
+   "hi": 0.09835991224865508,
+   "runs": 108,
+   "share_positive": 0.6574074074074074
+  }
+ },
+ "rows": [
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "ablation_no_grounding",
+   "method": "gradient_input",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 69,
+   "deletion": {
+    "mean": 0.11237251483857409,
+    "lo": 0.010802195870029912,
+    "hi": 0.17541670691092726,
+    "runs": 3,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": 0.18212998382149034,
+    "lo": 0.1420455265078036,
+    "hi": 0.2561326344349501,
+    "runs": 3,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "ablation_no_preimpact_loss",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 68,
+   "deletion": {
+    "mean": 0.1135587534197087,
+    "lo": -0.03268308691235726,
+    "hi": 0.29514125587011214,
+    "runs": 3,
+    "share_positive": 0.6666666666666666
+   },
+   "insertion": {
+    "mean": 0.0461085002501874,
+    "lo": -0.11944146508384772,
+    "hi": 0.22842923139847413,
+    "runs": 3,
+    "share_positive": 0.6666666666666666
+   }
+  },
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "ablation_no_temporal",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 72,
+   "deletion": {
+    "mean": 0.05278912004684441,
+    "lo": 0.03157158010438377,
+    "hi": 0.07178205981275397,
+    "runs": 3,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": 0.07638649534029102,
+    "lo": -0.05808771599390014,
+    "hi": 0.22377562570102022,
+    "runs": 3,
+    "share_positive": 0.6666666666666666
+   }
+  },
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "ablation_no_velocity",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 71,
+   "deletion": {
+    "mean": 0.044168524683621514,
+    "lo": 0.007976185945863487,
+    "hi": 0.11016863494913003,
+    "runs": 3,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": -0.05177845093710467,
+    "lo": -0.14043659759065544,
+    "hi": 0.011276953618000648,
+    "runs": 3,
+    "share_positive": 0.3333333333333333
+   }
+  },
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "baseline_stgcn",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 71,
+   "deletion": {
+    "mean": -0.05411653775153119,
+    "lo": -0.10490511986180197,
+    "hi": 0.0399401844746214,
+    "runs": 3,
+    "share_positive": 0.3333333333333333
+   },
+   "insertion": {
+    "mean": 0.13494770990619234,
+    "lo": 0.033811385962871525,
+    "hi": 0.31480468417673063,
+    "runs": 3,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "Synthetic fixture",
+   "variant": "ours_preimpact",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 3,
+   "explanations": 68,
+   "deletion": {
+    "mean": -0.04821309913109604,
+    "lo": -0.20879352752215172,
+    "hi": 0.22032894413139897,
+    "runs": 3,
+    "share_positive": 0.3333333333333333
+   },
+   "insertion": {
+    "mean": 0.007472101194417559,
+    "lo": -0.10030597809423714,
+    "hi": 0.14795777469179905,
+    "runs": 3,
+    "share_positive": 0.3333333333333333
+   }
+  },
+  {
+   "benchmark": "UR Fall + Le2i (combined)",
+   "variant": "combined",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 88,
+   "deletion": {
+    "mean": 0.07157208538277254,
+    "lo": 0.029627327571857535,
+    "hi": 0.1307544148968033,
+    "runs": 5,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": 0.11365440654380951,
+    "lo": 0.08097473433604098,
+    "hi": 0.15502764309298672,
+    "runs": 5,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "UR Fall + Le2i (combined)",
+   "variant": "combined_phases",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 91,
+   "deletion": {
+    "mean": 0.12888180159548435,
+    "lo": 0.07248422479864897,
+    "hi": 0.19202558026873154,
+    "runs": 5,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": 0.16334144923653973,
+    "lo": 0.09962918240831728,
+    "hi": 0.21558550803568216,
+    "runs": 5,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "UR Fall + Le2i (combined)",
+   "variant": "combined_xyv",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 87,
+   "deletion": {
+    "mean": 0.06880286774033605,
+    "lo": -0.012709907394427577,
+    "hi": 0.1533560041593429,
+    "runs": 5,
+    "share_positive": 0.8
+   },
+   "insertion": {
+    "mean": 0.09472123551806302,
+    "lo": 0.026257415528799576,
+    "hi": 0.14682089113939553,
+    "runs": 5,
+    "share_positive": 0.8
+   }
+  },
+  {
+   "benchmark": "Le2i",
+   "variant": "ablation_no_preimpact_loss",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 1,
+   "explanations": 17,
+   "deletion": {
+    "mean": 0.061122483612680883,
+    "lo": null,
+    "hi": null,
+    "runs": 1,
+    "share_positive": 1.0
+   },
+   "insertion": {
+    "mean": 0.07634913772135124,
+    "lo": null,
+    "hi": null,
+    "runs": 1,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "Le2i",
+   "variant": "ablation_no_temporal",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 4,
+   "explanations": 24,
+   "deletion": {
+    "mean": -0.052735834413061976,
+    "lo": -0.0752349221462603,
+    "hi": -0.03206299815107797,
+    "runs": 4,
+    "share_positive": 0.0
+   },
+   "insertion": {
+    "mean": -0.029801997026558672,
+    "lo": -0.08527202738938457,
+    "hi": 0.01762354338870332,
+    "runs": 4,
+    "share_positive": 0.25
+   }
+  },
+  {
+   "benchmark": "Le2i",
+   "variant": "baseline_stgcn",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 67,
+   "deletion": {
+    "mean": -0.11604641861630684,
+    "lo": -0.2517918578303729,
+    "hi": 0.051419275767229274,
+    "runs": 5,
+    "share_positive": 0.2
+   },
+   "insertion": {
+    "mean": -0.07502344182846672,
+    "lo": -0.17624546494117477,
+    "hi": 0.03605511294799094,
+    "runs": 5,
+    "share_positive": 0.2
+   }
+  },
+  {
+   "benchmark": "Le2i",
+   "variant": "ours_preimpact",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 64,
+   "deletion": {
+    "mean": 0.06169904112261062,
+    "lo": 0.0021398071523364257,
+    "hi": 0.11808680425976671,
+    "runs": 5,
+    "share_positive": 0.8
+   },
+   "insertion": {
+    "mean": 0.09819053372824316,
+    "lo": 0.0407005941361191,
+    "hi": 0.1413766326874209,
+    "runs": 5,
+    "share_positive": 0.8
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "ablation_no_grounding",
+   "method": "gradient_input",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 23,
+   "deletion": {
+    "mean": 0.015683216878200113,
+    "lo": -0.023339002167850086,
+    "hi": 0.07499834110180223,
+    "runs": 5,
+    "share_positive": 0.8
+   },
+   "insertion": {
+    "mean": 0.06511756864733896,
+    "lo": -0.014228023288779921,
+    "hi": 0.2070750356066205,
+    "runs": 5,
+    "share_positive": 0.8
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "ablation_no_preimpact_loss",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 15,
+   "explanations": 69,
+   "deletion": {
+    "mean": 0.01652897200535073,
+    "lo": -0.04200148583772051,
+    "hi": 0.08057676775433265,
+    "runs": 15,
+    "share_positive": 0.6
+   },
+   "insertion": {
+    "mean": 0.026656377507495273,
+    "lo": -0.03688761856814406,
+    "hi": 0.09530110255128067,
+    "runs": 15,
+    "share_positive": 0.5333333333333333
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "ablation_no_temporal",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 10,
+   "deletion": {
+    "mean": 0.08013216067271192,
+    "lo": -0.0747627382914088,
+    "hi": 0.1704997544471339,
+    "runs": 5,
+    "share_positive": 0.8
+   },
+   "insertion": {
+    "mean": 0.0973512945956878,
+    "lo": -0.04187442353599584,
+    "hi": 0.20894168432678698,
+    "runs": 5,
+    "share_positive": 0.8
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "ablation_no_velocity",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 5,
+   "explanations": 16,
+   "deletion": {
+    "mean": 0.07013379380422116,
+    "lo": -0.05187542918847452,
+    "hi": 0.24275494959666347,
+    "runs": 5,
+    "share_positive": 0.6
+   },
+   "insertion": {
+    "mean": 0.15806887497962321,
+    "lo": 0.12768820178301427,
+    "hi": 0.22194814284892236,
+    "runs": 5,
+    "share_positive": 1.0
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "baseline_stgcn",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 15,
+   "explanations": 64,
+   "deletion": {
+    "mean": 0.04878931786882968,
+    "lo": 0.004404044039766765,
+    "hi": 0.08797559955291458,
+    "runs": 15,
+    "share_positive": 0.6
+   },
+   "insertion": {
+    "mean": 0.08649748665982063,
+    "lo": 0.03663072400844359,
+    "hi": 0.13621525186109357,
+    "runs": 15,
+    "share_positive": 0.7333333333333333
+   }
+  },
+  {
+   "benchmark": "UR Fall",
+   "variant": "ours_preimpact",
+   "method": "attention",
+   "baseline": "zero",
+   "runs": 15,
+   "explanations": 57,
+   "deletion": {
+    "mean": 0.05046030262669545,
+    "lo": 0.0030941946986561926,
+    "hi": 0.10387985210069993,
+    "runs": 15,
+    "share_positive": 0.8666666666666667
+   },
+   "insertion": {
+    "mean": 0.020557242658346107,
+    "lo": -0.03371077856860225,
+    "hi": 0.08372024670963361,
+    "runs": 15,
+    "share_positive": 0.4
+   }
+  }
+ ],
+ "bootstrap_reps": 10000
+}

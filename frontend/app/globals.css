@@ -503,3 +503,9 @@ p.hero-lede { margin: 0 0 24px; max-width: 58ch; font-size: 16.5px; line-height:
              background: rgba(var(--mocha-rgb), 0.3); color: var(--burgundy); }
 .link-more { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 6px;
              font-size: 13px; font-weight: 600; color: var(--accent); }
+
+/* ---- interval plot (explanations tab) ------------------------------------------------------------- */
+.interval { position: relative; display: inline-block; width: 150px; height: 14px; vertical-align: middle; margin-right: 8px; }
+.interval .zero { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--control-edge); }
+.interval .span { position: absolute; top: 6px; height: 3px; border-radius: 2px; }
+.interval .dotpt { position: absolute; top: 3px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; }

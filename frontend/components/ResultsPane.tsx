@@ -5,6 +5,7 @@ import results from "@/lib/results.json";
 import { FINDINGS } from "@/lib/content";
 import ConfirmationPane from "./ConfirmationPane";
 import OperatingCurve from "./OperatingCurve";
+import Explanations from "./Explanations";
 import { SUBPAGES } from "@/lib/route";
 import { PageHeader, Section, TabPanel, Tabs } from "./ui";
 
@@ -254,6 +255,10 @@ export default function ResultsPane({ sub }: { sub: string }) {
         <Section>
           <ConfirmationPane />
         </Section>
+      </TabPanel>
+
+      <TabPanel view="results" id="explanations" value={sub}>
+        <Explanations />
       </TabPanel>
     </>
   );

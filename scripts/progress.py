@@ -26,6 +26,12 @@ JOBS = [
      "4 arms x seeds 1-4 x 5 folds, plus arm D seed 0"),
     ("Held-out-domain runs (PLAN_XDOMAIN.txt)", ROOT / "results/xdomain", 24,
      "4 protocols x 2 arms x seeds 1-3"),
+    ("Pre-impact loss on the combined benchmark (PLAN_COMPLETION E3)", ROOT / "results/combined_rq3", 20,
+     "arm G x seeds 1-4 x 5 folds"),
+    ("UR Fall ablation grid to seeds 0-2 (PLAN_COMPLETION E2)", ROOT / "results/urfd", 90,
+     "6 variants x 3 seeds x 5 folds"),
+    ("Le2i ablation grid to seeds 0-2 (PLAN_COMPLETION E2)", ROOT / "results/le2i", 90,
+     "6 variants x 3 seeds x 5 folds"),
 ]
 MAX_PLAUSIBLE_RUN_SECONDS = 3 * 3600  # longer than this means the job was down, not training
 
@@ -102,6 +108,12 @@ def report() -> str:
             lines.append("  no results yet")
         lines.append("")
 
+    done_e1 = len(list((ROOT / "results/combined_confirm").glob("*/faith_*/faithfulness_test.json")))
+    bar = "#" * round(30 * done_e1 / 160) + "-" * (30 - round(30 * done_e1 / 160))
+    lines.append("Explanation methods on 40 confirmation checkpoints (PLAN_COMPLETION E1)")
+    lines.append(f"  [{bar}] {done_e1}/160  ({100 * done_e1 / 160:.0f}%)   40 runs x 4 methods")
+    lines.append("")
+
     procs = training_processes()
     names = sorted({p.split("|")[0] for p in procs})
     working = any("run_ablations" in p and "python" in p.lower() for p in procs)
@@ -110,7 +122,8 @@ def report() -> str:
     if procs and not working:
         lines.append("  (only waiting scripts are alive: " + ", ".join(names) + ")")
     if not working:
-        lines.append("  restart the grid with:  powershell -File d:\\tmp\\run_all.ps1")
+        lines.append("  restart the remaining research with:  powershell -File d:\\tmp\\run_all_research.ps1")
+        lines.append("  (resumable: finished runs are skipped; check free memory first, see the memory note)")
     return "\n".join(lines)
 
 

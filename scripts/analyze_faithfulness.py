@@ -31,6 +31,13 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {"urfd": "UR Fall", "le2i": "Le2i", "combined": "UR Fall + Le2i (combined)", "bench": "Synthetic fixture"}
 BOOT = 10_000
+SYNTHETIC = {"bench"}        # a smoke-test fixture, not a benchmark: shown in the table, never pooled into a result
+
+
+def real_data(rows: list[dict]) -> list[dict]:
+    """Rows from real recordings only. The headline pooled answer to RQ2 must not mix in procedurally
+    generated skeletons."""
+    return [r for r in rows if r["source"] not in SYNTHETIC]
 
 
 def weighted_mean(values: np.ndarray, weights: np.ndarray) -> float:
@@ -139,11 +146,12 @@ def main() -> int:
         return 1
     table = summarise(rows)
 
-    allw = [r["n"] for r in rows]
+    real = real_data(rows)
+    allw = [r["n"] for r in real]
     overall = {
-        "runs": len(rows), "explanations": int(sum(allw)),
-        "deletion": pooled([r["deletion_gap"] for r in rows], allw),
-        "insertion": pooled([r["insertion_gap"] for r in rows], allw),
+        "runs": len(real), "explanations": int(sum(allw)),
+        "deletion": pooled([r["deletion_gap"] for r in real], allw),
+        "insertion": pooled([r["insertion_gap"] for r in real], allw),
     }
 
     out_csv = ROOT / "results" / "analysis" / "faithfulness_summary.csv"
@@ -165,7 +173,8 @@ def main() -> int:
 
     def fmt(p):
         return f"{p['mean']:+.3f} [{p['lo']:+.3f}, {p['hi']:+.3f}]" if p["lo"] is not None else f"{p['mean']:+.3f}"
-    print(f"{len(rows)} runs, {overall['explanations']} explanations\n")
+    print(f"{overall['runs']} real-data runs, {overall['explanations']} explanations "
+          f"({len(rows) - overall['runs']} synthetic-fixture runs are listed below but not pooled)\n")
     print(f"OVERALL  deletion gap {fmt(overall['deletion'])}   insertion gap {fmt(overall['insertion'])}\n")
     print(f"{'benchmark':27s}{'variant':20s}{'runs':>5s}{'expl':>6s}   {'deletion gap [95% CI]':26s}{'insertion gap [95% CI]':26s}")
     for r in table:

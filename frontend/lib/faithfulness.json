@@ -1,21 +1,21 @@
 {
- "generated_utc": "2026-10-27T15:20:35+00:00",
+ "generated_utc": "2026-10-28T10:55:39+00:00",
  "overall": {
-  "runs": 108,
-  "explanations": 1096,
+  "runs": 90,
+  "explanations": 677,
   "deletion": {
-   "mean": 0.040761525931447606,
-   "lo": 0.010735412144581442,
-   "hi": 0.06951141046628208,
-   "runs": 108,
-   "share_positive": 0.6944444444444444
+   "mean": 0.04340164946798834,
+   "lo": 0.01168759824372711,
+   "hi": 0.07399787168984362,
+   "runs": 90,
+   "share_positive": 0.6888888888888889
   },
   "insertion": {
-   "mean": 0.0694427226265428,
-   "lo": 0.040099172638460356,
-   "hi": 0.09835991224865508,
-   "runs": 108,
-   "share_positive": 0.6574074074074074
+   "mean": 0.07163061915135711,
+   "lo": 0.04251314406962066,
+   "hi": 0.09829357540440015,
+   "runs": 90,
+   "share_positive": 0.6555555555555556
   }
  },
  "rows": [
@@ -439,5 +439,435 @@
   }
  ],
  "bootstrap_reps": 10000,
- "methods": []
+ "methods": [
+  {
+   "arm": "all",
+   "method": "attention",
+   "runs": 9,
+   "explanations": 154,
+   "own": {
+    "deletion": {
+     "mean": 0.1041437158004651,
+     "lo": 0.060537364513725635,
+     "hi": 0.14764297937822923,
+     "runs": 9,
+     "share_positive": 0.8888888888888888
+    },
+    "insertion": {
+     "mean": 0.11227676294327571,
+     "lo": 0.06620343832165274,
+     "hi": 0.15658817585341683,
+     "runs": 9,
+     "share_positive": 1.0
+    }
+   },
+   "faithful": true
+  },
+  {
+   "arm": "all",
+   "method": "gradient",
+   "runs": 7,
+   "explanations": 110,
+   "own": {
+    "deletion": {
+     "mean": -0.032151592950544435,
+     "lo": -0.059276730216845146,
+     "hi": 0.003092631199255017,
+     "runs": 7,
+     "share_positive": 0.14285714285714285
+    },
+    "insertion": {
+     "mean": 0.0018244147091223855,
+     "lo": -0.04295454073624117,
+     "hi": 0.04597418425118498,
+     "runs": 7,
+     "share_positive": 0.42857142857142855
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": -0.12049311313822467,
+     "lo": -0.14176251792943909,
+     "hi": -0.08678146042442823,
+     "runs": 6,
+     "share_positive": 0.0
+    },
+    "insertion": {
+     "mean": -0.09188819319429233,
+     "lo": -0.10811220064375916,
+     "hi": -0.07517380022874465,
+     "runs": 6,
+     "share_positive": 0.0
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": false
+  },
+  {
+   "arm": "all",
+   "method": "gradient_input",
+   "runs": 6,
+   "explanations": 88,
+   "own": {
+    "deletion": {
+     "mean": 0.08531476629739766,
+     "lo": 0.04406463244478053,
+     "hi": 0.12822959189347594,
+     "runs": 6,
+     "share_positive": 0.8333333333333334
+    },
+    "insertion": {
+     "mean": 0.08867963117357922,
+     "lo": 0.02688274420287618,
+     "hi": 0.1726966815908346,
+     "runs": 6,
+     "share_positive": 0.8333333333333334
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.0047662252774142416,
+     "lo": -0.029499088983414416,
+     "hi": 0.04532303420698399,
+     "runs": 5,
+     "share_positive": 0.6
+    },
+    "insertion": {
+     "mean": 0.015230363671807396,
+     "lo": -0.021710978007902178,
+     "hi": 0.06916288022957547,
+     "runs": 5,
+     "share_positive": 0.4
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": true
+  },
+  {
+   "arm": "all",
+   "method": "occlusion",
+   "runs": 6,
+   "explanations": 88,
+   "own": {
+    "deletion": {
+     "mean": 0.20607161368223723,
+     "lo": 0.18751705582682926,
+     "hi": 0.22632757838400638,
+     "runs": 6,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.22300625472530794,
+     "lo": 0.1427324159972969,
+     "hi": 0.2972466460459098,
+     "runs": 6,
+     "share_positive": 1.0
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.10243469810373251,
+     "lo": 0.07375122071722363,
+     "hi": 0.12207957004585603,
+     "runs": 5,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.13258759444142101,
+     "lo": 0.07676568758066357,
+     "hi": 0.18643852543248388,
+     "runs": 5,
+     "share_positive": 1.0
+    }
+   },
+   "more_faithful_than_reference": true,
+   "faithful": true
+  },
+  {
+   "arm": "combined",
+   "method": "attention",
+   "runs": 4,
+   "explanations": 64,
+   "own": {
+    "deletion": {
+     "mean": 0.06881157214090104,
+     "lo": 0.007112811948767298,
+     "hi": 0.12346124430836122,
+     "runs": 4,
+     "share_positive": 0.75
+    },
+    "insertion": {
+     "mean": 0.11847564453617737,
+     "lo": 0.05573278377161412,
+     "hi": 0.1991450369477587,
+     "runs": 4,
+     "share_positive": 1.0
+    }
+   },
+   "faithful": true
+  },
+  {
+   "arm": "combined",
+   "method": "gradient",
+   "runs": 2,
+   "explanations": 31,
+   "own": {
+    "deletion": {
+     "mean": -0.04695384561491775,
+     "lo": -0.06481966096122628,
+     "hi": -0.025259641265828813,
+     "runs": 2,
+     "share_positive": 0.0
+    },
+    "insertion": {
+     "mean": 0.02829536446100797,
+     "lo": -0.030179755222286206,
+     "hi": 0.09930086693357947,
+     "runs": 2,
+     "share_positive": 0.5
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": -0.13607503274119254,
+     "lo": -0.13980237392744244,
+     "hi": -0.1315489755864605,
+     "runs": 2,
+     "share_positive": 0.0
+    },
+    "insertion": {
+     "mean": -0.08026759907911538,
+     "lo": -0.09247935994584472,
+     "hi": -0.06543903231237262,
+     "runs": 2,
+     "share_positive": 0.0
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": false
+  },
+  {
+   "arm": "combined",
+   "method": "gradient_input",
+   "runs": 2,
+   "explanations": 31,
+   "own": {
+    "deletion": {
+     "mean": 0.09339228200745164,
+     "lo": 0.08929864780676747,
+     "hi": 0.09676351017272097,
+     "runs": 2,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.16892485412294303,
+     "lo": 0.07780382843527207,
+     "hi": 0.2795718138865435,
+     "runs": 2,
+     "share_positive": 1.0
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.004271094881176866,
+     "lo": -0.016990686513864234,
+     "hi": 0.02178079720650483,
+     "runs": 2,
+     "share_positive": 0.5
+    },
+    "insertion": {
+     "mean": 0.06036189058281969,
+     "lo": 0.015504223711713554,
+     "hi": 0.11483191464059142,
+     "runs": 2,
+     "share_positive": 1.0
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": true
+  },
+  {
+   "arm": "combined",
+   "method": "occlusion",
+   "runs": 3,
+   "explanations": 44,
+   "own": {
+    "deletion": {
+     "mean": 0.2202182676403253,
+     "lo": 0.19521208230846046,
+     "hi": 0.24567356672267218,
+     "runs": 3,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.3169668835530613,
+     "lo": 0.2852899630540412,
+     "hi": 0.3396995081769321,
+     "runs": 3,
+     "share_positive": 1.0
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.12042227767306632,
+     "lo": 0.12022936934224433,
+     "hi": 0.12065652350335017,
+     "runs": 2,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.19887088388034693,
+     "lo": 0.16958295061946785,
+     "hi": 0.22299035833048267,
+     "runs": 2,
+     "share_positive": 1.0
+    }
+   },
+   "more_faithful_than_reference": true,
+   "faithful": true
+  },
+  {
+   "arm": "combined_phases",
+   "method": "attention",
+   "runs": 5,
+   "explanations": 90,
+   "own": {
+    "deletion": {
+     "mean": 0.12926879573615513,
+     "lo": 0.0925640049145244,
+     "hi": 0.17457368489924135,
+     "runs": 5,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.10786866936610116,
+     "lo": 0.04092513378936447,
+     "hi": 0.15878574064079198,
+     "runs": 5,
+     "share_positive": 1.0
+    }
+   },
+   "faithful": true
+  },
+  {
+   "arm": "combined_phases",
+   "method": "gradient",
+   "runs": 5,
+   "explanations": 79,
+   "own": {
+    "deletion": {
+     "mean": -0.02634311405692959,
+     "lo": -0.06333692247312873,
+     "hi": 0.023282945932597245,
+     "runs": 5,
+     "share_positive": 0.2
+    },
+    "insertion": {
+     "mean": -0.008562920003642845,
+     "lo": -0.060163185982919656,
+     "hi": 0.04048918469270672,
+     "runs": 5,
+     "share_positive": 0.4
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": -0.11317433271864885,
+     "lo": -0.14527991534961446,
+     "hi": -0.06399072543284816,
+     "runs": 4,
+     "share_positive": 0.0
+    },
+    "insertion": {
+     "mean": -0.09734635103626937,
+     "lo": -0.1179136364186907,
+     "hi": -0.07809133091683285,
+     "runs": 4,
+     "share_positive": 0.0
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": false
+  },
+  {
+   "arm": "combined_phases",
+   "method": "gradient_input",
+   "runs": 4,
+   "explanations": 57,
+   "own": {
+    "deletion": {
+     "mean": 0.08092173143754375,
+     "lo": 0.020659279535205327,
+     "hi": 0.15003092058203268,
+     "runs": 4,
+     "share_positive": 0.75
+    },
+    "insertion": {
+     "mean": 0.045037492376556784,
+     "lo": 0.0029442494445064125,
+     "hi": 0.0895802326599458,
+     "runs": 4,
+     "share_positive": 0.75
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.005115067147490574,
+     "lo": -0.05002606348934245,
+     "hi": 0.08388697721001492,
+     "runs": 3,
+     "share_positive": 0.6666666666666666
+    },
+    "insertion": {
+     "mean": -0.01656684847004217,
+     "lo": -0.03989645021280722,
+     "hi": -0.0011239337062166135,
+     "runs": 3,
+     "share_positive": 0.0
+    }
+   },
+   "more_faithful_than_reference": false,
+   "faithful": true
+  },
+  {
+   "arm": "combined_phases",
+   "method": "occlusion",
+   "runs": 3,
+   "explanations": 44,
+   "own": {
+    "deletion": {
+     "mean": 0.19192495972414916,
+     "lo": 0.17014688544388357,
+     "hi": 0.20597286185870903,
+     "runs": 3,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.12904562589755456,
+     "lo": 0.09720852371942772,
+     "hi": 0.17403009193833197,
+     "runs": 3,
+     "share_positive": 1.0
+    }
+   },
+   "paired": {
+    "deletion": {
+     "mean": 0.08976163067988369,
+     "lo": 0.053031866647898857,
+     "hi": 0.12430765489434237,
+     "runs": 3,
+     "share_positive": 1.0
+    },
+    "insertion": {
+     "mean": 0.08588800415490504,
+     "lo": 0.03842348630378278,
+     "hi": 0.1269384287389916,
+     "runs": 3,
+     "share_positive": 1.0
+    }
+   },
+   "more_faithful_than_reference": true,
+   "faithful": true
+  }
+ ]
 }

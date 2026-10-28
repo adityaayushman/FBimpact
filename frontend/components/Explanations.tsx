@@ -9,7 +9,8 @@ interface Row {
   runs: number; explanations: number; deletion: Pooled; insertion: Pooled;
 }
 
-const ROWS = data.rows as unknown as Row[];
+// The synthetic fixture is a smoke test, not a benchmark: it is neither pooled nor listed here.
+const ROWS = (data.rows as unknown as Row[]).filter((r) => r.benchmark !== "Synthetic fixture");
 const OVERALL = data.overall as unknown as { runs: number; explanations: number; deletion: Pooled; insertion: Pooled };
 
 const VARIANT: Record<string, string> = {
@@ -41,7 +42,7 @@ function Interval({ p }: { p: Pooled }) {
 const sgn = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(3)}`;
 const range = (p: Pooled) => (p.lo === null || p.hi === null ? "single run" : `${sgn(p.lo)} to ${sgn(p.hi)}`);
 
-/** RQ2: are the joint explanations faithful? Pooled from every run that scored explanations. */
+/** RQ2: are the joint explanations faithful? Pooled from every real-data run that scored explanations. */
 export default function Explanations() {
   const benchmarks = Array.from(new Set(ROWS.map((r) => r.benchmark)));
   return (
@@ -51,9 +52,10 @@ export default function Explanations() {
         sub="A faithful explanation names joints the model really relies on: deleting them should hurt the score more than deleting random joints, and adding them back should restore it faster."
       >
         <div className="notice warn" style={{ marginBottom: 18 }}>
-          <b>Exploratory pooling, not a pre-registered test.</b> This combines every run that scored
-          explanations, using only the &ldquo;attention&rdquo; method (and &ldquo;gradient × input&rdquo;
-          for the no-grounding ablation). The pre-registered comparison of all four methods on the same
+          <b>Exploratory pooling, not a pre-registered test.</b> This combines every run on real data
+          that scored explanations (the procedurally generated test fixture is left out), using only
+          the &ldquo;attention&rdquo; method (and &ldquo;gradient × input&rdquo; for the no-grounding
+          ablation). The pre-registered comparison of all four methods on the same
           models is still to run (see below).
         </div>
 

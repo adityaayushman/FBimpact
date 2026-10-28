@@ -56,3 +56,9 @@ def test_a_method_with_gaps_around_zero_is_not_called_faithful():
     out = af.compare_methods(rows)
     att = next(e for e in out if e["arm"] == "combined" and e["method"] == "attention")
     assert att["faithful"] is False
+
+
+def test_the_headline_pool_leaves_out_the_synthetic_fixture():
+    rows = [{"source": "bench", "n": 5}, {"source": "combined", "n": 5}, {"source": "urfd", "n": 5}, {"source": "le2i", "n": 5}]
+    kept = af.real_data(rows)
+    assert [r["source"] for r in kept] == ["combined", "urfd", "le2i"]

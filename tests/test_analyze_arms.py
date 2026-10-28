@@ -150,3 +150,19 @@ def test_universe_is_only_clips_present_in_every_cell():
     runs = make_runs(10, lambda s, i: 0, lambda s, i: 0)
     del runs[("R", 3)]["c4"]
     assert "c4" not in aa.ordered_clips(runs, ["T", "R"], [1, 2, 3, 4])
+
+
+def test_new_modes_define_the_planned_contrasts():
+    import analyze_arms as aa
+    assert aa.seed_majority(4) == 3 and aa.seed_majority(3) == 2
+    assert [c[0] for c in aa.RQ3_CONTRASTS] == ["G-B"]
+    assert {c[2] for c in aa.ABLATION_CONTRASTS} == {"ours_preimpact"}
+    assert len(aa.ABLATION_CONTRASTS) == 5
+
+
+def test_two_sided_needs_both_the_interval_and_the_seed_majority():
+    import analyze_arms as aa
+    assert aa.two_sided(-0.1, -0.02, [-0.05, -0.04, 0.01]) == "lower"      # 2 of 3 agree
+    assert aa.two_sided(-0.1, -0.02, [-0.05, 0.04, 0.01]) == "not shown"   # only 1 of 3
+    assert aa.two_sided(-0.1, 0.02, [-0.05, -0.04, -0.01]) == "not shown"  # interval spans zero
+    assert aa.two_sided(0.02, 0.1, [0.05, 0.04, -0.01]) == "higher"

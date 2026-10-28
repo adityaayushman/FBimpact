@@ -297,11 +297,11 @@ def main(argv: list[str] | None = None) -> int:
     defaults = {
         "arms": dict(results=["results/combined", "results/combined_confirm"], caches=["data/cache/urfd", "data/cache/le2i"],
                      confirmatory=[1, 2, 3, 4], descriptive=[0], out="results/analysis", arms=ARMS, contrasts=CONTRASTS),
-        "rq3": dict(results=["results/combined_confirm", "results/combined_rq3"], caches=["data/cache/urfd", "data/cache/le2i"],
+        "rq3": dict(results=["results/combined_rq3"], caches=["data/cache/urfd", "data/cache/le2i"],
                     confirmatory=[1, 2, 3, 4], descriptive=[], out="results/analysis/rq3", arms=RQ3_ARMS, contrasts=RQ3_CONTRASTS),
-        "ablation-urfd": dict(results=["results/urfd"], caches=["data/cache/urfd"], confirmatory=[0, 1, 2], descriptive=[],
+        "ablation-urfd": dict(results=["results/urfd_colab"], caches=["data/cache/urfd"], confirmatory=[0, 1, 2], descriptive=[],
                               out="results/analysis/ablation_urfd", arms=ABLATION_ARMS, contrasts=ABLATION_CONTRASTS),
-        "ablation-le2i": dict(results=["results/le2i"], caches=["data/cache/le2i"], confirmatory=[0, 1, 2], descriptive=[],
+        "ablation-le2i": dict(results=["results/le2i_colab"], caches=["data/cache/le2i"], confirmatory=[0, 1, 2], descriptive=[],
                               out="results/analysis/ablation_le2i", arms=ABLATION_ARMS, contrasts=ABLATION_CONTRASTS),
     }[args.mode]
     for key in ("results", "caches", "confirmatory", "descriptive", "out"):
@@ -397,6 +397,10 @@ def main(argv: list[str] | None = None) -> int:
                 "seeds_longer_lead": f"{sum(a > b for a, b in zip(lead_t, lead_r))}/{len(seeds)}",
                 "lead_mean_treat": round(float(np.nanmean(lead_t)), 4), "lead_mean_ref": round(float(np.nanmean(lead_r)), 4),
             })
+        if args.mode != "arms" and len(seeds) < len(args.confirmatory):
+            # A verdict needs every planned seed: 2 of 3 (or 3 of 4) is meaningless on fewer.
+            incomplete = f"incomplete: {len(seeds)} of {len(args.confirmatory)} seeds"
+            row.update({"fa_verdict": incomplete, "recall_verdict": incomplete, "fa_two_sided": incomplete})
         contrast_rows.append(row)
         print(f"  {name:<4} dFA {stats['d_fa']:+6.1f} [{stats['d_fa_lo']:+6.1f}, {stats['d_fa_hi']:+6.1f}]  "
               f"dRecall {stats['d_recall']:+.3f} [{stats['d_recall_lo']:+.3f}, {stats['d_recall_hi']:+.3f}]  "

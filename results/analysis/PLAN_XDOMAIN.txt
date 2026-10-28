@@ -85,3 +85,16 @@ ADDENDUM 2026-10-24: results of the corrected execution
     in two protocols, lower in two; one seed collapsed to recall 0.03 on UR Fall -> Le2i).
     No claim about the four-phase hypothesis is made here, per this document's scope.
   - Causes of the domain differences are not identified by these runs.
+
+ADDENDUM 2026-10-28: correction to the 2026-10-24 addendum
+  The 2026-10-24 addendum said false alarms "stay in the hundreds per hour in every protocol, so the
+  high recalls were bought with a permissive threshold". Recomputed from results/analysis/xdomain_by_run.csv,
+  the seed-averaged false-alarm rate per protocol and arm (control / four-phase) is:
+    UR Fall -> Le2i          148 / 71 per hour
+    Le2i -> UR Fall          650 / 664
+    leave Coffee room out     97 / 196
+    leave Home out           142 / 100
+  Five of the eight cells are below 150 per hour, so "in the hundreds in every protocol" overstated the
+  result, and the inference about a permissive threshold was not tested by these runs and is withdrawn.
+  The rates remain high for a care setting (a single false alarm is 7-15 per hour on these test sets).
+  Nothing else in this document changes; recall, counts and the four-phase comparison are as reported.

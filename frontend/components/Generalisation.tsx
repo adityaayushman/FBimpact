@@ -102,9 +102,10 @@ export default function Generalisation() {
             <div className="card">
               <div className="card-title">High recall did not mean a good detector</div>
               <p className="card-sub">
-                False alarms stay in the hundreds per hour in every protocol (shown on each card).
-                The high recalls were bought with a permissive threshold, chosen on the training
-                domain&apos;s validation clips, that does not transfer to a new place.
+                Mean false alarms per hour of normal activity range from about 70 to 660 across the eight
+                protocol-and-arm cells (shown on each card), and are highest for Le2i to UR Fall, the
+                protocol with the highest recall. The operating point is chosen on the training
+                domain&apos;s validation clips and is not re-tuned for the held-out domain.
               </p>
             </div>
             <div className="card">

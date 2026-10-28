@@ -289,6 +289,18 @@ Every run writes `config.yaml` (fully resolved), `environment.json` (versions, g
 dirty flag), `split.json`, `history.jsonl` and `best.pt` into its results directory.
 Reproducing means re-running the saved config — there is no hidden state in a shell history.
 
+## Verifying the published numbers
+
+```bash
+python scripts/verify_results.py --out results/analysis/VERIFICATION.txt
+```
+
+Recomputes the headline figures from the per-run totals in each `runs.csv` (a different source from
+the per-clip analysis that produced them) and checks that the 80 confirmation runs and 24 held-out-domain
+runs are all present, that every held-out run tested only on its held-out domain, and that the
+pre-registration files were committed before the first run they govern and have only been extended
+since. 27 checks; the latest result is [`results/analysis/VERIFICATION.txt`](results/analysis/VERIFICATION.txt).
+
 ---
 
 **Not a medical device.** A research prototype. Public fall datasets use *acted* falls by

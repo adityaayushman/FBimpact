@@ -79,3 +79,34 @@ Order of execution (cost only, not revisited after results): E1, E3, E2 (UR Fall
 All datasets are acted falls by young volunteers; Le2i has no actor labels, so splits are
 clip-independent. Null results get the same prominence as positive ones. Nothing here can
 support a clinical claim.
+
+ADDENDUM 2026-10-28 (before any E2 or E3 run): execution on Google Colab, same-hardware pairing
+  Why: local GPU jobs repeatedly failed on host memory (Windows commit exhaustion), not on the
+  GPU. E1 (re-scoring saved local checkpoints; no training) continues locally.
+  Where: E3 and E2 are executed on Google Colab. The GPU, torch and numpy versions and the git
+  commit are recorded per run in environment.json.
+  Pairing: GPUs and library versions differ, so a Colab run is not bit-identical to a local one
+  (the saved configs already set run.deterministic false, so two local runs differ too). To keep
+  every comparison on ONE machine:
+    - E3 re-runs arm B (combined) on Colab, seeds 1-4 x 5 folds, together with arm G: 40 runs.
+      The reference for G minus B is that Colab arm B, not the local confirmation-grid arm B.
+    - E2 runs the COMPLETE grid on Colab for each benchmark (6 variants x seeds 0-2 x 5 folds =
+      90 runs each). The existing partial local grids are not used for these contrasts; they stay
+      in the existing benchmark tables unchanged.
+  Held constant: code commit, frozen configs (configs/frozen/, configs/combined*.yaml), skeleton
+  data (sha256-checked against a manifest), numerical-precision settings (train.amp as written in
+  the frozen configs, i.e. unchanged), seeds, folds, overrides. Correction made before any Colab
+  run: an earlier draft of this line said "32-bit precision"; the frozen configs and every local
+  run use train.amp: true, and they are used unchanged, so that is what is held constant.
+  Gate: scripts/import_colab_results.py must confirm that every run's saved config matches its
+  expected config, that its environment record shows CUDA and the pinned commit, and that all
+  expected runs are present, before any Colab result is analysed.
+  Unchanged: the questions, decision rules, allowed claims and limits above.
+
+ADDENDUM 2026-10-28 (b, before any Colab run): E1 also moves to Colab
+  At the owner's instruction all of E1, E2 and E3 run on Colab, and the local runner is stopped.
+  E1 therefore re-scores all 160 (checkpoint, method) pairs on Colab, from the 40 saved
+  confirmation-grid checkpoints, so that every method is scored on the same hardware. The 28
+  re-scores that finished locally before the stop are kept as a record and are not used.
+  The pinned code commit, data checksums, per-run provenance checks and decision rules in the
+  addendum above apply to E1 as well.

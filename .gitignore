@@ -48,3 +48,7 @@ next-env.d.ts
 # Tournament run records (regenerable, large, not source)
 .colosseum/
 .arena/
+
+# Colab hand-off: the data/checkpoint bundles and returned results are derived, not source.
+colab/*.zip
+colab_results/

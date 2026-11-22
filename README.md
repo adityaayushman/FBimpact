@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧓 Pre-Impact Fall Anticipation
+# Pre-Impact Fall Anticipation
 
 **Privacy-preserving fall anticipation for elderly care: an ST-GCN on skeletal pose predicts a fall before impact and names the joints that signalled it.**
 

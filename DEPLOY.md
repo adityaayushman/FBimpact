@@ -5,7 +5,7 @@ Two services: a **Next.js frontend on Vercel** and a **FastAPI inference API on 
 | | Status | URL |
 |---|---|---|
 | Backend (Render) | **live** | https://fbimpact-api.onrender.com — [`/docs`](https://fbimpact-api.onrender.com/docs) |
-| Frontend (Vercel) | needs the repo connected | project `fbimpact` |
+| Frontend (Vercel) | **live** | https://fbimpact.vercel.app (project `fbimpact`) |
 
 ```
 Browser (Vercel)                                    Render

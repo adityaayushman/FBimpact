@@ -14,6 +14,7 @@
 </p>
 
 <p>
+  <a href="https://fbimpact.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-6A1B9A?style=for-the-badge&logo=vercel&logoColor=white" /></a>
   <a href="https://fbimpact-api.onrender.com/docs"><img src="https://img.shields.io/badge/Live_API-46E3B7?style=for-the-badge&logo=render&logoColor=white" /></a>
 </p>
 
@@ -174,6 +175,7 @@ decision logic and metrics needed somewhere to live that was neither data nor mo
 ## Live demo
 
 Frontend on Vercel, API on Render — see [`DEPLOY.md`](DEPLOY.md).
+The frontend is live at **https://fbimpact.vercel.app**.
 The API is live at **https://fbimpact-api.onrender.com** ([`/docs`](https://fbimpact-api.onrender.com/docs));
 allow 30–60 s for the free tier's cold start.
 

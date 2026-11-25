@@ -1,0 +1,241 @@
+# ============================================================================================ III. Methods
+add(("sec", "Materials and Methods", "sec:methods"))
+add(("p", "[#tab:notation] lists the symbols used in this section."))
+add(("table", dict(
+    label="tab:notation", wide=False, spec=r"p{0.27\columnwidth}p{0.65\columnwidth}",
+    caption="Notation.",
+    header=["Symbol", "Meaning"],
+    rows=[
+        ["<m>t^{*}</m>", "Impact frame (first ground contact)"],
+        ["<m>W</m>, <m>D</m>", "Imminent window in frames; in seconds, <m>D=W/f_s</m>"],
+        ["<m>f_s</m>", "Frame rate of a clip"],
+        ["<m>C, T, V</m>", "Channels, window length and joints (14, 25, 17)"],
+        ["<m>p_t</m>", "Per-frame imminence probability"],
+        ["<m>\\tau</m>, <m>k</m>, <m>R</m>", "Score threshold, persistence and refractory period (frames)"],
+        ["<m>t_{\\mathrm{warn}}</m>, <m>L</m>", "Warning frame and lead time"],
+        ["<m>\\lambda</m>", "Pre-impact time-weighting strength"],
+        ["<m>A_k</m>, <m>M_k</m>", "Adjacency of partition <m>k</m> and its learnable edge importance"],
+        ["<m>a_{t,v}</m>", "Joint attention weight at frame <m>t</m>, joint <m>v</m>"],
+        ["<m>\\Delta_{\\mathrm{del}}</m>, <m>\\Delta_{\\mathrm{ins}}</m>", "Deletion and insertion faithfulness gaps"],
+    ])))
+
+add(("sub", "System Overview", "sub:overview"))
+add(("p", "[#fig:pipeline] shows the processing chain. A frozen pose estimator converts video into 17-keypoint skeletons, after which pixels are discarded, so only skeletons are stored and modelled. "
+          "Skeletons are normalised, enriched with motion features and cut into windows. A spatio-temporal graph network scores every frame with an imminence probability, "
+          "a threshold-and-persistence rule turns the score stream into warnings with a lead time, and at each warning the relevance of every joint is extracted and tested by deletion and insertion."))
+add(("fig", dict(label="fig:pipeline", file="fig1_pipeline", wide=True,
+                 caption="Processing chain. A frozen pose estimator turns video into skeletons, after which pixels are discarded. A causal ST-GCN scores every frame, a threshold and persistence rule issues the warning, and the joint relevance at the warning frame is scored by deletion and insertion.")))
+
+add(("sub", "Datasets", "sub:data"))
+add(("p", "We use UR Fall (70 sequences, camera 0) and the Home and Coffee-room scenes of Le2i (130 clips), pooled into a combined benchmark of 200 clips, 129 falls and 71 normal clips ([#tab:data]). "
+          "Every clip carries its own frame rate and all frame counts are converted to seconds, so pooling clips recorded at 24 to 30 frames per second is safe. "
+          "The impact frame <i>t</i><sup>*</sup> comes from each dataset’s own annotation (the first frame labelled “lying” on UR Fall, the annotated fall end on Le2i) and never from the skeleton the model reads, so lead time is not circular. "
+          "The UR Fall label falls at or after ground contact, which shortens measured lead time. "
+          "A procedurally generated fixture of 320 clips was used only to test the code and is excluded from every result. "
+          "Neither dataset publishes actor identity, so splits are independent by clip, not by subject, and may overstate performance on unseen people."))
+add(("table", dict(
+    label="tab:data", wide=True, spec=r"lccc",
+    caption="Datasets after skeleton extraction.",
+    header=["Property", "UR Fall", "Le2i (Home, Coffee room)", "Combined"],
+    rows=[
+        ["Clips (falls / normal)", "70 (30 / 40)", "130 (99 / 31)", "200 (129 / 71)"],
+        ["Duration; normal activity", "6.6 min; 5.8 min", "28.6 min; 20.6 min", "35.2 min; 26.4 min"],
+        ["Frame rate", "30 fps", "24 to 25 fps", "24 to 30 fps"],
+        ["Frames with a usable skeleton", "79.8%", "85.3%", "n/a"],
+        ["Impact frame", "first frame labelled “lying”", "annotated fall end", "dataset annotation"],
+        ["Frames before impact (min / median / max)", "33 / 56 / 177", "1 / 161 / 1,115", "n/a"],
+        ["Frames per phase (normal / imminent / falling / grounded)", "9,664 / 469 / 930 / 873", "28,178 / 1,632 / 2,289 / 9,967", "37,842 / 2,101 / 3,219 / 10,840"],
+    ])))
+
+add(("sub", "Pose and Features", "sub:pose"))
+add(("p", "Skeletons follow the COCO 17-keypoint layout from a frozen, off-the-shelf pose estimator (Ultralytics YOLO11n-pose). "
+          "Joints below a confidence of 0.30 (0.35 for the UR Fall ablations) are treated as missing and linearly interpolated. "
+          "Coordinates are centred on the mid-hip and divided by the clip’s median torso length, so they are independent of where the person stands and how far away the camera is. "
+          "[#tab:features] defines the channels. The UR Fall ablations use position and velocity <m>(x, y, v_x, v_y)</m>; the combined-benchmark arms use either the same four channels (arm A) or all 14 (arms B–D). "
+          "Velocities and accelerations are backward differences, clipped to loose bounds so that a single pose-estimator dropout cannot set a channel’s scale. "
+          "In the offline evaluation, however, interpolation uses the observed frames on both sides of a gap and the scale is the median torso length over the clip, "
+          "whereas a live system can only hold the last value and track a running median."))
+add(("table", dict(
+    label="tab:features", wide=True, spec=r"p{0.15\textwidth}p{0.06\textwidth}p{0.69\textwidth}",
+    caption="The 14 input channels. Arm A and the UR Fall ablations use the first four; arms B–D use all 14. Derivatives are per second in torso lengths.",
+    header=["Channels", "Count", "Definition"],
+    rows=[
+        ["<m>x, y</m>", "2", "Joint position after centring on the mid-hip and scaling by the median torso length"],
+        ["<m>v_x, v_y</m>", "2", "Backward-difference velocity, clipped to ±30 torso lengths per second"],
+        ["<m>a_x, a_y</m>", "2", "Backward-difference acceleration, clipped to ±300"],
+        ["<m>b_x, b_y</m>", "2", "Bone vector: offset from the joint to its parent in a fixed spanning tree (the mid-hip and mid-shoulder act as parents, which keeps the features mirror-symmetric)"],
+        ["<m>\\dot b_x, \\dot b_y</m>", "2", "Backward-difference rate of the bone vector"],
+        ["<m>\\theta, \\dot\\theta</m>", "2", "Trunk angle from vertical (sign dropped, so forward and backward falls look alike) and its rate; shared by all joints"],
+        ["<m>h, \\dot h</m>", "2", "Mid-hip height as a whole-body summary, and its vertical rate; shared by all joints"],
+    ])))
+
+add(("sub", "Network Architecture", "sub:model"))
+add(("p", "The network ([#fig:arch]) maps a window <m>X \\in \\mathbb{R}^{C\\times T\\times V}</m> to one logit per frame. The input channels are batch-normalised and passed through four ST-GCN blocks with 64, 64, 128 and 128 channels. "
+          "Each block first applies a spatial graph convolution over the one-hop neighbourhood of every joint, split into <m>K=3</m> partitions: the joint itself, neighbours nearer the body centre (the hips) and neighbours farther from it[@stgcn],"))
+add(("eq", "eq:gconv", r"H^{(l+1)} = \sum_{k=1}^{3} \left(A_k \odot M_k\right) H^{(l)} W_k,",
+     "<span class=\"m\">H<sup>(l+1)</sup> = &Sigma;<sub>k=1..3</sub> (A<sub>k</sub> &odot; M<sub>k</sub>) H<sup>(l)</sup> W<sub>k</sub></span>"))
+add(("p", "where <m>A_k</m> are row-normalised adjacency matrices, <m>M_k</m> is a learnable edge-importance matrix initialised to ones, and <m>W_k</m> is a <m>1\\times 1</m> convolution. "
+          "A temporal convolution of kernel size <m>\\kappa = 7</m> then pads only the past, so that the output at frame <m>t</m> reads frames <m>t-6,\\dots,t</m> only,"))
+add(("eq", "eq:tconv", r"h'_t = \sum_{j=0}^{\kappa-1} U_j\, h_{t-j},",
+     "<span class=\"m\">h&prime;<sub>t</sub> = &Sigma;<sub>j=0..&kappa;&minus;1</sub> U<sub>j</sub> h<sub>t&minus;j</sub></span>"))
+add(("p", "followed by batch normalisation, dropout (0.1), a residual connection and a ReLU. With four blocks of kernel 7 and dilation 1 the receptive field is <m>1+\\sum_l(\\kappa-1)d_l = 25</m> frames, equal to the input window on the combined benchmark (30 frames on UR Fall). "
+          "A joint-attention module then weights the joints of each frame from that frame’s own features, which keeps the weights causal and attributable to a single frame–joint pair,"))
+add(("eq", "eq:attn", r"a_{t,v}=\frac{\exp\!\big(w^{\top}\tanh(U h_{t,v})\big)}{\sum_{u}\exp\!\big(w^{\top}\tanh(U h_{t,u})\big)},\qquad z_t=\sum_{v}a_{t,v}\,h_{t,v}.",
+     "<span class=\"m\">a<sub>t,v</sub> = exp(w<sup>T</sup>tanh(U h<sub>t,v</sub>)) / &Sigma;<sub>u</sub> exp(w<sup>T</sup>tanh(U h<sub>t,u</sub>)), &nbsp;z<sub>t</sub> = &Sigma;<sub>v</sub> a<sub>t,v</sub> h<sub>t,v</sub></span>"))
+add(("p", "A <m>1\\times 1</m> convolution maps <m>z_t</m> to the imminence logit and <m>p_t</m> is its sigmoid. The attention weights are what we report as the evidence for each warning (we call the module the grounding module). "
+          "The model has about 0.4 million parameters. An optional four-way phase head (normal, imminent, falling, grounded) sits beside the imminence head and adds auxiliary supervision. "
+          "The ablation variants change one component each: “without grounding” replaces the attention pooling by a mean over joints, “without temporal modelling” sets the temporal kernel to 1 and averages the window into a single score, "
+          "and “without velocity” removes the velocity channels."))
+add(("fig", dict(label="fig:arch", file="fig2_architecture", wide=True,
+                 caption="Network architecture. (a) Block diagram: each ST-GCN block combines a spatial graph convolution over three partitions with a causal temporal convolution; joint attention pools the joints and a 1 × 1 head emits one logit per frame. (b) The 17-joint body graph with the hips as its centre. (c) Receptive field of the four causal blocks: the output at frame t reads only the previous 25 frames.")))
+
+add(("sub", "Labels and Objective", "sub:loss"))
+add(("p", "With <i>W</i> the length of the imminent window in frames (17 frames, 0.68 s, on the combined benchmark; 20 frames, 0.67 s, on UR Fall), the binary target is"))
+add(("eq", "eq:label", r"y_t = \begin{cases} 1, & t^{*}-W \le t \le t^{*},\\ 0, & t < t^{*}-W \ \text{or the clip is normal},\\ \text{ignored}, & t > t^{*}, \end{cases}",
+     "<span class=\"m\">y<sub>t</sub> = 1 if t*&minus;W &le; t &le; t*; &nbsp;0 if t &lt; t*&minus;W or the clip is normal; &nbsp;ignored if t &gt; t*</span>"))
+add(("p", "The per-frame loss is class-weighted binary cross-entropy with positive weight <m>\\rho = \\min\\{(1-\\pi)/\\pi,\\,20\\}</m>, where <m>\\pi</m> is the positive frame fraction in the training split. "
+          "The pre-impact objective scales each frame inside the imminent window by an exponential in the time to impact <m>d_t = (t^{*}-t)/f_s</m>,"))
+add(("eq", "eq:weight", r"w_t = \frac{e^{\lambda d_t}}{Z},\qquad Z=\frac{e^{\lambda D}-1}{\lambda D},\qquad 0\le d_t\le D=\frac{W}{f_s},",
+     "<span class=\"m\">w<sub>t</sub> = e<sup>&lambda;d<sub>t</sub></sup> / Z, &nbsp;Z = (e<sup>&lambda;D</sup>&minus;1) / (&lambda;D), &nbsp;0 &le; d<sub>t</sub> &le; D = W / f<sub>s</sub></span>"))
+add(("p", "and <m>w_t = 1</m> elsewhere. <m>Z</m> normalises the mean weight over the window to one, so <m>\\lambda</m> can change without changing the effective learning rate, and <m>\\lambda = 0</m> recovers the plain loss. "
+          "With <m>m_t</m> the mask of non-ignored frames and <m>\\ell_t</m> the weighted cross-entropy of frame <m>t</m>,"))
+add(("eq", "eq:loss", r"\mathcal{L} = \frac{\sum_t m_t w_t \ell_t}{\sum_t m_t w_t} + 0.5\,\mathcal{L}_{\mathrm{phase}} + 0.1\,\mathcal{L}_{\mathrm{cons}},",
+     "<span class=\"m\"><span class=\"cal\">L</span> = &Sigma;<sub>t</sub> m<sub>t</sub>w<sub>t</sub>&ell;<sub>t</sub> / &Sigma;<sub>t</sub> m<sub>t</sub>w<sub>t</sub> + 0.5 <span class=\"cal\">L</span><sub>phase</sub> + 0.1 <span class=\"cal\">L</span><sub>cons</sub></span>"))
+add(("p", "where the last two terms exist only for the phase arms. The four phases are normal, imminent (the <i>W</i> frames before the annotated fall onset), falling (onset to impact) and grounded (after impact); "
+          "<m>\\mathcal{L}_{\\mathrm{phase}}</m> is a cross-entropy over them with capped inverse-frequency class weights, "
+          "and <m>\\mathcal{L}_{\\mathrm{cons}}</m> is the mean squared difference between <m>p_t</m> and the phase head’s probability mass on the imminent and falling phases. "
+          "The full UR Fall model uses <m>\\lambda = 1.5</m>; all combined-benchmark arms use <m>\\lambda = 0</m> because the UR Fall result below showed no benefit from the weighting."))
+
+add(("sub", "Decision Rule and Operating-Point Selection", "sub:decision"))
+add(("p", "[#alg:stream] turns the score stream into warnings. A warning fires at the <i>k</i>-th consecutive frame at which the score reaches a threshold <m>\\tau</m>, "
+          "and a refractory period of <m>R</m> frames (25 on the combined benchmark, 30 on UR Fall) suppresses repeat alarms from one episode. "
+          "The warning time <m>t_{\\mathrm{warn}}</m> is the <i>k</i>-th frame, because the system cannot know a run of <i>k</i> frames occurred earlier. Lead time is"))
+add(("algo", dict(
+    label="alg:stream", caption="Streaming warning generation (one clip).",
+    lines=[
+        ("req", "scores <m>p_1, p_2, \\dots</m> arriving one frame at a time; threshold <m>\\tau</m>; persistence <m>k</m>; refractory period <m>R</m>"),
+        ("state", "<m>\\text{run} \\leftarrow 0</m>; <m>\\text{cooldown} \\leftarrow 0</m>"),
+        ("for", "each new frame <m>t</m>"),
+        ("if", "<m>p_t \\ge \\tau</m>"),
+        ("state", "<m>\\text{run} \\leftarrow \\text{run}+1</m>"),
+        ("else", ""),
+        ("state", "<m>\\text{run} \\leftarrow 0</m>"),
+        ("endif", ""),
+        ("if", "<m>\\text{cooldown} > 0</m>"),
+        ("state", "<m>\\text{cooldown} \\leftarrow \\text{cooldown}-1</m> // suppressed"),
+        ("elsif", "<m>\\text{run} \\ge k</m>"),
+        ("state", "emit a warning with <m>t_{\\mathrm{warn}} \\leftarrow t</m>"),
+        ("state", "<m>\\text{cooldown} \\leftarrow R</m>"),
+        ("endif", ""),
+        ("endfor", ""),
+    ])))
+add(("eq", "eq:lead", r"L = (t^{*} - t_{\mathrm{warn}})/f_s,",
+     "<span class=\"m\">L = (t* &minus; t<sub>warn</sub>) / f<sub>s</sub></span>"))
+add(("p", "reported over correctly warned falls only. A warning inside the window <m>[t^{*}-W,\\,t^{*}]</m> counts as a hit, and the earliest one sets the lead time. "
+          "A fall with no such warning is a miss. Any warning in a normal clip, or before the imminent window in a fall clip, is a false alarm, because that frame is labelled normal; warnings after impact are neither credited nor penalised. "
+          "Recall is pooled (warned falls divided by tested falls, summed over folds), and false alarms are counted and also expressed per hour of normal activity."))
+add(("p", "The pair <m>(\\tau, k)</m> is chosen on validation clips only ([#alg:select]) and frozen into the checkpoint, so the test set never influences it. "
+          "The same validation score selects the training epoch: the mean lead time at the selected operating point, or the frame-level AUC minus one when no point meets the budget."))
+add(("algo", dict(
+    label="alg:select", caption="Operating-point selection on validation clips.",
+    lines=[
+        ("req", "validation clips with scores; grid <m>\\tau \\in \\{0.05, 0.10, \\dots, 0.95\\}</m>, <m>k \\in \\{1,2,3,5,8\\}</m>; false-alarm budget <m>B</m> (2 per hour)"),
+        ("ens", "operating point <m>(\\tau^{*}, k^{*})</m>, or a default if none is feasible"),
+        ("state", "<m>S \\leftarrow \\emptyset</m>"),
+        ("for", "each <m>(\\tau, k)</m> in the grid"),
+        ("state", "run [#alg:stream] on every validation clip; compute recall, mean lead time <m>\\bar L</m> and false alarms per hour"),
+        ("if", "false alarms per hour <m>\\le B</m> and at least one fall is warned"),
+        ("state", "add <m>(\\tau, k)</m> to <m>S</m>"),
+        ("endif", ""),
+        ("endfor", ""),
+        ("if", "<m>S = \\emptyset</m>"),
+        ("return", "default <m>(0.70, 3)</m> and validation score AUC <m>-1</m>"),
+        ("endif", ""),
+        ("return", "the point of <m>S</m> that maximises <m>\\bar L</m>, ties broken by recall"),
+    ])))
+
+add(("sub", "Evaluation Protocols", "sub:protocol"))
+add(("p", "[#fig:protocol] summarises the workflow. In-domain evaluation uses five-fold cross-validation over clips, with folds fixed by a split seed so that every arm and every training seed scores the same clips and contrasts are paired. "
+          "Held-out-domain evaluation uses four protocols that remove a place or dataset from training: UR Fall to Le2i, Le2i to UR Fall, leave the Coffee room out, and leave the Home scene out. "
+          "Validation clips come from the training side only, and the test domain influences no choice. [#tab:settings] gives the training settings of the confirmation grid."))
+add(("fig", dict(label="fig:protocol", file="fig3_protocol", wide=True,
+                 caption="Evaluation workflow. The in-domain grid and the held-out-domain protocols share training, operating-point selection and the streaming test; the decision rules and analysis plan were committed before the first run they govern.")))
+add(("table", dict(
+    label="tab:settings", wide=False, spec=r"p{0.36\columnwidth}p{0.56\columnwidth}",
+    caption="Training and protocol settings of the combined-benchmark confirmation grid.",
+    header=["Setting", "Value"],
+    rows=[
+        ["Window; stride", "25 frames; 4 (training), 1 (inference)"],
+        ["Blocks; kernel; dropout", "64-64-128-128; 7; 0.1"],
+        ["Optimiser", "Adam, learning rate 0.001, weight decay 0.0001"],
+        ["Schedule", "Cosine, 2 warm-up epochs, gradient clip 5"],
+        ["Batch; epochs; patience", "24; 30; 6 (evaluated every 2 epochs)"],
+        ["Precision", "Mixed (automatic)"],
+        ["Augmentation", "Noise <m>\\sigma</m> = 0.015; scale 0.85–1.15; flip 0.5"],
+        ["Imminent window <i>W</i>", "17 frames (0.68 s)"],
+        ["Pre-impact weight <m>\\lambda</m>", "0 (arms A–D); 1.5 (UR Fall full model)"],
+        ["Phase and consistency weights", "0.5; 0.1 (arms C, D); 0 (D consistency)"],
+        ["False-alarm budget; refractory", "2 per hour; 25 frames"],
+        ["Explanations", "At most 40 warnings per run; 5 random orders; zero baseline"],
+    ])))
+
+add(("sub", "Faithfulness Test", "sub:ftest"))
+add(("p", "At each warning the joints are ranked by relevance (the attention weights of the warning frame; gradient × input for one ablation). [#alg:faith] removes joints in that order: "
+          "a removed joint has all its channels set to zero in every frame of the window, and the score is read at the warning frame, giving <m>V+1=18</m> points per curve. "
+          "Insertion starts from a blank skeleton and adds the joints in the same order. Each curve is compared with the mean of five random orders. "
+          "Removing joints produces skeletons the model never saw in training, so part of any score drop is distribution shift; the random-order control suffers the same shift and is subtracted. "
+          "With <m>A(\\cdot)</m> the trapezoidal area under a curve, normalised by the number of steps, the gaps are"))
+add(("algo", dict(
+    label="alg:faith", caption="Deletion and insertion faithfulness for one warning.",
+    lines=[
+        ("req", "model <m>f</m>; window <m>X</m>; warning frame <m>t</m>; relevance <m>r \\in \\mathbb{R}^{V}</m>; zero baseline; <m>N_r = 5</m> random orders"),
+        ("ens", "gaps <m>\\Delta_{\\mathrm{del}}</m> and <m>\\Delta_{\\mathrm{ins}}</m>"),
+        ("state", "<m>\\pi \\leftarrow</m> joints sorted by decreasing <m>r</m>"),
+        ("for", "<m>s = 0, 1, \\dots, V</m>"),
+        ("state", "<m>\\mathrm{del}_s \\leftarrow p_t</m> with joints <m>\\pi_1,\\dots,\\pi_s</m> set to zero"),
+        ("state", "<m>\\mathrm{ins}_s \\leftarrow p_t</m> with joints <m>\\pi_{s+1},\\dots,\\pi_V</m> set to zero"),
+        ("endfor", ""),
+        ("for", "each of <m>N_r</m> random permutations"),
+        ("state", "compute the random deletion and insertion curves in the same way"),
+        ("endfor", ""),
+        ("state", "average the random curves to <m>\\mathrm{del}^{\\mathrm{rand}}</m> and <m>\\mathrm{ins}^{\\mathrm{rand}}</m>"),
+        ("return", "<m>\\Delta_{\\mathrm{del}} = A(\\mathrm{del}^{\\mathrm{rand}}) - A(\\mathrm{del})</m>, <m>\\Delta_{\\mathrm{ins}} = A(\\mathrm{ins}) - A(\\mathrm{ins}^{\\mathrm{rand}})</m>"),
+    ])))
+add(("eq", "eq:gaps", r"\Delta_{\mathrm{del}} = A_{\mathrm{rand}}^{\mathrm{del}} - A_{\mathrm{rel}}^{\mathrm{del}},\qquad \Delta_{\mathrm{ins}} = A_{\mathrm{rel}}^{\mathrm{ins}} - A_{\mathrm{rand}}^{\mathrm{ins}},",
+     "<span class=\"m\">&Delta;<sub>del</sub> = A<sup>del</sup><sub>rand</sub> &minus; A<sup>del</sup><sub>rel</sub>, &nbsp;&Delta;<sub>ins</sub> = A<sup>ins</sup><sub>rel</sub> &minus; A<sup>ins</sup><sub>rand</sub></span>"))
+add(("p", "so positive values mean the named joints matter more than random ones. The run, not the explanation, is the unit of analysis, because explanations from one model are not independent."))
+
+add(("sub", "Statistical Analysis and Pre-Registration", "sub:stats"))
+add(("p", "Intervals come from a paired clip-level bootstrap[@efron] (2,000 resamples, [#alg:boot]). Clips are resampled once and the same indices are used for every seed and arm, because seeds re-score the same clips and are not extra data. "
+          "A treatment “reduces false alarms” only if (1) the 95% interval of the seed-averaged paired difference lies entirely below zero, "
+          "(2) the treatment has fewer false alarms in at least three of four seeds, and (3) its false-alarm rate is lower at matched recall (0.60 and 0.65, read from the pooled out-of-fold operating curve). "
+          "“Improves recall” uses the same test without (3). Failure of a rule is reported as “not shown”, which is not a finding of no effect. Seed 0 generated the hypotheses and is descriptive only. "
+          "No multiplicity correction is applied. Faithfulness intervals use a run-level bootstrap (10,000 resamples) with runs weighted by the number of explanations they scored."))
+add(("algo", dict(
+    label="alg:boot", caption="Paired bootstrap and the pre-registered decision rule for “reduces false alarms”.",
+    lines=[
+        ("req", "per-clip false-alarm counts of treatment <m>X</m> and reference for seeds <m>s=1..S</m> (<m>S=4</m>); matched-recall rates; <m>B=2000</m>"),
+        ("ens", "verdict: “reduces false alarms” or “not shown”"),
+        ("for", "<m>b = 1, \\dots, B</m>"),
+        ("state", "draw clip indices <m>I_b</m> with replacement, shared by all seeds and arms"),
+        ("state", "<m>\\delta_b \\leftarrow \\frac{1}{S}\\sum_s \\big(\\mathrm{FA}^{X}_s(I_b) - \\mathrm{FA}^{\\mathrm{ref}}_s(I_b)\\big)</m>"),
+        ("endfor", ""),
+        ("state", "<m>c_1 \\leftarrow</m> the 97.5th percentile of <m>\\delta_b</m> is below zero"),
+        ("state", "<m>c_2 \\leftarrow X</m> has fewer false alarms than the reference in at least 3 of 4 seeds"),
+        ("state", "<m>c_3 \\leftarrow X</m> has a lower false-alarm rate at recall 0.60 and 0.65 wherever both curves reach them"),
+        ("if", "<m>c_1 \\wedge c_2 \\wedge c_3</m>"),
+        ("return", "“reduces false alarms”"),
+        ("endif", ""),
+        ("return", "“not shown”"),
+    ])))
+add(("p", "The decision rules for the confirmation grid and for the held-out-domain protocols were written before the runs and extended only by dated addenda. "
+          "Version-control timestamps place the confirmation plan 11 s before the first confirmatory run and the held-out-domain plan four days before its first run. "
+          "The first execution of the held-out-domain runs was invalid, because every run had tested on ordinary fold 0. This was detected because recall was identical across protocols with different test sets; "
+          "none of those numbers is used, a verifier now checks that each run tested only on its held-out domain, and the experiment was rerun. "
+          "The UR Fall seed 0–2 grid predates the confirmation plan, so the interval reported for its headline contrast (Section [#sec:results]) is exploratory."))
+add(("sub", "Reproducibility and Availability", "sub:repro"))
+add(("p", "Every run saves its resolved configuration, environment record (library versions, git commit), split, history, checkpoint and per-clip outcomes. "
+          "A verification script (<code>scripts/verify_results.py</code>) recomputes the reported figures from the per-run totals, a different source from the per-clip analysis that produced them, and checks that all planned runs exist; "
+          "all 27 checks pass. Code, configurations and the pre-registration files are available at <code>github.com/adityaayushman/FBimpact</code>. "
+          "The datasets are public and must be obtained from their authors; the derived skeleton caches are not redistributed."))
+

@@ -23,7 +23,7 @@
 ---
 
 <p align="center">
-  <img src="FBimpact/demo.webp" alt="FBimpact demo" width="420" />
+  <img src="FBimpact/demo.webp" alt="FBimpact demo" width="640" />
 </p>
 
 Vision-based, privacy-preserving fall **anticipation** for elderly care: predict a fall

@@ -31,7 +31,7 @@ Runs **E1** (explanation methods), **E3** (pre-impact loss on the combined bench
 3. *Runtime → Run all*. Allow the Drive pop-up.
 
 **If it disconnects** (free Colab does that), open the notebook again and *Run all*. It picks up where it stopped.
-**When the last cell says DONE**, download `My Drive/fbimpact/results_for_import.zip` and give it to Claude.
+**When the last cell says DONE**, download `My Drive/fbimpact/results_for_import.zip`. It holds the results to import back into the project.
 
 Nothing here changes the questions, the decision rules or the configs; it only runs them.
 """

@@ -440,7 +440,7 @@ def build(out: Path) -> None:
             f = b[1]
             if f.get("wide"):
                 to_columns(1)
-                add_figure(doc, f, d.labels[f["label"]], PAGE_W, H)
+                add_figure(doc, f, d.labels[f["label"]], PAGE_W * f.get("width_frac", 1.0), H)
                 to_columns(2)
             else:
                 add_figure(doc, f, d.labels[f["label"]], COL_W, H)

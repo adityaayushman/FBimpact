@@ -496,7 +496,7 @@ add(("table", dict(
         ["UR Fall, full model", "15", "57", "+0.051 (+0.003, +0.104)", "+0.021 (−0.034, +0.084)"],
         ["UR Fall, baseline", "15", "64", "+0.049 (+0.004, +0.088)", "+0.087 (+0.037, +0.136)"],
     ])))
-add(("fig", dict(label="fig:faith", file="fig5_faithfulness", wide=True,
+add(("fig", dict(label="fig:faith", file="fig5_faithfulness", wide=True, width_frac=0.78,
                  caption="Faithfulness gaps with 95% intervals over runs (number of runs in parentheses). The first row pools all real-data runs.")))
 add(("sub", "Computational Cost and Verification", "sub:cost"))
 add(("p", "On an RTX 4050 laptop GPU the base model runs at 16.3 ms per frame (61 frames per second) on GPU and 35.0 ms per frame (28.6 frames per second) on CPU at batch size 1, excluding pose estimation, which would dominate in deployment. "

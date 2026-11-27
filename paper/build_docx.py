@@ -358,10 +358,36 @@ def build(out: Path) -> None:
     t.alignment = WD_ALIGN_PARAGRAPH.CENTER
     t.paragraph_format.space_after = Pt(10)
     style_run(t.add_run(bp.META["title_plain"]), 24)
-    a = doc.add_paragraph()
-    a.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    a.paragraph_format.space_after = Pt(10)
-    style_run(a.add_run("Aditya Ayushman Sahoo"), 11)
+    authors = [
+        ("Aditya Ayushman Sahoo",
+         ["Department of Computational Intelligence", "School of Computing,"],
+         ["SRM Institute of Science and Technology,", "Kattankulathur – 603203", "adityaasahoo@gmail.com"]),
+        ("Kothai G",
+         ["Department of Computational Intelligence", "School of Computing,", "Faculty of Engineering and Technology,"],
+         ["SRM Institute of Science and Technology,", "Kattankulathur – 603203"]),
+    ]
+    atbl = doc.add_table(rows=1, cols=len(authors))
+    atbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    atbl.autofit = False
+    acol_w = PAGE_W / len(authors)
+    for c, (name, pre_lines, post_lines) in enumerate(authors):
+        cell = atbl.cell(0, c)
+        cell.width = Inches(acol_w)
+        first = True
+        for text, size, space_after in (
+            [(name, 11, 2)] + [(t, 10, 0) for t in pre_lines] + [("", 4, 0)] + [(t, 10, 0) for t in post_lines]
+        ):
+            par = cell.paragraphs[0] if first else cell.add_paragraph()
+            first = False
+            par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            par.paragraph_format.space_after, par.paragraph_format.space_before = Pt(space_after), Pt(0)
+            par.paragraph_format.line_spacing = 1.0
+            if text:
+                style_run(par.add_run(text), size)
+    for c in range(len(authors)):
+        atbl.columns[c].width = Inches(acol_w)
+    gap = doc.add_paragraph()
+    gap.paragraph_format.space_after = gap.paragraph_format.space_before = Pt(10)
 
     def to_columns(n: int) -> None:
         doc.add_section(WD_SECTION.CONTINUOUS)

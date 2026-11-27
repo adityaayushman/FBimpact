@@ -19,8 +19,23 @@ META = {
     "title": "Anticipating Falls from Skeletal Pose: A Pre-Registered, Held-Out-Domain Evaluation of Causal ST-GCN Warnings and Their Joint Evidence",
     "title_plain": "Anticipating Falls from Skeletal Pose: A Pre-Registered, Held-Out-Domain Evaluation of Causal ST-GCN Warnings and Their Joint Evidence",
     "running_head": "Sahoo: Anticipating Falls from Skeletal Pose",
-    "authors_tex": "Aditya~Ayushman~Sahoo",
-    "authors_html": '<div class="a">Aditya Ayushman Sahoo</div>',
+    "authors_tex": (
+        r"\IEEEauthorblockN{Aditya~Ayushman~Sahoo}"
+        r"\IEEEauthorblockA{Department of Computational Intelligence\\School of Computing\\"
+        r"SRM Institute of Science and Technology\\Kattankulathur -- 603203\\adityaasahoo@gmail.com}"
+        r"\and"
+        r"\IEEEauthorblockN{Kothai~G}"
+        r"\IEEEauthorblockA{Department of Computational Intelligence\\School of Computing\\"
+        r"Faculty of Engineering and Technology\\SRM Institute of Science and Technology\\Kattankulathur -- 603203}"
+    ),
+    "authors_html": (
+        '<div class="au-block"><div class="an">Aditya Ayushman Sahoo</div><div class="aa">'
+        'Department of Computational Intelligence<br>School of Computing<br><br>'
+        'SRM Institute of Science and Technology<br>Kattankulathur &ndash; 603203<br>adityaasahoo@gmail.com</div></div>'
+        '<div class="au-block"><div class="an">Kothai G</div><div class="aa">'
+        'Department of Computational Intelligence<br>School of Computing<br>Faculty of Engineering and Technology<br>'
+        'SRM Institute of Science and Technology<br>Kattankulathur &ndash; 603203</div></div>'
+    ),
     "abstract": (
         "Pre-impact fall detection aims to raise a warning before the body reaches the ground, leaving time for a protective response such as an airbag or a call for help. "
         "Most evidence comes from wearable inertial sensors, and camera-based work is scarce and usually evaluated on windows cut at a fixed lead time rather than on streaming video. "
@@ -549,6 +564,10 @@ body { font: 10pt/1.2 "Times New Roman", Times, serif; color: #000; margin: 0; }
 header { text-align: center; margin-bottom: 14pt; }
 h1 { font: 24pt/1.12 "Times New Roman", serif; font-weight: normal; margin: 0 0 12pt; }
 .a { font-size: 11pt; margin-bottom: 4pt; }
+.au { display: flex; justify-content: center; gap: 0.5in; margin-bottom: 10pt; }
+.au-block { font-size: 11pt; line-height: 1.3; }
+.an { margin-bottom: 2pt; }
+.aa { font-size: 10pt; }
 .aff { font-size: 9pt; font-style: italic; }
 main { column-count: 2; column-gap: 0.25in; text-align: justify; hyphens: auto; }
 .abs { font-size: 9pt; font-weight: bold; margin: 0 0 6pt; }
